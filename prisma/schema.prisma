@@ -83,6 +83,8 @@ model Vehiculo {
   precioUsd  Decimal
   estado     EstadoVehiculo @default(DISPONIBLE)
   categoria  String?
+  transmision String?
+  motor      String?
   fotos      String[]       @default([])
   fechaIngreso DateTime     @default(now())
 

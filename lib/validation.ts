@@ -10,6 +10,8 @@ export const vehiculoInputSchema = z.object({
   precioUsd: z.coerce.number().min(0),
   estado: z.enum(estadoVehiculoValues).default("DISPONIBLE"),
   categoria: z.string().trim().optional().nullable(),
+  transmision: z.string().trim().optional().nullable(),
+  motor: z.string().trim().optional().nullable(),
   docTitulo: z.coerce.boolean().default(false),
   docCedula: z.coerce.boolean().default(false),
   docDominio: z.coerce.boolean().default(false),

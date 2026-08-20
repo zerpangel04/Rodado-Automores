@@ -59,20 +59,12 @@ export default async function VehiculoDetalle({
                 <div className={styles.v}>{vehiculo.km.toLocaleString("es-AR")} km</div>
               </div>
               <div className={styles.specItem}>
-                <div className={styles.l}>Categoría</div>
-                <div className={styles.v}>{vehiculo.categoria ?? "—"}</div>
+                <div className={styles.l}>Transmisión</div>
+                <div className={styles.v}>{vehiculo.transmision ?? "—"}</div>
               </div>
               <div className={styles.specItem}>
-                <div className={styles.l}>Documentación</div>
-                <div className={styles.v}>
-                  {[
-                    vehiculo.docTitulo,
-                    vehiculo.docCedula,
-                    vehiculo.docDominio,
-                    vehiculo.docLibreDeuda,
-                  ].filter(Boolean).length}
-                  /4 al día
-                </div>
+                <div className={styles.l}>Motor</div>
+                <div className={styles.v}>{vehiculo.motor ?? "—"}</div>
               </div>
             </div>
           </div>

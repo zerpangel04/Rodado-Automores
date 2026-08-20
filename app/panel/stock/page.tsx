@@ -28,6 +28,8 @@ export default async function StockPage() {
     precioUsd: Number(v.precioUsd),
     estado: v.estado,
     categoria: v.categoria,
+    transmision: v.transmision,
+    motor: v.motor,
     docTitulo: v.docTitulo,
     docCedula: v.docCedula,
     docDominio: v.docDominio,

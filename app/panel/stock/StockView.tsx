@@ -16,6 +16,8 @@ export type VehiculoDTO = {
   precioUsd: number;
   estado: EstadoVehiculo;
   categoria: string | null;
+  transmision: string | null;
+  motor: string | null;
   docTitulo: boolean;
   docCedula: boolean;
   docDominio: boolean;
@@ -32,6 +34,8 @@ type FormState = {
   km: string;
   precioUsd: string;
   categoria: string;
+  transmision: string;
+  motor: string;
   docTitulo: boolean;
   docCedula: boolean;
   docDominio: boolean;
@@ -46,6 +50,8 @@ const emptyForm: FormState = {
   km: "",
   precioUsd: "",
   categoria: "Sedán",
+  transmision: "",
+  motor: "",
   docTitulo: false,
   docCedula: false,
   docDominio: false,
@@ -160,6 +166,8 @@ export function StockView({
       km: String(v.km),
       precioUsd: String(v.precioUsd),
       categoria: v.categoria ?? "Sedán",
+      transmision: v.transmision ?? "",
+      motor: v.motor ?? "",
       docTitulo: v.docTitulo,
       docCedula: v.docCedula,
       docDominio: v.docDominio,
@@ -185,6 +193,8 @@ export function StockView({
       km: Number(form.km) || 0,
       precioUsd: Number(form.precioUsd) || 0,
       categoria: form.categoria,
+      transmision: form.transmision.trim() || null,
+      motor: form.motor.trim() || null,
       docTitulo: form.docTitulo,
       docCedula: form.docCedula,
       docDominio: form.docDominio,
@@ -449,6 +459,25 @@ export function StockView({
               <option value="SUV">SUV</option>
               <option value="Pickup">Pickup</option>
             </select>
+          </div>
+
+          <div className={styles.fieldRow}>
+            <div className={styles.field}>
+              <label>Transmisión</label>
+              <input
+                value={form.transmision}
+                onChange={(e) => setForm({ ...form, transmision: e.target.value })}
+                placeholder="Automática, Manual, CVT…"
+              />
+            </div>
+            <div className={styles.field}>
+              <label>Motor</label>
+              <input
+                value={form.motor}
+                onChange={(e) => setForm({ ...form, motor: e.target.value })}
+                placeholder="1.8L 16v, 3.0 V6 TDI…"
+              />
+            </div>
           </div>
 
           {!editingId && (
