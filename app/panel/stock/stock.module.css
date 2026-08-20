@@ -1,0 +1,394 @@
+.topActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.btnPrimary {
+  background: var(--ink);
+  color: #fff;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btnPrimary .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.btnGhost {
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: #fff;
+}
+
+.filterBar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.filterLeft {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fbtn {
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  border-radius: 100px;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.fbtn.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.empty {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.photo {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #efebe0;
+}
+
+.photo svg {
+  width: 65%;
+}
+
+.state {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.state.disponible {
+  background: #e4f5ec;
+  color: var(--green);
+}
+
+.state.reservado {
+  background: #fff3d6;
+  color: #9a6f00;
+}
+
+.state.vendido {
+  background: #f1eee9;
+  color: #8a8780;
+}
+
+.del {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--red);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.body {
+  padding: 14px;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.meta {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  margin: 6px 0 8px;
+}
+
+.docs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  margin-bottom: 10px;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+
+.docs.ok {
+  background: #e4f5ec;
+  color: var(--green);
+}
+
+.docs.warn {
+  background: #fdeeea;
+  color: var(--red);
+}
+
+.docs.warnSoon {
+  background: #fff3d6;
+  color: #9a6f00;
+}
+
+.iaBox {
+  background: #fff9ea;
+  border: 1px solid #f0dfa0;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.iaBoxHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.iaBoxHead span {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9a6f00;
+  font-weight: 700;
+}
+
+.iaSuggestBtn {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #9a6f00;
+  border: 1px solid #e4c464;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.iaResult {
+  font-family: var(--font-mono), monospace;
+  font-size: 20px;
+  font-weight: 600;
+  color: #7a5600;
+  margin: 4px 0;
+}
+
+.iaNote {
+  font-size: 11px;
+  color: #9a8046;
+  line-height: 1.4;
+}
+
+.iaUseBtn {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9a6f00;
+  text-decoration: underline;
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.price {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.modalBg {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 22, 28, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modalBg.show {
+  display: flex;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 26px;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal h3 {
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.sectionLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 18px 0 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13.5px;
+  outline: none;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--ink);
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.modalActions .btnGhost,
+.modalActions .btnPrimary {
+  flex: 1;
+  justify-content: center;
+  text-align: center;
+}
+
+.docGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+.docCheck {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.docCheck input {
+  width: 16px;
+  height: 16px;
+}
+
+.errorBox {
+  background: #fdeeea;
+  color: var(--red);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  margin-bottom: 14px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--ink);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.25s;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}

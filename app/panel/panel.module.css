@@ -1,0 +1,281 @@
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 230px;
+  background: var(--sidebar);
+  color: #fff;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 8px 18px;
+}
+
+.logoMark {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #fff;
+  position: relative;
+}
+
+.fxBox {
+  background: #1b1e25;
+  border-radius: 9px;
+  padding: 11px 12px;
+  margin-bottom: 18px;
+}
+
+.fxLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6d707a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fxLive {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.fxRow {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  margin-top: 6px;
+  color: #dadcdf;
+}
+
+.fxRow b {
+  color: #fff;
+}
+
+.logoMark::after {
+  content: "";
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  background: var(--accent);
+  border-radius: 3px;
+  top: 7px;
+  left: 7px;
+}
+
+.brand span {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.navGroup {
+  margin-bottom: 18px;
+}
+
+.navLabel {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6d707a;
+  padding: 0 10px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #b7bac0;
+  font-weight: 500;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 2px;
+}
+
+.navItem:hover {
+  background: var(--sidebar-hover);
+  color: #fff;
+}
+
+.navItem.active {
+  background: var(--sidebar-hover);
+  color: #fff;
+}
+
+.navItem.disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.navItem.disabled:hover {
+  background: none;
+  color: #b7bac0;
+}
+
+.navIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: #262a33;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+  flex: none;
+}
+
+.navItem.active .navIcon {
+  background: var(--accent);
+  color: #14161c;
+}
+
+.navBadge {
+  margin-left: auto;
+  background: #262a33;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  padding: 2px 6px;
+  border-radius: 100px;
+  color: #b7bac0;
+}
+
+.sidebarFoot {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid #23262e;
+  padding-top: 16px;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: #14161c;
+  flex: none;
+}
+
+.sidebarFoot div {
+  font-size: 12.5px;
+}
+
+.role {
+  color: #6d707a;
+  font-size: 11px;
+}
+
+.logoutBtn {
+  margin-left: auto;
+  font-size: 11px;
+  color: #6d707a;
+  padding: 4px;
+}
+
+.logoutBtn:hover {
+  color: #fff;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.topbar h1 {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.topbarSub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.content {
+  padding: 26px 28px;
+  flex: 1;
+}
+
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+  .kpiRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.kpi {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.kpi .l {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.kpi .v {
+  font-weight: 700;
+  font-size: 28px;
+  margin-top: 6px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.card h3 {
+  font-size: 15.5px;
+  margin-bottom: 14px;
+}

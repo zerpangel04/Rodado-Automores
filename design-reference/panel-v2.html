@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rodado — Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF9F5; --sidebar:#14161C; --sidebar-hover:#1F222B;
+    --ink:#14161C; --ink-soft:#63676A; --line:#E1DDD0;
+    --accent:#F5B400; --blue:#2A4CD6; --green:#1E8A5C; --red:#C4453A;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .disp{ font-family:'Space Grotesk', sans-serif; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a,button{ color:inherit; text-decoration:none; font-family:inherit; }
+  button{ cursor:pointer; border:none; background:none; }
+
+  .app{ display:flex; min-height:100vh; }
+  .sidebar{ width:230px; background:var(--sidebar); color:#fff; flex:none; display:flex; flex-direction:column; padding:20px 14px; }
+  .brand{ display:flex; align-items:center; gap:9px; padding:6px 8px 18px; }
+  .logo-mark{ width:26px; height:26px; border-radius:7px; background:#fff; position:relative; }
+  .logo-mark::after{ content:''; position:absolute; width:11px; height:11px; background:var(--accent); border-radius:3px; top:7px; left:7px; }
+  .brand span{ font-family:'Space Grotesk'; font-weight:700; font-size:17px; }
+
+  .fx-box{ background:#1B1E25; border-radius:9px; padding:11px 12px; margin-bottom:18px; }
+  .fx-label{ font-family:'IBM Plex Mono'; font-size:9px; text-transform:uppercase; letter-spacing:0.06em; color:#6D707A; display:flex; justify-content:space-between; align-items:center; }
+  .fx-live{ width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; }
+  .fx-row{ display:flex; justify-content:space-between; font-family:'IBM Plex Mono'; font-size:12px; margin-top:6px; color:#DADCDF; }
+  .fx-row b{ color:#fff; }
+
+  .nav-group{ margin-bottom:18px; }
+  .nav-label{ font-family:'IBM Plex Mono'; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:#6D707A; padding:0 10px; margin-bottom:8px; display:block; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; font-size:13.5px; color:#B7BAC0; font-weight:500; width:100%; text-align:left; margin-bottom:2px; }
+  .nav-item:hover{ background:var(--sidebar-hover); color:#fff; }
+  .nav-item.active{ background:var(--sidebar-hover); color:#fff; }
+  .nav-item .ic{ width:20px; height:20px; border-radius:5px; background:#262A33; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:11px; flex:none; }
+  .nav-item.active .ic{ background:var(--accent); color:#14161C; }
+  .nav-item .badge{ margin-left:auto; background:#262A33; font-family:'IBM Plex Mono'; font-size:9.5px; padding:2px 6px; border-radius:100px; color:#B7BAC0; }
+  .sidebar-foot{ margin-top:auto; display:flex; align-items:center; gap:10px; padding:10px; border-top:1px solid #23262E; padding-top:16px; }
+  .avatar{ width:30px; height:30px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:12px; color:#14161C; flex:none; }
+  .sidebar-foot div{ font-size:12.5px; }
+  .sidebar-foot .role{ color:#6D707A; font-size:11px; }
+
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar{ background:#fff; border-bottom:1px solid var(--line); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .topbar h1{ font-family:'Space Grotesk'; font-size:19px; font-weight:700; }
+  .topbar .sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .btn-primary{ background:var(--ink); color:#fff; padding:9px 16px; border-radius:8px; font-size:13px; font-weight:600; display:inline-flex; align-items:center; gap:6px; }
+  .btn-primary .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .btn-ghost{ border:1px solid var(--line); padding:8px 14px; border-radius:8px; font-size:12.5px; font-weight:600; background:#fff; }
+
+  .content{ padding:26px 28px; flex:1; }
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .save-toast{ position:fixed; bottom:20px; right:20px; background:var(--ink); color:#fff; padding:10px 16px; border-radius:8px; font-size:12.5px; opacity:0; transform:translateY(8px); transition:all .25s; pointer-events:none; z-index:100; }
+  .save-toast.show{ opacity:1; transform:translateY(0); }
+
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  @media(max-width:900px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+  .kpi{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:18px; }
+  .kpi .l{ font-size:12px; color:var(--ink-soft); }
+  .kpi .v{ font-family:'Space Grotesk'; font-weight:700; font-size:28px; margin-top:6px; }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:20px; }
+  .card h3{ font-family:'Space Grotesk'; font-size:15.5px; margin-bottom:14px; }
+
+  .filter-bar{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; justify-content:space-between; }
+  .filter-left{ display:flex; gap:10px; flex-wrap:wrap; }
+  .fbtn{ background:#fff; border:1px solid var(--line); padding:8px 14px; border-radius:100px; font-size:12.5px; font-weight:500; }
+  .fbtn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .stock-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media(max-width:1000px){ .stock-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:640px){ .stock-grid{ grid-template-columns:1fr; } }
+  .scard{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .scard-photo{ height:100px; display:flex; align-items:center; justify-content:center; position:relative; background:#EFEBE0; }
+  .scard-photo svg{ width:65%; }
+  .scard-state{ position:absolute; top:10px; left:10px; font-family:'IBM Plex Mono'; font-size:9px; text-transform:uppercase; padding:3px 8px; border-radius:100px; font-weight:700; cursor:pointer; }
+  .scard-state.disponible{ background:#E4F5EC; color:var(--green); }
+  .scard-state.reservado{ background:#FFF3D6; color:#9A6F00; }
+  .scard-state.vendido{ background:#F1EEE9; color:#8A8780; }
+  .scard-del{ position:absolute; top:10px; right:10px; width:22px; height:22px; border-radius:50%; background:rgba(255,255,255,0.85); color:var(--red); font-size:13px; display:flex; align-items:center; justify-content:center; }
+  .scard-body{ padding:14px; }
+  .scard-title{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; }
+  .scard-meta{ font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--ink-soft); margin:6px 0 8px; }
+  .scard-docs{ display:flex; align-items:center; gap:6px; font-size:10.5px; margin-bottom:10px; padding:5px 8px; border-radius:6px; }
+  .scard-docs.ok{ background:#E4F5EC; color:var(--green); }
+  .scard-docs.warn{ background:#FDEEEA; color:var(--red); }
+  .scard-foot{ display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:10px; }
+  .scard-price{ font-family:'Space Grotesk'; font-weight:700; font-size:15px; }
+
+  .kanban{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-items:start; }
+  @media(max-width:900px){ .kanban{ grid-template-columns:1fr; } }
+  .kcol{ background:var(--bg); border:1px solid var(--line); border-radius:var(--radius); padding:12px; min-height:80px; }
+  .kcol-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 4px; }
+  .kcol-head h4{ font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-soft); }
+  .kcol-head span{ font-family:'IBM Plex Mono'; font-size:11px; background:#fff; border:1px solid var(--line); border-radius:100px; padding:1px 8px; }
+  .kcard{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:10px; }
+  .kcard .name{ font-weight:600; font-size:13px; margin-bottom:3px; }
+  .kcard .car{ font-size:12px; color:var(--ink-soft); margin-bottom:8px; }
+  .kcard .foot{ display:flex; justify-content:space-between; align-items:center; gap:6px; }
+  .chip{ font-family:'IBM Plex Mono'; font-size:9.5px; text-transform:uppercase; padding:3px 8px; border-radius:100px; font-weight:600; }
+  .chip.wa{ background:#E4F5EC; color:var(--green); }
+  .chip.ml{ background:#FFF3D6; color:#9A6F00; }
+  .chip.ig{ background:#F5E4F0; color:#A83D8A; }
+  .kcard-actions{ display:flex; gap:6px; margin-top:8px; }
+  .kmini{ font-size:10.5px; border:1px solid var(--line); border-radius:6px; padding:4px 7px; }
+  .kmini:hover{ background:var(--bg); }
+
+  .table{ width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .table th{ text-align:left; font-family:'IBM Plex Mono'; font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); padding:12px 16px; background:var(--bg); border-bottom:1px solid var(--line); }
+  .table td{ padding:13px 16px; font-size:13px; border-bottom:1px solid var(--line); }
+  .table tr:last-child td{ border-bottom:none; }
+  .table td.num{ font-family:'IBM Plex Mono'; }
+
+  .modal-bg{ position:fixed; inset:0; background:rgba(20,22,28,0.5); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; overflow-y:auto; }
+  .modal-bg.show{ display:flex; }
+  .modal{ background:#fff; border-radius:14px; padding:26px; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; }
+  .modal h3{ font-family:'Space Grotesk'; font-size:18px; margin-bottom:4px; }
+  .modal-section-label{ font-family:'IBM Plex Mono'; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); margin:18px 0 10px; padding-top:14px; border-top:1px solid var(--line); }
+  .modal-section-label:first-of-type{ border-top:none; padding-top:0; margin-top:16px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  .field input, .field select{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; font-family:'Inter'; outline:none; }
+  .field input:focus, .field select:focus{ border-color:var(--ink); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .modal-actions{ display:flex; gap:10px; margin-top:18px; }
+  .modal-actions .btn-ghost{ flex:1; text-align:center; }
+  .modal-actions .btn-primary{ flex:1; justify-content:center; }
+
+  .ia-box{ background:#FFF9EA; border:1px solid #F0DFA0; border-radius:10px; padding:12px; margin-bottom:14px; }
+  .ia-box-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .ia-box-head span{ font-family:'IBM Plex Mono'; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:#9A6F00; font-weight:700; }
+  .ia-suggest-btn{ font-size:11.5px; font-weight:700; color:#9A6F00; border:1px solid #E4C464; padding:5px 10px; border-radius:6px; background:#fff; }
+  .ia-result{ font-family:'IBM Plex Mono'; font-size:20px; font-weight:600; color:#7A5600; margin:4px 0; }
+  .ia-note{ font-size:11px; color:#9A8046; line-height:1.4; }
+
+  .doc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px 14px; }
+  .doc-check{ display:flex; align-items:center; gap:8px; font-size:13px; }
+  .doc-check input{ width:16px; height:16px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo-mark"></div><span>Rodado</span></div>
+
+    <div class="fx-box">
+      <div class="fx-label"><span>Cotización dólar</span><span class="fx-live" id="fxDot"></span></div>
+      <div class="fx-row"><span>Oficial</span><b id="fxOficial">—</b></div>
+      <div class="fx-row"><span>Blue</span><b id="fxBlue">—</b></div>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-label">Operación</span>
+      <button class="nav-item active" data-view="panel"><span class="ic">P</span>Panel general</button>
+      <button class="nav-item" data-view="stock"><span class="ic">S</span>Stock<span class="badge" id="badgeStock">0</span></button>
+      <button class="nav-item" data-view="leads"><span class="ic">L</span>Leads<span class="badge" id="badgeLeads">0</span></button>
+      <button class="nav-item" data-view="ventas"><span class="ic">V</span>Ventas</button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">AD</div>
+      <div><div>Agencia Demo</div><div class="role">Datos guardados en vivo</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 class="disp" id="viewTitle">Panel general</h1>
+        <div class="sub" id="viewSub">Cargá tu propio stock — los datos se guardan solos</div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-ghost" id="resetBtn">Reiniciar datos de ejemplo</button>
+        <button class="btn-primary" id="newVehicleBtn"><span class="dot"></span>Nuevo vehículo</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="view active" id="view-panel">
+        <div class="kpi-row">
+          <div class="kpi"><div class="l">Stock activo</div><div class="v disp" id="kpiStock">0</div></div>
+          <div class="kpi"><div class="l">Leads abiertos</div><div class="v disp" id="kpiLeads">0</div></div>
+          <div class="kpi"><div class="l">Ventas registradas</div><div class="v disp" id="kpiVentas">0</div></div>
+          <div class="kpi"><div class="l">Valor del stock</div><div class="v disp mono" id="kpiValor">0</div></div>
+        </div>
+        <div class="card">
+          <h3>Últimos leads</h3>
+          <div id="lastLeads"></div>
+        </div>
+      </div>
+
+      <div class="view" id="view-stock">
+        <div class="filter-bar">
+          <div class="filter-left">
+            <button class="fbtn active" data-f="todos">Todos</button>
+            <button class="fbtn" data-f="disponible">Disponibles</button>
+            <button class="fbtn" data-f="reservado">Reservados</button>
+            <button class="fbtn" data-f="vendido">Vendidos</button>
+          </div>
+        </div>
+        <div class="stock-grid" id="stockGrid"></div>
+      </div>
+
+      <div class="view" id="view-leads">
+        <div class="filter-bar">
+          <div class="filter-left"></div>
+          <button class="btn-ghost" id="newLeadBtn">+ Nuevo lead</button>
+        </div>
+        <div class="kanban" id="kanbanBoard"></div>
+      </div>
+
+      <div class="view" id="view-ventas">
+        <table class="table">
+          <thead><tr><th>Fecha</th><th>Vehículo</th><th>Cliente</th><th>Precio</th></tr></thead>
+          <tbody id="ventasBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal: nuevo vehículo -->
+<div class="modal-bg" id="modalVehiculo">
+  <div class="modal">
+    <h3 class="disp">Nuevo vehículo</h3>
+
+    <div class="field-row">
+      <div class="field"><label>Marca</label><input id="fMarca" type="text" placeholder="Toyota"></div>
+      <div class="field"><label>Modelo</label><input id="fModelo" type="text" placeholder="Corolla XEI"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Año</label><input id="fAnio" type="number" placeholder="2024"></div>
+      <div class="field"><label>Km</label><input id="fKm" type="text" placeholder="12.000"></div>
+    </div>
+    <div class="field">
+      <label>Categoría (para la tasación)</label>
+      <select id="fCategoria"><option value="Compacto">Compacto</option><option value="Sedán">Sedán</option><option value="SUV">SUV</option><option value="Pickup">Pickup</option></select>
+    </div>
+
+    <div class="ia-box">
+      <div class="ia-box-head">
+        <span>✦ Tasación con IA</span>
+        <button class="ia-suggest-btn" type="button" onclick="suggestPrice()">Sugerir precio</button>
+      </div>
+      <div class="ia-result" id="iaResult">—</div>
+      <div class="ia-note" id="iaNote">Completá año, km y categoría, y tocá "Sugerir precio" para ver una estimación.</div>
+    </div>
+
+    <div class="field-row">
+      <div class="field"><label>Precio final (USD)</label><input id="fPrecio" type="text" placeholder="24.500"></div>
+      <div class="field"><label>Estado</label>
+        <select id="fEstado"><option value="disponible">Disponible</option><option value="reservado">Reservado</option><option value="vendido">Vendido</option></select>
+      </div>
+    </div>
+
+    <div class="modal-section-label">Documentación</div>
+    <div class="doc-grid">
+      <label class="doc-check"><input type="checkbox" id="dTitulo"> Título</label>
+      <label class="doc-check"><input type="checkbox" id="dCedula"> Cédula</label>
+      <label class="doc-check"><input type="checkbox" id="dDominio"> Informe de dominio</label>
+      <label class="doc-check"><input type="checkbox" id="dLibre"> Libre de deuda</label>
+    </div>
+    <div class="field" style="margin-top:12px;"><label>Vencimiento VTV</label><input id="dVtv" type="date"></div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modalVehiculo')">Cancelar</button>
+      <button class="btn-primary" style="background:var(--ink)" onclick="saveVehicle()">Guardar vehículo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: nuevo lead -->
+<div class="modal-bg" id="modalLead">
+  <div class="modal">
+    <h3 class="disp">Nuevo lead</h3>
+    <div class="field"><label>Nombre del cliente</label><input id="lNombre" type="text" placeholder="Juan Pérez"></div>
+    <div class="field"><label>Vehículo de interés</label><input id="lAuto" type="text" placeholder="Toyota Corolla XEI"></div>
+    <div class="field"><label>Canal</label>
+      <select id="lCanal"><option value="wa">WhatsApp</option><option value="ml">Mercado Libre</option><option value="ig">Instagram</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('modalLead')">Cancelar</button>
+      <button class="btn-primary" style="background:var(--ink)" onclick="saveLead()">Guardar lead</button>
+    </div>
+  </div>
+</div>
+
+<div class="save-toast" id="saveToast">Guardado ✓</div>
+
+<script>
+  const carSVG = (c1,c2) => `<svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 82 C20 66 40 58 60 56 L90 38 C98 32 110 29 122 29 L200 29 C215 29 227 34 235 44 L255 56 C278 58 296 66 298 82 L298 88 L272 88 C272 75 262 65 249 65 C236 65 226 75 226 88 L94 88 C94 75 84 65 71 65 C58 65 48 75 48 88 L20 88 Z" fill="${c1}" stroke="${c2}" stroke-width="1.6"/>
+    <circle cx="71" cy="88" r="16" fill="${c2}"/><circle cx="249" cy="88" r="16" fill="${c2}"/>
+  </svg>`;
+  const stateLabel = {disponible:'Disponible', reservado:'Reservado', vendido:'Vendido'};
+  const chanLabel = {wa:['WhatsApp','wa'], ml:['Mercado Libre','ml'], ig:['Instagram','ig']};
+  const kanbanStages = ['Nuevo','Contactado','Test drive','Negociación'];
+
+  let stock = [];
+  let leads = [];
+  let stockFilter = 'todos';
+
+  const seedStock = () => ([
+    {id:1, marca:'Volkswagen', modelo:'Amarok V6', estado:'disponible', anio:2023, km:'8.200', precio:'42.500', docs:{titulo:true,cedula:true,dominio:true,libre:true,vtv:'2027-03-15'}},
+    {id:2, marca:'Toyota', modelo:'Corolla XEI', estado:'reservado', anio:2024, km:'12.000', precio:'24.500', docs:{titulo:true,cedula:true,dominio:false,libre:true,vtv:'2025-11-01'}},
+    {id:3, marca:'Chevrolet', modelo:'Onix Turbo', estado:'vendido', anio:2023, km:'21.400', precio:'17.800', docs:{titulo:true,cedula:true,dominio:true,libre:true,vtv:'2027-01-10'}},
+    {id:4, marca:'Fiat', modelo:'Cronos Drive', estado:'disponible', anio:2024, km:'3.100', precio:'16.200', docs:{titulo:false,cedula:true,dominio:false,libre:false,vtv:''}},
+  ]);
+  const seedLeads = () => ([
+    {id:1, nombre:'Sofía Ruiz', auto:'Peugeot 208 Feline', canal:'wa', etapa:'Nuevo'},
+    {id:2, nombre:'Juan Pérez', auto:'Toyota Corolla XEI', canal:'wa', etapa:'Contactado'},
+    {id:3, nombre:'Marta Gómez', auto:'VW Amarok V6', canal:'ml', etapa:'Test drive'},
+    {id:4, nombre:'Carla Núñez', auto:'Chevrolet Onix', canal:'wa', etapa:'Negociación'},
+  ]);
+
+  function showToast(){
+    const t = document.getElementById('saveToast');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 1400);
+  }
+  async function persist(key, value){
+    try{ await window.storage.set(key, JSON.stringify(value), false); showToast(); }
+    catch(e){ console.error('Error guardando', e); }
+  }
+  async function loadAll(){
+    try{ const s = await window.storage.get('rodado_stock_v2', false); stock = JSON.parse(s.value); }
+    catch(e){ stock = seedStock(); await persist('rodado_stock_v2', stock); }
+    try{ const l = await window.storage.get('rodado_leads_v2', false); leads = JSON.parse(l.value); }
+    catch(e){ leads = seedLeads(); await persist('rodado_leads_v2', leads); }
+    renderAll();
+  }
+  function renderAll(){ renderPanel(); renderStock(); renderLeads(); renderVentas(); }
+
+  // ---- COTIZACIÓN DÓLAR (API pública en vivo) ----
+  async function loadFx(){
+    try{
+      const [ofi, blue] = await Promise.all([
+        fetch('https://dolarapi.com/v1/dolares/oficial').then(r=>r.json()),
+        fetch('https://dolarapi.com/v1/dolares/blue').then(r=>r.json())
+      ]);
+      document.getElementById('fxOficial').textContent = '$' + Math.round(ofi.venta).toLocaleString('es-AR');
+      document.getElementById('fxBlue').textContent = '$' + Math.round(blue.venta).toLocaleString('es-AR');
+    }catch(e){
+      document.getElementById('fxOficial').textContent = 'No disponible';
+      document.getElementById('fxBlue').textContent = 'No disponible';
+      document.getElementById('fxDot').style.background = '#C4453A';
+    }
+  }
+  loadFx();
+
+  // ---- TASACIÓN CON IA (simulada) ----
+  const categoryBase = {Compacto:18000, 'Sedán':24000, SUV:32000, Pickup:38000};
+  function suggestPrice(){
+    const anio = parseInt(document.getElementById('fAnio').value);
+    const km = parseFloat((document.getElementById('fKm').value||'0').replace(/\./g,'').replace(',','.'));
+    const cat = document.getElementById('fCategoria').value;
+    if(!anio){
+      document.getElementById('iaNote').textContent = 'Falta el año para poder estimar.';
+      return;
+    }
+    const base = categoryBase[cat] || 20000;
+    const age = Math.max(0, new Date().getFullYear() - anio);
+    let precio = base * Math.pow(0.92, age) - ((km||0)/10000)*150;
+    precio = Math.max(precio, 3000);
+    document.getElementById('iaResult').textContent = 'USD ' + Math.round(precio).toLocaleString('es-AR');
+    document.getElementById('iaNote').innerHTML = `Estimación simulada según categoría, año y kilometraje. <b>Es una demo</b> — en producción esto se conecta a datos reales de mercado (como hace deConcesionarias con su módulo de tasación).<br><button style="margin-top:6px; font-size:11px; font-weight:700; color:#9A6F00; text-decoration:underline;" onclick="document.getElementById('fPrecio').value=Math.round(${precio}).toLocaleString('es-AR')">Usar este precio →</button>`;
+  }
+
+  // ---- PANEL ----
+  function renderPanel(){
+    document.getElementById('kpiStock').textContent = stock.filter(s=>s.estado!=='vendido').length;
+    document.getElementById('kpiLeads').textContent = leads.length;
+    document.getElementById('kpiVentas').textContent = stock.filter(s=>s.estado==='vendido').length;
+    const valor = stock.filter(s=>s.estado!=='vendido').reduce((a,s)=>a + (parseFloat((s.precio+'').replace(/\./g,'').replace(',','.'))||0), 0);
+    document.getElementById('kpiValor').textContent = 'USD ' + Math.round(valor).toLocaleString('es-AR');
+    document.getElementById('badgeStock').textContent = stock.length;
+    document.getElementById('badgeLeads').textContent = leads.length;
+    document.getElementById('lastLeads').innerHTML = leads.slice(0,5).map(l=>`
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line); font-size:13px;">
+        <div><b>${l.nombre}</b> <span style="color:var(--ink-soft); font-size:12px;">· ${l.auto}</span></div>
+        <span class="chip ${chanLabel[l.canal][1]}">${chanLabel[l.canal][0]}</span>
+      </div>`).join('') || '<p style="color:var(--ink-soft); font-size:13px;">Sin leads todavía.</p>';
+  }
+
+  // ---- STOCK ----
+  function docStatus(docs){
+    if(!docs) return {ok:false, label:'Sin datos documentales'};
+    const count = [docs.titulo, docs.cedula, docs.dominio, docs.libre].filter(Boolean).length;
+    const vtvVencida = docs.vtv && new Date(docs.vtv) < new Date();
+    if(vtvVencida) return {ok:false, label:'⚠ VTV vencida'};
+    if(count < 4) return {ok:false, label:`Docs ${count}/4 incompletos`};
+    return {ok:true, label:'Documentación completa'};
+  }
+
+  function renderStock(){
+    const grid = document.getElementById('stockGrid');
+    const items = stockFilter === 'todos' ? stock : stock.filter(s=>s.estado===stockFilter);
+    grid.innerHTML = items.map(s=>{
+      const ds = docStatus(s.docs);
+      return `
+      <div class="scard">
+        <div class="scard-photo">
+          <span class="scard-state ${s.estado}" onclick="cycleState(${s.id})">${stateLabel[s.estado]}</span>
+          <button class="scard-del" onclick="deleteVehicle(${s.id})">✕</button>
+          ${carSVG('#EFEBE0','#63676A')}
+        </div>
+        <div class="scard-body">
+          <div class="scard-title">${s.marca} ${s.modelo}</div>
+          <div class="scard-meta mono">${s.anio} · ${s.km} km</div>
+          <div class="scard-docs ${ds.ok?'ok':'warn'}">${ds.label}</div>
+          <div class="scard-foot"><div class="scard-price disp">USD ${s.precio}</div></div>
+        </div>
+      </div>`;
+    }).join('') || '<p style="color:var(--ink-soft); font-size:13px;">No hay vehículos en este filtro.</p>';
+  }
+
+  function cycleState(id){
+    const order = ['disponible','reservado','vendido'];
+    const v = stock.find(s=>s.id===id);
+    v.estado = order[(order.indexOf(v.estado)+1) % order.length];
+    persist('rodado_stock_v2', stock);
+    renderStock(); renderPanel();
+  }
+  function deleteVehicle(id){
+    stock = stock.filter(s=>s.id!==id);
+    persist('rodado_stock_v2', stock);
+    renderStock(); renderPanel();
+  }
+
+  function saveVehicle(){
+    const marca = document.getElementById('fMarca').value.trim();
+    const modelo = document.getElementById('fModelo').value.trim();
+    if(!marca || !modelo){ alert('Completá al menos marca y modelo'); return; }
+    const nuevo = {
+      id: Date.now(), marca, modelo,
+      anio: document.getElementById('fAnio').value || '—',
+      km: document.getElementById('fKm').value || '0',
+      precio: document.getElementById('fPrecio').value || '0',
+      estado: document.getElementById('fEstado').value,
+      docs: {
+        titulo: document.getElementById('dTitulo').checked,
+        cedula: document.getElementById('dCedula').checked,
+        dominio: document.getElementById('dDominio').checked,
+        libre: document.getElementById('dLibre').checked,
+        vtv: document.getElementById('dVtv').value,
+      }
+    };
+    stock.unshift(nuevo);
+    persist('rodado_stock_v2', stock);
+    renderStock(); renderPanel();
+    closeModal('modalVehiculo');
+    ['fMarca','fModelo','fAnio','fKm','fPrecio','dVtv'].forEach(id=>document.getElementById(id).value='');
+    ['dTitulo','dCedula','dDominio','dLibre'].forEach(id=>document.getElementById(id).checked=false);
+    document.getElementById('iaResult').textContent = '—';
+    document.getElementById('iaNote').textContent = 'Completá año, km y categoría, y tocá "Sugerir precio" para ver una estimación.';
+  }
+
+  // ---- LEADS ----
+  function renderLeads(){
+    document.getElementById('kanbanBoard').innerHTML = kanbanStages.map(stage => {
+      const items = leads.filter(l=>l.etapa===stage);
+      return `<div class="kcol">
+        <div class="kcol-head"><h4>${stage}</h4><span>${items.length}</span></div>
+        ${items.map(l => {
+          const nextStage = kanbanStages[kanbanStages.indexOf(stage)+1];
+          return `<div class="kcard">
+            <div class="name">${l.nombre}</div>
+            <div class="car">${l.auto}</div>
+            <div class="foot"><span class="chip ${chanLabel[l.canal][1]}">${chanLabel[l.canal][0]}</span></div>
+            <div class="kcard-actions">
+              ${nextStage ? `<button class="kmini" onclick="advanceLead(${l.id})">→ ${nextStage}</button>` : `<button class="kmini" onclick="advanceLead(${l.id})">✓ Cerrar</button>`}
+              <button class="kmini" onclick="deleteLead(${l.id})">Eliminar</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('');
+  }
+  function advanceLead(id){
+    const l = leads.find(x=>x.id===id);
+    const idx = kanbanStages.indexOf(l.etapa);
+    if(idx < kanbanStages.length-1){ l.etapa = kanbanStages[idx+1]; }
+    else { leads = leads.filter(x=>x.id!==id); }
+    persist('rodado_leads_v2', leads);
+    renderLeads(); renderPanel();
+  }
+  function deleteLead(id){
+    leads = leads.filter(l=>l.id!==id);
+    persist('rodado_leads_v2', leads);
+    renderLeads(); renderPanel();
+  }
+  function saveLead(){
+    const nombre = document.getElementById('lNombre').value.trim();
+    const auto = document.getElementById('lAuto').value.trim();
+    if(!nombre || !auto){ alert('Completá nombre y vehículo'); return; }
+    leads.unshift({ id: Date.now(), nombre, auto, canal: document.getElementById('lCanal').value, etapa:'Nuevo' });
+    persist('rodado_leads_v2', leads);
+    renderLeads(); renderPanel();
+    closeModal('modalLead');
+    document.getElementById('lNombre').value=''; document.getElementById('lAuto').value='';
+  }
+
+  // ---- VENTAS ----
+  function renderVentas(){
+    const vendidos = stock.filter(s=>s.estado==='vendido');
+    document.getElementById('ventasBody').innerHTML = vendidos.map(v=>`
+      <tr><td>—</td><td>${v.marca} ${v.modelo}</td><td>—</td><td class="num">USD ${v.precio}</td></tr>
+    `).join('') || '<tr><td colspan="4" style="color:var(--ink-soft);">Todavía no hay ventas registradas. Marcá un vehículo como "Vendido" en Stock.</td></tr>';
+  }
+
+  // ---- NAV ----
+  const titles = {panel:['Panel general','Vista general de tu negocio'], stock:['Stock','Tu inventario, guardado en vivo'], leads:['Leads','Avanzá cada lead con los botones de su tarjeta'], ventas:['Ventas','Se completa automáticamente al marcar un auto como vendido']};
+  document.querySelectorAll('.nav-item[data-view]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.nav-item[data-view]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const v = btn.dataset.view;
+      document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+      document.getElementById('view-'+v).classList.add('active');
+      document.getElementById('viewTitle').textContent = titles[v][0];
+      document.getElementById('viewSub').textContent = titles[v][1];
+    });
+  });
+  document.querySelectorAll('.fbtn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      stockFilter = b.dataset.f;
+      renderStock();
+    });
+  });
+  document.getElementById('newVehicleBtn').addEventListener('click', ()=>document.getElementById('modalVehiculo').classList.add('show'));
+  document.getElementById('newLeadBtn').addEventListener('click', ()=>document.getElementById('modalLead').classList.add('show'));
+  function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+  document.getElementById('resetBtn').addEventListener('click', async ()=>{
+    if(!confirm('Esto reemplaza tus datos actuales por los de ejemplo. ¿Continuar?')) return;
+    stock = seedStock(); leads = seedLeads();
+    await persist('rodado_stock_v2', stock);
+    await persist('rodado_leads_v2', leads);
+    renderAll();
+  });
+
+  loadAll();
+</script>
+
+</body>
+</html>

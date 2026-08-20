@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rodado — La plataforma comercial para tu concesionaria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF9F5; --bg-alt:#F1EEE5; --panel:#14161C;
+    --ink:#14161C; --ink-soft:#63676A; --line:#E1DDD0;
+    --accent:#F5B400; --blue:#2A4CD6; --green:#1E8A5C;
+    --radius:12px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .disp{ font-family:'Space Grotesk', sans-serif; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+  ::selection{ background:var(--accent); color:var(--ink); }
+
+  nav{ position:sticky; top:0; z-index:50; background:rgba(250,249,245,0.88); backdrop-filter:blur(10px); border-bottom:1px solid var(--line); }
+  .nav-inner{ display:flex; align-items:center; justify-content:space-between; padding:16px 24px; max-width:1180px; margin:0 auto; }
+  .logo{ display:flex; align-items:center; gap:9px; }
+  .logo-mark{ width:30px; height:30px; border-radius:8px; background:var(--ink); position:relative; overflow:hidden; }
+  .logo-mark::after{ content:''; position:absolute; width:14px; height:14px; background:var(--accent); border-radius:4px; top:8px; left:8px; }
+  .logo-text{ font-family:'Space Grotesk'; font-weight:700; font-size:19px; }
+  .nav-links{ display:flex; gap:30px; }
+  .nav-links a{ font-size:14px; color:var(--ink-soft); font-weight:500; }
+  .nav-links a:hover{ color:var(--ink); }
+  @media(max-width:800px){ .nav-links{ display:none; } }
+  .nav-right{ display:flex; align-items:center; gap:18px; }
+  .nav-login{ font-size:14px; font-weight:600; color:var(--ink-soft); }
+  .btn-primary{ background:var(--ink); color:#fff; padding:10px 18px; border-radius:100px; font-size:13.5px; font-weight:600; display:inline-flex; align-items:center; gap:6px; }
+  .btn-primary:hover{ background:#000; }
+  .btn-primary .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+
+  .hero{ padding:64px 0 0; }
+  .hero-top{ text-align:center; max-width:760px; margin:0 auto; }
+  .eyebrow{ display:inline-flex; align-items:center; gap:7px; background:var(--bg-alt); border:1px solid var(--line); padding:6px 14px; border-radius:100px; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin-bottom:24px; }
+  .eyebrow b{ color:var(--ink); }
+  .hero h1{ font-family:'Space Grotesk'; font-weight:700; font-size:clamp(34px,5.4vw,58px); line-height:1.06; letter-spacing:-0.01em; }
+  .hero h1 .hl{ position:relative; white-space:nowrap; }
+  .hero h1 .hl::after{ content:''; position:absolute; left:0; right:0; bottom:6px; height:14px; background:var(--accent); z-index:-1; opacity:0.55; }
+  .hero p.sub{ margin:22px auto 0; color:var(--ink-soft); font-size:17px; line-height:1.6; max-width:520px; }
+  .hero-ctas{ display:flex; justify-content:center; gap:14px; margin-top:32px; flex-wrap:wrap; }
+  .btn-outline{ border:1.5px solid var(--ink); padding:12px 22px; border-radius:100px; font-weight:600; font-size:14.5px; }
+  .hero-ctas .btn-primary{ padding:12px 22px; font-size:14.5px; }
+
+  .hero-stats{ display:flex; justify-content:center; gap:44px; margin-top:44px; flex-wrap:wrap; }
+  .hstat{ text-align:center; }
+  .hstat .n{ font-family:'Space Grotesk'; font-weight:700; font-size:26px; }
+  .hstat .l{ font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
+
+  .mock-frame{ max-width:1020px; margin:56px auto 0; background:var(--panel); border-radius:18px 18px 0 0; padding:14px 14px 0; box-shadow:0 30px 70px -20px rgba(20,22,28,0.35); }
+  .mock-topbar{ display:flex; gap:6px; padding:0 6px 12px; }
+  .mock-topbar span{ width:10px; height:10px; border-radius:50%; background:#3A3D45; }
+  .mock-body{ background:#1B1E25; border-radius:10px 10px 0 0; padding:22px; min-height:320px; overflow:hidden; }
+  .mock-grid{ display:grid; grid-template-columns:180px 1fr; gap:18px; height:100%; }
+  @media(max-width:700px){ .mock-grid{ grid-template-columns:1fr; } .mock-side{ display:none; } }
+  .mock-side{ background:#14161C; border-radius:10px; padding:16px 12px; }
+  .mock-side .mi{ font-size:12px; color:#8B8E96; padding:9px 8px; border-radius:6px; margin-bottom:2px; }
+  .mock-side .mi.active{ background:#262A33; color:#fff; font-weight:600; }
+  .mock-main{ display:flex; flex-direction:column; gap:14px; }
+  .mock-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .mock-kpi{ background:#14161C; border-radius:10px; padding:14px; }
+  .mock-kpi .l{ font-size:10.5px; color:#8B8E96; text-transform:uppercase; letter-spacing:0.04em; }
+  .mock-kpi .v{ font-family:'IBM Plex Mono'; font-weight:600; font-size:22px; color:#fff; margin-top:4px; }
+  .mock-kpi .v.accent{ color:var(--accent); }
+  .mock-kpi .v.green{ color:#4ADE9C; }
+  .mock-table{ background:#14161C; border-radius:10px; padding:14px; flex:1; }
+  .mock-row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #23262E; font-size:11.5px; color:#B7BAC0; }
+  .mock-row:last-child{ border-bottom:none; }
+  .mock-row b{ color:#fff; font-weight:500; }
+  .mock-tag{ background:rgba(245,180,0,0.15); color:var(--accent); font-family:'IBM Plex Mono'; font-size:9.5px; padding:2px 7px; border-radius:100px; }
+
+  .section{ padding:80px 0; }
+  .section-head{ text-align:center; max-width:620px; margin:0 auto 44px; }
+  .kicker{ font-family:'IBM Plex Mono'; font-size:11.5px; color:var(--blue); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px; }
+  .section-head h2{ font-family:'Space Grotesk'; font-weight:700; font-size:clamp(26px,3.6vw,36px); line-height:1.15; }
+  .section-head p{ color:var(--ink-soft); margin-top:14px; font-size:15.5px; }
+
+  .problem-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  @media(max-width:800px){ .problem-grid{ grid-template-columns:1fr; } }
+  .pcard{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:24px; }
+  .pcard .x{ width:32px; height:32px; border-radius:8px; background:#FBE9E9; color:#C4453A; display:flex; align-items:center; justify-content:center; font-weight:700; margin-bottom:16px; }
+  .pcard h4{ font-size:15.5px; margin-bottom:8px; }
+  .pcard p{ font-size:13.5px; color:var(--ink-soft); line-height:1.55; }
+
+  .bg-alt{ background:var(--bg-alt); }
+  .mod-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  @media(max-width:900px){ .mod-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:600px){ .mod-grid{ grid-template-columns:1fr; } }
+  .mcard{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:22px; transition:border-color .2s, transform .2s; }
+  .mcard:hover{ border-color:var(--ink); transform:translateY(-2px); }
+  .mcard .icon{ width:36px; height:36px; border-radius:9px; background:var(--ink); color:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; margin-bottom:14px; }
+  .mcard h4{ font-family:'Space Grotesk'; font-size:16.5px; margin-bottom:6px; }
+  .mcard p{ font-size:13px; color:var(--ink-soft); line-height:1.5; }
+
+  .ai-split{ display:grid; grid-template-columns:1fr 1fr; gap:50px; align-items:center; }
+  @media(max-width:860px){ .ai-split{ grid-template-columns:1fr; } }
+  .ai-split .kicker{ margin-bottom:14px; }
+  .ai-split h2{ font-family:'Space Grotesk'; font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.18; margin-bottom:16px; }
+  .ai-split p{ color:var(--ink-soft); font-size:15px; line-height:1.65; margin-bottom:22px; }
+  .ai-list{ display:flex; flex-direction:column; gap:12px; }
+  .ai-list div{ display:flex; gap:10px; align-items:flex-start; font-size:14px; }
+  .ai-list div::before{ content:'✓'; color:var(--green); font-weight:700; }
+
+  .ai-visual{ background:var(--panel); border-radius:16px; padding:22px; }
+  .chat-bubble{ background:#1E212A; border-radius:10px; padding:12px 14px; margin-bottom:10px; font-size:13px; color:#D6D8DC; max-width:85%; }
+  .chat-bubble.user{ background:var(--accent); color:#14161C; margin-left:auto; font-weight:500; }
+  .chat-typing{ display:flex; gap:4px; padding:10px 14px; }
+  .chat-typing span{ width:6px; height:6px; border-radius:50%; background:#66696F; animation:blink 1.3s infinite; }
+  .chat-typing span:nth-child(2){ animation-delay:0.15s; }
+  .chat-typing span:nth-child(3){ animation-delay:0.3s; }
+  @keyframes blink{ 0%,80%,100%{ opacity:0.3; } 40%{ opacity:1; } }
+
+  .price-strip{ display:flex; justify-content:space-between; align-items:center; background:var(--panel); border-radius:18px; padding:40px 44px; flex-wrap:wrap; gap:24px; color:#fff; }
+  .price-strip h3{ font-family:'Space Grotesk'; font-size:26px; font-weight:700; max-width:380px; line-height:1.25; }
+  .price-strip p{ color:#9A9DA4; font-size:14px; margin-top:8px; }
+  .price-strip .btn-primary{ background:var(--accent); color:var(--ink); }
+
+  footer{ border-top:1px solid var(--line); padding:36px 0; }
+  .footer-inner{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:14px; align-items:center; }
+  .footer-inner p{ color:var(--ink-soft); font-size:13px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">
+      <div class="logo-mark"></div>
+      <div class="logo-text">Rodado</div>
+    </div>
+    <div class="nav-links">
+      <a href="#plataforma">Plataforma</a>
+      <a href="#modulos">Módulos</a>
+      <a href="#ia">IA</a>
+      <a href="#precios">Precios</a>
+    </div>
+    <div class="nav-right">
+      <a class="nav-login" href="#">Ingresar</a>
+      <a class="btn-primary" href="#"><span class="dot"></span>Pedí tu demo</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero" id="plataforma">
+  <div class="wrap hero-top">
+    <div class="eyebrow">● Stock, leads y ventas <b>en un solo lugar</b></div>
+    <h1 class="disp">La plataforma comercial<br>para tu <span class="hl">concesionaria.</span></h1>
+    <p class="sub">Dejá de cargar el mismo auto tres veces. Stock, leads de todos tus canales y financiación, conectados en un solo sistema — pensado para agencias multimarca argentinas.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#">Pedí tu demo →</a>
+      <a class="btn-outline" href="#modulos">Ver la plataforma</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="n disp">+40</div><div class="l">Agencias activas</div></div>
+      <div class="hstat"><div class="n disp mono">6.200</div><div class="l">Autos gestionados</div></div>
+      <div class="hstat"><div class="n disp">&lt;5min</div><div class="l">1ra respuesta a un lead</div></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="mock-frame">
+      <div class="mock-topbar"><span></span><span></span><span></span></div>
+      <div class="mock-body">
+        <div class="mock-grid">
+          <div class="mock-side">
+            <div class="mi active">Panel general</div>
+            <div class="mi">Stock</div>
+            <div class="mi">Leads</div>
+            <div class="mi">Ventas</div>
+            <div class="mi">Financiación</div>
+            <div class="mi">Reportes</div>
+          </div>
+          <div class="mock-main">
+            <div class="mock-kpis">
+              <div class="mock-kpi"><div class="l">Stock activo</div><div class="v" id="kpiStock">0</div></div>
+              <div class="mock-kpi"><div class="l">Leads hoy</div><div class="v accent" id="kpiLeads">0</div></div>
+              <div class="mock-kpi"><div class="l">Ventas del mes</div><div class="v green" id="kpiVentas">0</div></div>
+            </div>
+            <div class="mock-table">
+              <div class="mock-row"><span><b>Toyota Corolla XEI</b> · Juan Pérez</span><span class="mock-tag">NUEVO LEAD</span></div>
+              <div class="mock-row"><span><b>VW Amarok V6</b> · Marta Gómez</span><span class="mock-tag">EN NEGOCIACIÓN</span></div>
+              <div class="mock-row"><span><b>Fiat Cronos</b> · Lucas Díaz</span><span class="mock-tag">RESERVADO</span></div>
+              <div class="mock-row"><span><b>Peugeot 208</b> · Sofía Ruiz</span><span class="mock-tag">SEÑADO</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">El problema</div>
+      <h2 class="disp">El mercado digitalizó problemas.<br>No los resolvió.</h2>
+      <p>CRM por un lado, Excel por otro, publicación a mano en cada portal. Nada se conecta y el dato se carga tres veces.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="pcard"><div class="x">✕</div><h4>Herramientas sueltas</h4><p>Un sistema para el stock, otro para los clientes, WhatsApp aparte. Nadie mira el negocio completo.</p></div>
+      <div class="pcard"><div class="x">✕</div><h4>El lead se pierde</h4><p>Entra una consulta y nadie sabe qué campaña la trajo, ni por qué se cerró — o no — la venta.</p></div>
+      <div class="pcard"><div class="x">✕</div><h4>El stock, una caja negra</h4><p>Auto que sigue publicado cuando ya se vendió. Precio desactualizado. Errores que espantan clientes.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-alt" id="modulos">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">La plataforma</div>
+      <h2 class="disp">Un núcleo. Sumás los módulos que tu agencia necesita.</h2>
+      <p>Todo comparte el mismo dato — cargás el auto una vez y corre por todo el sistema.</p>
+    </div>
+    <div class="mod-grid">
+      <div class="mcard"><div class="icon">S</div><h4>e-Stock</h4><p>Inventario en tiempo real: fotos, estado, ubicación y precio de cada unidad, siempre actualizado.</p></div>
+      <div class="mcard"><div class="icon">C</div><h4>e-CRM</h4><p>Cliente y vehículo trabajados juntos, en una sola pantalla, con historial completo.</p></div>
+      <div class="mcard"><div class="icon">P</div><h4>Multipublicador</h4><p>Cargás el auto una vez y se publica en Mercado Libre y el resto de tus canales al instante.</p></div>
+      <div class="mcard"><div class="icon">W</div><h4>WhatsApp</h4><p>Catálogo sincronizado y seguimiento de cada conversación, sin salir del sistema.</p></div>
+      <div class="mcard"><div class="icon">F</div><h4>Financiación</h4><p>Simulador de cuota en cada ficha, conectado a tus entidades financieras.</p></div>
+      <div class="mcard"><div class="icon">R</div><h4>Reportes</h4><p>KPIs reales de stock, ventas, leads y origen de cada campaña. Medís el negocio de verdad.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="ia">
+  <div class="wrap ai-split">
+    <div>
+      <div class="kicker">Tu diferencial</div>
+      <h2 class="disp">La IA filtra curiosos.<br>Tu equipo solo cierra.</h2>
+      <p>Las consultas masivas de redes y WhatsApp las atiende el asistente: responde al instante, mide intención de compra y solo deriva al vendedor cuando hay un comprador real.</p>
+      <div class="ai-list">
+        <div>Responde en segundos, en cada canal, las 24 horas</div>
+        <div>Sugiere el precio de mercado antes de publicar un auto</div>
+        <div>Llega al vendedor con el vehículo de interés y el contexto ya resuelto</div>
+      </div>
+    </div>
+    <div class="ai-visual">
+      <div class="chat-bubble">Hola! Vi el Corolla 2024 en Instagram, ¿sigue disponible?</div>
+      <div class="chat-bubble user">Sí, disponible! 12.000km, USD 24.500. ¿Tenés vehículo para entregar en parte de pago?</div>
+      <div class="chat-bubble">Sí, un Onix 2021</div>
+      <div class="chat-typing"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="precios">
+  <div class="wrap">
+    <div class="price-strip">
+      <div>
+        <h3 class="disp">Te mostramos la plataforma con tu propio stock.</h3>
+        <p>El 70% de las agencias que ven la demo empiezan en menos de una semana.</p>
+      </div>
+      <a class="btn-primary" href="#">Pedí tu demo →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="logo"><div class="logo-mark"></div><div class="logo-text" style="font-size:16px;">Rodado</div></div>
+    <p>La plataforma comercial para concesionarias argentinas · Prototipo de producto</p>
+  </div>
+</footer>
+
+<script>
+  function animateCount(el, target, suffix=''){
+    let cur = 0;
+    const step = Math.max(1, Math.round(target/40));
+    const t = setInterval(()=>{
+      cur += step;
+      if(cur >= target){ cur = target; clearInterval(t); }
+      el.textContent = cur.toLocaleString('es-AR') + suffix;
+    }, 30);
+  }
+  window.addEventListener('load', ()=>{
+    animateCount(document.getElementById('kpiStock'), 214);
+    animateCount(document.getElementById('kpiLeads'), 38);
+    animateCount(document.getElementById('kpiVentas'), 19);
+  });
+</script>
+
+</body>
+</html>

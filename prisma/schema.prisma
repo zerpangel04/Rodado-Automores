@@ -1,0 +1,133 @@
+// Rodado — esquema de base de datos inicial
+// Basado en el modelo de datos definido en docs/rodado-brief-tecnico.md
+// Ejecutar: npx prisma generate / npx prisma migrate dev
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Rol {
+  DUENIO
+  VENDEDOR
+  ADMIN
+}
+
+enum EstadoVehiculo {
+  DISPONIBLE
+  RESERVADO
+  VENDIDO
+}
+
+enum CanalLead {
+  WHATSAPP
+  MERCADO_LIBRE
+  INSTAGRAM
+  WEB
+}
+
+enum EtapaLead {
+  NUEVO
+  CONTACTADO
+  TEST_DRIVE
+  NEGOCIACION
+  CERRADO
+}
+
+enum EstadoCobro {
+  PENDIENTE
+  COBRADO
+}
+
+// Cada concesionaria = un tenant. Todo dato cuelga de un tenant_id.
+model Tenant {
+  id        String   @id @default(cuid())
+  nombre    String
+  plan      String   @default("basico")
+  dominio   String?  @unique
+  createdAt DateTime @default(now())
+
+  usuarios  Usuario[]
+  vehiculos Vehiculo[]
+  leads     Lead[]
+  ventas    Venta[]
+}
+
+model Usuario {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  nombre       String
+  email        String   @unique
+  passwordHash String
+  rol          Rol      @default(VENDEDOR)
+  createdAt    DateTime @default(now())
+
+  leadsAsignados Lead[]  @relation("VendedorAsignado")
+  ventas         Venta[] @relation("VendedorVenta")
+}
+
+model Vehiculo {
+  id         String         @id @default(cuid())
+  tenantId   String
+  tenant     Tenant         @relation(fields: [tenantId], references: [id])
+  marca      String
+  modelo     String
+  anio       Int
+  km         Int
+  precioUsd  Decimal
+  estado     EstadoVehiculo @default(DISPONIBLE)
+  categoria  String?
+  fotos      String[]       @default([])
+  fechaIngreso DateTime     @default(now())
+
+  // Documentación
+  docTitulo       Boolean   @default(false)
+  docCedula       Boolean   @default(false)
+  docDominio      Boolean   @default(false)
+  docLibreDeuda   Boolean   @default(false)
+  vtvVencimiento  DateTime?
+
+  leads Lead[]
+  venta Venta?
+
+  @@index([tenantId, estado])
+}
+
+model Lead {
+  id            String    @id @default(cuid())
+  tenantId      String
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+  vehiculoId    String?
+  vehiculo      Vehiculo? @relation(fields: [vehiculoId], references: [id])
+  nombreCliente String
+  contacto      String?
+  canal         CanalLead
+  etapa         EtapaLead @default(NUEVO)
+  vendedorId    String?
+  vendedor      Usuario?  @relation("VendedorAsignado", fields: [vendedorId], references: [id])
+  createdAt     DateTime  @default(now())
+
+  @@index([tenantId, etapa])
+}
+
+model Venta {
+  id           String      @id @default(cuid())
+  tenantId     String
+  tenant       Tenant      @relation(fields: [tenantId], references: [id])
+  vehiculoId   String      @unique
+  vehiculo     Vehiculo    @relation(fields: [vehiculoId], references: [id])
+  vendedorId   String
+  vendedor     Usuario     @relation("VendedorVenta", fields: [vendedorId], references: [id])
+  precioFinal  Decimal
+  comision     Decimal
+  estadoCobro  EstadoCobro @default(PENDIENTE)
+  fecha        DateTime    @default(now())
+
+  @@index([tenantId, fecha])
+}

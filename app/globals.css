@@ -1,0 +1,53 @@
+:root {
+  --bg: #faf9f5;
+  --sidebar: #14161c;
+  --sidebar-hover: #1f222b;
+  --ink: #14161c;
+  --ink-soft: #63676a;
+  --line: #e1ddd0;
+  --accent: #f5b400;
+  --blue: #2a4cd6;
+  --green: #1e8a5c;
+  --red: #c4453a;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a,
+button {
+  color: inherit;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.disp {
+  font-family: var(--font-display), sans-serif;
+}
+
+.mono {
+  font-family: var(--font-mono), monospace;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
