@@ -5,14 +5,15 @@
   "description": "SaaS de gestión comercial para concesionarias multimarca en Argentina",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.16.0",
+    "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",
     "next": "^14.2.0",
     "next-auth": "^5.0.0-beta.32",
