@@ -107,6 +107,7 @@ model Lead {
   vehiculo      Vehiculo? @relation(fields: [vehiculoId], references: [id])
   nombreCliente String
   contacto      String?
+  mensaje       String?
   canal         CanalLead
   etapa         EtapaLead @default(NUEVO)
   vendedorId    String?

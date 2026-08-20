@@ -46,6 +46,14 @@ export const leadInputSchema = z.object({
   vendedorId: z.string().trim().optional().nullable(),
 });
 
+export const publicLeadInputSchema = z.object({
+  dominio: z.string().trim().min(1),
+  vehiculoId: z.string().trim().min(1),
+  nombreCliente: z.string().trim().min(1, "Dejanos tu nombre"),
+  contacto: z.string().trim().min(1, "Dejanos un teléfono o email de contacto"),
+  mensaje: z.string().trim().max(1000).optional().nullable(),
+});
+
 export const leadUpdateSchema = z.object({
   nombreCliente: z.string().trim().min(1).optional(),
   contacto: z.string().trim().optional().nullable(),

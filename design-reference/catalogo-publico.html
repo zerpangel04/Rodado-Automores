@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agencia Demo — Catálogo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF9F5; --panel:#14161C;
+    --ink:#14161C; --ink-soft:#63676A; --line:#E1DDD0;
+    --accent:#F5B400; --blue:#2A4CD6; --green:#1E8A5C;
+    --radius:12px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .disp{ font-family:'Space Grotesk', sans-serif; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a,button{ color:inherit; text-decoration:none; font-family:inherit; }
+  button{ cursor:pointer; border:none; background:none; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  header{ background:var(--panel); color:#fff; padding:20px 0; }
+  .header-inner{ display:flex; justify-content:space-between; align-items:center; }
+  .agency{ display:flex; align-items:center; gap:10px; }
+  .agency-mark{ width:32px; height:32px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; color:#14161C; }
+  .agency-name{ font-family:'Space Grotesk'; font-weight:700; font-size:19px; }
+  .agency-sub{ font-size:11.5px; color:#9A9DA4; }
+  .header-contact{ font-size:13px; color:#B7BAC0; }
+  .header-contact b{ color:#fff; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .hero-strip{ padding:30px 0 20px; }
+  .hero-strip h1{ font-family:'Space Grotesk'; font-size:clamp(24px,3.4vw,32px); font-weight:700; }
+  .hero-strip p{ color:var(--ink-soft); margin-top:6px; font-size:14px; }
+
+  .filter-bar{ display:flex; gap:10px; margin:18px 0 22px; flex-wrap:wrap; }
+  .filter-bar select, .filter-bar input{ background:#fff; border:1px solid var(--line); border-radius:8px; padding:9px 12px; font-size:13px; font-family:'Inter'; }
+
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; padding-bottom:50px; }
+  @media(max-width:900px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:600px){ .grid{ grid-template-columns:1fr; } }
+
+  .card{ background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; cursor:pointer; transition:transform .2s, border-color .2s; }
+  .card:hover{ transform:translateY(-3px); border-color:var(--panel); }
+  .card-photo{ height:160px; background:#EFEBE0; display:flex; align-items:center; justify-content:center; position:relative; }
+  .card-photo svg{ width:65%; }
+  .card-badge{ position:absolute; top:12px; left:12px; font-family:'IBM Plex Mono'; font-size:10px; text-transform:uppercase; padding:4px 9px; border-radius:100px; font-weight:700; }
+  .card-badge.disponible{ background:#E4F5EC; color:var(--green); }
+  .card-badge.reservado{ background:#FFF3D6; color:#9A6F00; }
+  .card-body{ padding:16px; }
+  .card-title{ font-family:'Space Grotesk'; font-weight:700; font-size:16px; }
+  .card-meta{ font-family:'IBM Plex Mono'; font-size:11px; color:var(--ink-soft); margin:6px 0 12px; }
+  .card-foot{ display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:12px; }
+  .card-price{ font-family:'Space Grotesk'; font-weight:700; font-size:16px; }
+  .card-arrow{ width:28px; height:28px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; color:var(--panel); font-size:13px; }
+
+  .detail{ padding:26px 0 60px; }
+  .back-btn{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:20px; }
+  .detail-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:30px; }
+  @media(max-width:860px){ .detail-grid{ grid-template-columns:1fr; } }
+
+  .gallery-main{ background:#EFEBE0; border-radius:14px; height:340px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .gallery-main svg{ width:60%; }
+  .gallery-thumbs{ display:flex; gap:8px; }
+  .gallery-thumbs div{ width:64px; height:48px; border-radius:8px; background:#EFEBE0; border:2px solid transparent; display:flex; align-items:center; justify-content:center; }
+  .gallery-thumbs div.active{ border-color:var(--accent); }
+  .gallery-thumbs svg{ width:60%; }
+
+  .detail-title{ font-family:'Space Grotesk'; font-weight:700; font-size:28px; margin-top:22px; }
+  .detail-badge{ display:inline-block; font-family:'IBM Plex Mono'; font-size:10.5px; text-transform:uppercase; padding:4px 10px; border-radius:100px; font-weight:700; background:#E4F5EC; color:var(--green); margin-bottom:10px; }
+
+  .spec-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0; padding:18px; background:#fff; border:1px solid var(--line); border-radius:12px; }
+  .spec-item .l{ font-family:'IBM Plex Mono'; font-size:10px; text-transform:uppercase; color:var(--ink-soft); }
+  .spec-item .v{ font-weight:600; font-size:14px; margin-top:2px; }
+
+  .side-card{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px; position:sticky; top:20px; }
+  .side-price{ font-family:'Space Grotesk'; font-weight:700; font-size:30px; }
+  .side-price small{ display:block; font-family:'Inter'; font-weight:400; font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+  .contact-form{ margin-top:20px; border-top:1px solid var(--line); padding-top:18px; }
+  .contact-form h4{ font-family:'Space Grotesk'; font-size:16px; margin-bottom:4px; }
+  .contact-form p{ font-size:12.5px; color:var(--ink-soft); margin-bottom:14px; }
+  .field{ margin-bottom:12px; }
+  .field input, .field textarea{ width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:13.5px; font-family:'Inter'; outline:none; resize:none; }
+  .field input:focus, .field textarea:focus{ border-color:var(--panel); }
+  .submit-btn{ width:100%; background:var(--panel); color:#fff; padding:12px; border-radius:8px; font-weight:700; font-size:14px; margin-top:6px; }
+  .submit-btn:hover{ background:#000; }
+  .success-box{ display:none; background:#E4F5EC; color:var(--green); padding:14px; border-radius:10px; font-size:13.5px; font-weight:600; text-align:center; margin-top:14px; }
+  .success-box.show{ display:block; }
+
+  footer{ border-top:1px solid var(--line); padding:26px 0; margin-top:20px; }
+  footer p{ color:var(--ink-soft); font-size:12.5px; text-align:center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-inner">
+    <div class="agency">
+      <div class="agency-mark">A</div>
+      <div><div class="agency-name">Agencia Demo</div><div class="agency-sub">Catálogo actualizado en vivo</div></div>
+    </div>
+    <div class="header-contact">📞 <b>+54 9 11 5555-1234</b></div>
+  </div>
+</header>
+
+<div class="view active" id="view-catalog">
+  <div class="wrap">
+    <div class="hero-strip">
+      <h1 class="disp">Vehículos disponibles</h1>
+      <p>6 unidades en stock · precios en USD, actualizados hoy</p>
+    </div>
+    <div class="filter-bar">
+      <select><option>Todas las marcas</option><option>Toyota</option><option>Volkswagen</option></select>
+      <select><option>0km y usados</option><option>Solo 0km</option><option>Solo usados</option></select>
+      <input type="text" placeholder="Precio máx. (USD)">
+    </div>
+    <div class="grid" id="catalogGrid"></div>
+  </div>
+</div>
+
+<div class="view" id="view-detail">
+  <div class="wrap detail">
+    <button class="back-btn" onclick="showCatalog()">← Volver al catálogo</button>
+    <div class="detail-grid">
+      <div>
+        <div class="gallery-main" id="galleryMain"></div>
+        <div class="gallery-thumbs" id="galleryThumbs"></div>
+
+        <span class="detail-badge">Disponible</span>
+        <div class="detail-title disp" id="detailTitle">—</div>
+
+        <div class="spec-grid" id="specGrid"></div>
+      </div>
+
+      <div>
+        <div class="side-card">
+          <div class="side-price" id="sidePrice">—<small>Precio de contado, financiación disponible</small></div>
+
+          <div class="contact-form">
+            <h4>¿Te interesa este auto?</h4>
+            <p>Dejá tus datos y te contactamos en el momento — no hace falta que vengas al local primero.</p>
+            <div class="field"><input id="leadNombre" type="text" placeholder="Tu nombre"></div>
+            <div class="field"><input id="leadTelefono" type="text" placeholder="Teléfono o WhatsApp"></div>
+            <div class="field"><textarea rows="2" placeholder="¿Algo puntual que quieras consultar? (opcional)"></textarea></div>
+            <button class="submit-btn" onclick="sendLead()">Quiero que me contacten →</button>
+            <div class="success-box" id="successBox">✓ ¡Listo! La agencia recibió tu consulta y te va a contactar a la brevedad.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><div class="wrap"><p>Catálogo de Agencia Demo — powered by Rodado</p></div></footer>
+
+<script>
+  const carSVG = (c1,c2) => `<svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 82 C20 66 40 58 60 56 L90 38 C98 32 110 29 122 29 L200 29 C215 29 227 34 235 44 L255 56 C278 58 296 66 298 82 L298 88 L272 88 C272 75 262 65 249 65 C236 65 226 75 226 88 L94 88 C94 75 84 65 71 65 C58 65 48 75 48 88 L20 88 Z" fill="${c1}" stroke="${c2}" stroke-width="1.6"/>
+    <circle cx="71" cy="88" r="16" fill="${c2}"/><circle cx="249" cy="88" r="16" fill="${c2}"/>
+  </svg>`;
+
+  const cars = [
+    {id:1, marca:'Volkswagen', modelo:'Amarok V6', estado:'disponible', anio:2023, km:'8.200', caja:'Automática', motor:'3.0 V6 TDI', precio:'42.500'},
+    {id:2, marca:'Toyota', modelo:'Corolla XEI', estado:'disponible', anio:2024, km:'12.000', caja:'CVT', motor:'1.8L 16v', precio:'24.500'},
+    {id:3, marca:'Chevrolet', modelo:'Onix Turbo', estado:'reservado', anio:2023, km:'21.400', caja:'Manual', motor:'1.0 Turbo', precio:'17.800'},
+    {id:4, marca:'Fiat', modelo:'Cronos Drive', estado:'disponible', anio:2024, km:'3.100', caja:'Manual', motor:'1.3L', precio:'16.200'},
+    {id:5, marca:'Ford', modelo:'Ranger XLT', estado:'disponible', anio:2022, km:'34.600', caja:'Automática', motor:'2.0 Bi-Turbo', precio:'31.500'},
+    {id:6, marca:'Peugeot', modelo:'208 Feline', estado:'disponible', anio:2024, km:'6.800', caja:'Manual', motor:'1.6L', precio:'19.900'},
+  ];
+
+  const grid = document.getElementById('catalogGrid');
+  grid.innerHTML = cars.map(c => `
+    <div class="card" onclick="showDetail(${c.id})">
+      <div class="card-photo">
+        <span class="card-badge ${c.estado}">${c.estado === 'disponible' ? 'Disponible' : 'Reservado'}</span>
+        ${carSVG('#D8D2C0','#63676A')}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${c.marca} ${c.modelo}</div>
+        <div class="card-meta">${c.anio} · ${c.km} km</div>
+        <div class="card-foot">
+          <div class="card-price disp">USD ${c.precio}</div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  function showDetail(id){
+    const c = cars.find(x=>x.id===id);
+    document.getElementById('detailTitle').textContent = `${c.marca} ${c.modelo}`;
+    document.getElementById('sidePrice').innerHTML = `USD ${c.precio}<small>Precio de contado, financiación disponible</small>`;
+    document.getElementById('galleryMain').innerHTML = carSVG('#D8D2C0','#63676A');
+    document.getElementById('galleryThumbs').innerHTML = [1,2,3,4].map((n,i)=>`<div class="${i===0?'active':''}">${carSVG('#D8D2C0','#63676A')}</div>`).join('');
+    document.getElementById('specGrid').innerHTML = `
+      <div class="spec-item"><div class="l">Año</div><div class="v">${c.anio}</div></div>
+      <div class="spec-item"><div class="l">Kilometraje</div><div class="v">${c.km} km</div></div>
+      <div class="spec-item"><div class="l">Transmisión</div><div class="v">${c.caja}</div></div>
+      <div class="spec-item"><div class="l">Motor</div><div class="v">${c.motor}</div></div>
+    `;
+    document.getElementById('successBox').classList.remove('show');
+    document.getElementById('view-catalog').classList.remove('active');
+    document.getElementById('view-detail').classList.add('active');
+    window.scrollTo(0,0);
+  }
+  function showCatalog(){
+    document.getElementById('view-detail').classList.remove('active');
+    document.getElementById('view-catalog').classList.add('active');
+  }
+  function sendLead(){
+    const nombre = document.getElementById('leadNombre').value.trim();
+    if(!nombre){ alert('Dejanos al menos tu nombre'); return; }
+    document.getElementById('successBox').classList.add('show');
+  }
+</script>
+
+</body>
+</html>
