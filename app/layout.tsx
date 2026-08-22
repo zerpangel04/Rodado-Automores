@@ -1,20 +1,21 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Rajdhani, Manrope, JetBrains_Mono } from "next/font/google";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const rajdhani = Rajdhani({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   variable: "--font-display",
 });
-const inter = Inter({
+const manrope = Manrope({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
 });
-const ibmPlexMono = IBM_Plex_Mono({
+const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["500", "600"],
+  weight: ["400", "500"],
   variable: "--font-mono",
 });
 
@@ -30,9 +31,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es-AR">
+    <html lang="es-AR" data-theme="dark">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body
-        className={`${spaceGrotesk.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+        className={`${rajdhani.variable} ${manrope.variable} ${jetBrainsMono.variable}`}
       >
         {children}
       </body>

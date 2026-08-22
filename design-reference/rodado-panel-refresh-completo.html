@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rodado — Panel (refresh)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF9F5; --sidebar:#14161C; --sidebar-hover:#1F222B;
+    --ink:#14161C; --ink-soft:#63676A; --line:#E1DDD0;
+    --accent:#F5B400; --blue:#2A4CD6; --green:#1E8A5C; --red:#C4453A;
+    --radius:12px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .disp{ font-family:'Space Grotesk', sans-serif; }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a,button{ color:inherit; text-decoration:none; font-family:inherit; }
+  button{ cursor:pointer; border:none; background:none; }
+
+  .app{ display:flex; min-height:100vh; }
+  .sidebar{ width:240px; background:var(--sidebar); color:#fff; flex:none; display:flex; flex-direction:column; padding:16px 14px; }
+
+  /* Selector de agencia (workspace switcher) */
+  .workspace{ display:flex; align-items:center; gap:9px; padding:10px; border-radius:10px; background:#1F222B; margin-bottom:18px; cursor:pointer; transition:background .15s; }
+  .workspace:hover{ background:#262A33; }
+  .workspace-mark{ width:28px; height:28px; border-radius:7px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:13px; color:#14161C; flex:none; }
+  .workspace-info{ flex:1; min-width:0; }
+  .workspace-name{ font-family:'Space Grotesk'; font-weight:700; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .workspace-plan{ font-size:10.5px; color:#8B8E96; }
+  .workspace-chevron{ color:#6D707A; font-size:11px; }
+
+  .nav-group{ margin-bottom:18px; }
+  .nav-label{ font-family:'IBM Plex Mono'; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:#6D707A; padding:0 10px; margin-bottom:8px; display:block; }
+  .nav-item{ display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; font-size:13.5px; color:#B7BAC0; font-weight:500; width:100%; text-align:left; margin-bottom:2px; }
+  .nav-item:hover{ background:var(--sidebar-hover); color:#fff; }
+  .nav-item.active{ background:var(--sidebar-hover); color:#fff; }
+  .nav-item .ic{ width:20px; height:20px; border-radius:5px; background:#262A33; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:11px; flex:none; }
+  .nav-item.active .ic{ background:var(--accent); color:#14161C; }
+  .nav-item .badge{ margin-left:auto; background:#262A33; font-family:'IBM Plex Mono'; font-size:9.5px; padding:2px 6px; border-radius:100px; color:#B7BAC0; }
+
+  .sidebar-foot{ margin-top:auto; display:flex; align-items:center; gap:10px; padding:10px; border-top:1px solid #23262E; padding-top:16px; }
+  .avatar{ width:30px; height:30px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; font-size:12px; color:#14161C; flex:none; }
+  .sidebar-foot div{ font-size:12.5px; }
+  .sidebar-foot .role{ color:#6D707A; font-size:11px; }
+
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; }
+  .topbar{ background:#fff; border-bottom:1px solid var(--line); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; }
+  .topbar h1{ font-family:'Space Grotesk'; font-size:20px; font-weight:700; }
+  .topbar .sub{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+
+  .content{ padding:28px 32px; flex:1; }
+
+  /* KPI con anillos de progreso */
+  .kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  @media(max-width:1000px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+  .kpi{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:20px; display:flex; align-items:center; gap:16px; }
+  .ring{ position:relative; width:64px; height:64px; flex:none; }
+  .ring svg{ transform:rotate(-90deg); }
+  .ring .bg{ fill:none; stroke:var(--line); stroke-width:6; }
+  .ring .fg{ fill:none; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1); }
+  .ring .val{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono'; font-weight:600; font-size:13px; }
+  .kpi-info .l{ font-size:11.5px; color:var(--ink-soft); }
+  .kpi-info .v{ font-family:'Space Grotesk'; font-weight:700; font-size:20px; margin-top:2px; }
+
+  .panel-grid{ display:grid; grid-template-columns:1.5fr 1fr; gap:18px; }
+  @media(max-width:900px){ .panel-grid{ grid-template-columns:1fr; } }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:20px; }
+  .card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .card h3{ font-family:'Space Grotesk'; font-size:15.5px; }
+  .card-head a{ font-size:12px; font-weight:600; color:var(--blue); }
+
+  /* Tabla con píldoras de estado refinadas */
+  table.refined{ width:100%; border-collapse:collapse; }
+  table.refined th{ text-align:left; font-family:'IBM Plex Mono'; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); padding:0 0 10px; }
+  table.refined td{ padding:11px 0; font-size:13px; border-top:1px solid var(--line); }
+  .pill{ display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:100px; }
+  .pill::before{ content:''; width:6px; height:6px; border-radius:50%; }
+  .pill.done{ background:#E4F5EC; color:var(--green); }
+  .pill.done::before{ background:var(--green); }
+  .pill.progress{ background:#FFF3D6; color:#9A6F00; }
+  .pill.progress::before{ background:#D9A400; }
+  .pill.new{ background:#EAECF7; color:var(--blue); }
+  .pill.new::before{ background:var(--blue); }
+
+  .task-row{ display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--line); font-size:12.5px; }
+  .task-row:last-child{ border-bottom:none; }
+  .task-dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); margin-top:5px; flex:none; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="workspace">
+      <div class="workspace-mark">A</div>
+      <div class="workspace-info">
+        <div class="workspace-name">Agencia Demo</div>
+        <div class="workspace-plan">Plan Profesional</div>
+      </div>
+      <div class="workspace-chevron">▾</div>
+    </div>
+
+    <div class="nav-group">
+      <span class="nav-label">Operación</span>
+      <button class="nav-item active"><span class="ic">P</span>Panel general</button>
+      <button class="nav-item"><span class="ic">S</span>Stock<span class="badge">13</span></button>
+      <button class="nav-item"><span class="ic">L</span>Leads<span class="badge">6</span></button>
+      <button class="nav-item"><span class="ic">V</span>Ventas</button>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="avatar">AD</div>
+      <div><div>Ángel</div><div class="role">Dueño</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div><h1 class="disp">Panel general</h1><div class="sub">Hoy, 20 de agosto — actualizado en vivo</div></div>
+    </div>
+
+    <div class="content">
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="ring">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle class="bg" cx="32" cy="32" r="27"/>
+              <circle class="fg" cx="32" cy="32" r="27" stroke="#F5B400" stroke-dasharray="170" stroke-dashoffset="45" id="r1"/>
+            </svg>
+            <div class="val mono">77%</div>
+          </div>
+          <div class="kpi-info"><div class="l">Stock disponible</div><div class="v disp">10 / 13</div></div>
+        </div>
+        <div class="kpi">
+          <div class="ring">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle class="bg" cx="32" cy="32" r="27"/>
+              <circle class="fg" cx="32" cy="32" r="27" stroke="#2A4CD6" stroke-dasharray="170" stroke-dashoffset="119" id="r2"/>
+            </svg>
+            <div class="val mono">30%</div>
+          </div>
+          <div class="kpi-info"><div class="l">Leads en negociación</div><div class="v disp">2 / 6</div></div>
+        </div>
+        <div class="kpi">
+          <div class="ring">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle class="bg" cx="32" cy="32" r="27"/>
+              <circle class="fg" cx="32" cy="32" r="27" stroke="#1E8A5C" stroke-dasharray="170" stroke-dashoffset="128" id="r3"/>
+            </svg>
+            <div class="val mono">25%</div>
+          </div>
+          <div class="kpi-info"><div class="l">Conversión lead→venta</div><div class="v disp">1 / 4</div></div>
+        </div>
+        <div class="kpi">
+          <div class="ring">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle class="bg" cx="32" cy="32" r="27"/>
+              <circle class="fg" cx="32" cy="32" r="27" stroke="#C4453A" stroke-dasharray="170" stroke-dashoffset="153" id="r4"/>
+            </svg>
+            <div class="val mono">10%</div>
+          </div>
+          <div class="kpi-info"><div class="l">Docs. por vencer</div><div class="v disp">2 vehículos</div></div>
+        </div>
+      </div>
+
+      <div class="panel-grid">
+        <div class="card">
+          <div class="card-head"><h3>Leads recientes</h3><a href="#">Ver todos →</a></div>
+          <table class="refined">
+            <tr><th>Cliente</th><th>Vehículo</th><th>Etapa</th></tr>
+            <tr><td>Lucía Fernandez</td><td>Peugeot 208 Feline</td><td><span class="pill new">Nuevo</span></td></tr>
+            <tr><td>Sofía Ramirez</td><td>Ford Ranger XLT</td><td><span class="pill progress">Contactado</span></td></tr>
+            <tr><td>Valentina Torres</td><td>Toyota Hilux SRX</td><td><span class="pill progress">Negociación</span></td></tr>
+            <tr><td>Maria Lopez</td><td>Renault Duster</td><td><span class="pill done">Cerrado</span></td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px;">Pendientes de hoy</h3>
+          <div class="task-row"><div class="task-dot"></div><div>Confirmar entrega Duster a Maria Lopez</div></div>
+          <div class="task-row"><div class="task-dot"></div><div>Actualizar precio Ranger XLT (mercado subió)</div></div>
+          <div class="task-row"><div class="task-dot"></div><div>Test drive Hilux SRX — 17hs, Valentina T.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    // Los stroke-dashoffset ya están seteados a su valor final en el HTML;
+    // esta animación los hace arrancar en 170 (vacío) y crecer hasta el valor real.
+    const rings = [
+      {id:'r1', target:45}, {id:'r2', target:119}, {id:'r3', target:128}, {id:'r4', target:153}
+    ];
+    rings.forEach((r,i) => {
+      const el = document.getElementById(r.id);
+      el.style.strokeDashoffset = 170;
+      setTimeout(() => { el.style.strokeDashoffset = r.target; }, 150 + i*120);
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import styles from "./stock.module.css";
 import { docStatus, diasHastaVtv } from "@/lib/docs";
 import { estimarPrecio } from "@/lib/tasacion";
+import { Pill, type PillColor } from "../Pill";
 
 export type EstadoVehiculo = "DISPONIBLE" | "RESERVADO" | "VENDIDO";
 
@@ -71,17 +72,23 @@ const stateLabel: Record<EstadoVehiculo, string> = {
   VENDIDO: "Vendido",
 };
 
+const stateColor: Record<EstadoVehiculo, PillColor> = {
+  DISPONIBLE: "green",
+  RESERVADO: "amber",
+  VENDIDO: "gray",
+};
+
 function CarSVG() {
   return (
     <svg viewBox="0 0 320 110" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M20 82 C20 66 40 58 60 56 L90 38 C98 32 110 29 122 29 L200 29 C215 29 227 34 235 44 L255 56 C278 58 296 66 298 82 L298 88 L272 88 C272 75 262 65 249 65 C236 65 226 75 226 88 L94 88 C94 75 84 65 71 65 C58 65 48 75 48 88 L20 88 Z"
-        fill="#EFEBE0"
-        stroke="#63676A"
+        fill="var(--input-bg)"
+        stroke="var(--ink-soft)"
         strokeWidth="1.6"
       />
-      <circle cx="71" cy="88" r="16" fill="#63676A" />
-      <circle cx="249" cy="88" r="16" fill="#63676A" />
+      <circle cx="71" cy="88" r="16" fill="var(--ink-soft)" />
+      <circle cx="249" cy="88" r="16" fill="var(--ink-soft)" />
     </svg>
   );
 }
@@ -353,13 +360,14 @@ export function StockView({
             return (
               <div className={styles.card} key={v.id}>
                 <div className={styles.photo}>
-                  <span
-                    className={`${styles.state} ${styles[v.estado.toLowerCase()]}`}
-                    onClick={() => !vendido && toggleReserva(v)}
-                    style={vendido ? { cursor: "default" } : undefined}
-                  >
-                    {stateLabel[v.estado]}
-                  </span>
+                  <div className={styles.state}>
+                    <Pill
+                      color={stateColor[v.estado]}
+                      onClick={vendido ? undefined : () => toggleReserva(v)}
+                    >
+                      {stateLabel[v.estado]}
+                    </Pill>
+                  </div>
                   {vendido ? (
                     canRevertirVenta && (
                       <button

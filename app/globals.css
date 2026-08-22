@@ -1,15 +1,57 @@
 :root {
-  --bg: #faf9f5;
-  --sidebar: #14161c;
-  --sidebar-hover: #1f222b;
-  --ink: #14161c;
-  --ink-soft: #63676a;
-  --line: #e1ddd0;
-  --accent: #f5b400;
-  --blue: #2a4cd6;
-  --green: #1e8a5c;
-  --red: #c4453a;
-  --radius: 10px;
+  --bg: #0b0a14;
+  --ink: #f4f2fa;
+  --ink-soft: #9c97ac;
+  --surface: rgba(28, 23, 48, 0.55);
+  --surface-strong: rgba(28, 23, 48, 0.7);
+  --line: rgba(255, 255, 255, 0.08);
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --modal-overlay: rgba(6, 5, 12, 0.6);
+  --tooltip-bg: #1c1730;
+
+  --violet: #8b5cf6;
+  --magenta: #e8319b;
+  --cyan: #22d3ee;
+  --success: #34d399;
+  --warn: #f5b400;
+  --danger: #e8319b;
+
+  /* Alias legacy: mantiene compatibilidad con el resto del código que
+     ya referencia estos nombres, ahora resueltos contra la paleta neon. */
+  --accent: var(--violet);
+  --blue: var(--cyan);
+  --green: var(--success);
+  --red: var(--danger);
+  --purple: var(--violet);
+  --gray: var(--ink-soft);
+  --sidebar: var(--surface-strong);
+  --sidebar-hover: color-mix(in srgb, var(--violet) 16%, transparent);
+
+  --accent-grad: linear-gradient(135deg, #8b5cf6, #e8319b);
+  --blob-1: rgba(139, 92, 246, 0.45);
+  --blob-2: rgba(34, 211, 238, 0.35);
+
+  --radius: 16px;
+  --blur: 18px;
+}
+
+html[data-theme="light"] {
+  --bg: #f3f1fa;
+  --ink: #1b1730;
+  --ink-soft: #6b6478;
+  --surface: rgba(255, 255, 255, 0.6);
+  --surface-strong: rgba(255, 255, 255, 0.85);
+  --line: rgba(30, 20, 60, 0.09);
+  --input-bg: rgba(255, 255, 255, 0.75);
+  --modal-overlay: rgba(30, 20, 60, 0.35);
+  --tooltip-bg: #2a2140;
+
+  --success: #0e9668;
+  --warn: #9a6f00;
+  --danger: #c0197a;
+
+  --blob-1: rgba(139, 92, 246, 0.2);
+  --blob-2: rgba(34, 211, 238, 0.18);
 }
 
 * {
@@ -18,11 +60,46 @@
   padding: 0;
 }
 
+html,
+body {
+  min-height: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body), sans-serif;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 0;
+  pointer-events: none;
+  transition: background 0.3s;
+}
+
+body::before {
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, var(--blob-1), transparent 70%);
+  top: -140px;
+  left: -80px;
+}
+
+body::after {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, var(--blob-2), transparent 70%);
+  bottom: -140px;
+  right: -60px;
 }
 
 a,
@@ -50,4 +127,112 @@ input,
 select,
 textarea {
   font-family: inherit;
+}
+
+/* Glass — superficie translúcida compartida por cards, sidebar y modales
+   en las tres experiencias (panel, landing, catálogo). */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+/* Theme toggle — usado en el panel, la landing y el catálogo público.
+   Persiste vía lib/theme.ts (localStorage), este componente solo refleja
+   el atributo data-theme ya aplicado por el script de arranque. */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 4px;
+  flex: none;
+}
+
+.theme-toggle button {
+  padding: 6px 11px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1;
+}
+
+.theme-toggle button.active {
+  background: var(--accent-grad);
+  color: #fff;
+}
+
+/* Pill — punto de color + texto, componente único de estado reutilizado
+   en Stock, Leads y Ventas. Fondo derivado por color-mix así se adapta
+   solo entre modo claro y oscuro sin duplicar valores. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.pill-green {
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+  color: var(--success);
+}
+.pill-green::before {
+  background: var(--success);
+}
+
+.pill-amber {
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+  color: var(--warn);
+}
+.pill-amber::before {
+  background: var(--warn);
+}
+
+.pill-red {
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
+}
+.pill-red::before {
+  background: var(--danger);
+}
+
+.pill-blue {
+  background: color-mix(in srgb, var(--cyan) 16%, transparent);
+  color: var(--cyan);
+}
+.pill-blue::before {
+  background: var(--cyan);
+}
+
+.pill-purple {
+  background: color-mix(in srgb, var(--violet) 16%, transparent);
+  color: var(--violet);
+}
+.pill-purple::before {
+  background: var(--violet);
+}
+
+.pill-gray {
+  background: color-mix(in srgb, var(--ink-soft) 14%, transparent);
+  color: var(--ink-soft);
+}
+.pill-gray::before {
+  background: var(--ink-soft);
 }

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Rodado — Panel (neón/glass, claro y oscuro)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0A14;
+    --glass:rgba(28,23,48,0.55);
+    --glass-strong:rgba(28,23,48,0.7);
+    --glass-border:rgba(255,255,255,0.08);
+    --tooltip-bg:#1C1730;
+    --violet:#8B5CF6; --magenta:#E8319B; --cyan:#22D3EE;
+    --text:#F4F2FA; --text-muted:#9C97AC;
+    --success:#34D399; --warn:#F5B400; --danger:#E8319B;
+    --grad-1: linear-gradient(135deg, rgba(109,40,217,0.55) 0%, rgba(192,38,163,0.55) 100%);
+    --grad-2: linear-gradient(135deg, rgba(192,38,163,0.5) 0%, rgba(34,211,238,0.4) 100%);
+    --blob-1: rgba(139,92,246,0.45); --blob-2: rgba(34,211,238,0.35);
+    --pipeline-track: rgba(255,255,255,0.06);
+    --scard-photo-bg: linear-gradient(90deg, rgba(139,92,246,0.18), rgba(34,211,238,0.12));
+    --sidebar-item-active-bg: rgba(139,92,246,0.18);
+    --kcard-bg: rgba(255,255,255,0.04);
+    --radius:16px; --blur:18px;
+    --font-display:'Rajdhani', sans-serif; --font-body:'Manrope', sans-serif; --font-mono:'JetBrains Mono', monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#F3F1FA;
+    --glass:rgba(255,255,255,0.6);
+    --glass-strong:rgba(255,255,255,0.8);
+    --glass-border:rgba(30,20,60,0.09);
+    --tooltip-bg:#2A2140;
+    --text:#1B1730; --text-muted:#6B6478;
+    --success:#0E9668; --warn:#9A6F00; --danger:#C0197A;
+    --grad-1: linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(232,49,155,0.16) 100%);
+    --grad-2: linear-gradient(135deg, rgba(232,49,155,0.14) 0%, rgba(34,211,238,0.16) 100%);
+    --blob-1: rgba(139,92,246,0.20); --blob-2: rgba(34,211,238,0.18);
+    --pipeline-track: rgba(30,20,60,0.07);
+    --scard-photo-bg: linear-gradient(90deg, rgba(139,92,246,0.14), rgba(34,211,238,0.10));
+    --sidebar-item-active-bg: rgba(139,92,246,0.14);
+    --kcard-bg: rgba(255,255,255,0.7);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{ background:var(--bg); color:var(--text); font-family:var(--font-body); display:flex; min-height:100vh; position:relative; overflow-x:hidden; transition:background .3s, color .3s; }
+  body::before, body::after{ content:""; position:fixed; border-radius:50%; filter:blur(90px); z-index:0; transition:background .3s; }
+  body::before{ width:520px; height:520px; background:radial-gradient(circle, var(--blob-1), transparent 70%); top:-120px; left:220px; }
+  body::after{ width:480px; height:480px; background:radial-gradient(circle, var(--blob-2), transparent 70%); bottom:-140px; right:80px; }
+  .sidebar, .main{ position:relative; z-index:1; }
+  a,button{ color:inherit; text-decoration:none; font-family:inherit; }
+  button{ cursor:pointer; border:none; background:none; }
+
+  .sidebar{ width:72px; background:var(--glass-strong); backdrop-filter:blur(var(--blur)) saturate(140%); -webkit-backdrop-filter:blur(var(--blur)) saturate(140%); border-right:1px solid var(--glass-border); display:flex; flex-direction:column; align-items:center; padding:20px 0; gap:28px; flex:none; }
+  .sidebar .logo{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #6D28D9, #C026A3); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:16px; box-shadow:0 0 18px rgba(192,38,163,0.55); color:#fff; }
+  .sidebar nav{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+  .sidebar .item{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:18px; cursor:pointer; position:relative; }
+  .sidebar .item.active{ background:var(--sidebar-item-active-bg); color:var(--violet); box-shadow:0 0 14px rgba(139,92,246,0.35) inset; }
+  .sidebar .item .tip{ position:absolute; left:52px; top:50%; transform:translateY(-50%); background:var(--tooltip-bg); color:#fff; border:1px solid var(--glass-border); padding:5px 10px; border-radius:6px; font-size:11px; font-family:var(--font-body); white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s; }
+  .sidebar .item:hover .tip{ opacity:1; }
+
+  .main{ flex:1; padding:24px 32px 40px; max-width:1240px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+  .agency-select{ display:flex; align-items:center; gap:10px; background:var(--glass); backdrop-filter:blur(var(--blur)); -webkit-backdrop-filter:blur(var(--blur)); border:1px solid var(--glass-border); padding:8px 14px; border-radius:12px; font-size:13px; color:var(--text-muted); }
+  .agency-select strong{ color:var(--text); font-family:var(--font-display); font-weight:600; letter-spacing:.3px; }
+  .topbar-right{ display:flex; align-items:center; gap:14px; }
+
+  .theme-toggle{ display:flex; align-items:center; gap:6px; background:var(--glass); border:1px solid var(--glass-border); border-radius:100px; padding:4px; }
+  .theme-toggle button{ padding:6px 12px; border-radius:100px; font-size:12px; font-weight:600; color:var(--text-muted); }
+  .theme-toggle button.active{ background:linear-gradient(135deg, #8B5CF6, #E8319B); color:#fff; }
+
+  .avatar{ width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, #C026A3, #22D3EE); }
+  .btn-glow{ background:linear-gradient(135deg, #8B5CF6, #E8319B); padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 0 20px rgba(139,92,246,0.4); color:#fff; }
+
+  h1.page-title{ font-family:var(--font-display); font-weight:600; font-size:22px; letter-spacing:.3px; margin-bottom:24px; color:var(--text); }
+
+  .glass{ background:var(--glass); backdrop-filter:blur(var(--blur)) saturate(150%); -webkit-backdrop-filter:blur(var(--blur)) saturate(150%); border:1px solid var(--glass-border); border-radius:var(--radius); box-shadow:0 8px 32px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.06); transition:background .3s, border-color .3s; }
+
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .kpi-row{ display:grid; grid-template-columns:1fr 1fr 1.4fr; gap:16px; margin-bottom:16px; }
+  @media(max-width:900px){ .kpi-row{ grid-template-columns:1fr; } }
+  .kpi-card{ padding:20px 22px; position:relative; overflow:hidden; }
+  .kpi-card.glow-a{ background:var(--grad-1), var(--glass); background-blend-mode:overlay; }
+  .kpi-card.glow-b{ background:var(--grad-2), var(--glass); background-blend-mode:overlay; }
+  .kpi-label{ font-size:12px; text-transform:uppercase; letter-spacing:1px; opacity:.85; font-weight:600; }
+  .kpi-value{ font-family:var(--font-display); font-weight:700; font-size:30px; margin-top:6px; letter-spacing:.3px; }
+  .kpi-delta{ font-size:12px; margin-top:6px; opacity:.85; font-family:var(--font-mono); }
+  .spotlight-card{ padding:18px 20px; display:flex; flex-direction:column; justify-content:space-between; }
+  .spotlight-top{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .spotlight-eyebrow{ font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; }
+  .spotlight-name{ font-family:var(--font-display); font-weight:600; font-size:19px; margin-top:2px; }
+  .spotlight-badge{ font-size:11px; padding:4px 10px; border-radius:20px; background:rgba(52,211,153,0.15); color:var(--success); font-weight:600; }
+  .car-visual{ height:60px; border-radius:12px; margin:14px 0; background:var(--scard-photo-bg); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:11px; font-family:var(--font-mono); }
+
+  .content-grid{ display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-top:16px; }
+  @media(max-width:900px){ .content-grid{ grid-template-columns:1fr; } }
+  .panel{ padding:20px 22px; }
+  .panel h2{ font-family:var(--font-display); font-size:15px; font-weight:600; margin-bottom:14px; letter-spacing:.3px; }
+  .panel .subtext{ font-size:12px; color:var(--text-muted); margin-top:-10px; margin-bottom:14px; }
+
+  .pipeline-list{ display:flex; flex-direction:column; gap:10px; }
+  .pipeline-row{ display:flex; align-items:center; justify-content:space-between; font-size:13px; }
+  .pipeline-row .stage{ color:var(--text-muted); width:96px; }
+  .pipeline-bar{ flex:1; height:6px; background:var(--pipeline-track); border-radius:4px; margin:0 12px; overflow:hidden; }
+  .pipeline-fill{ height:100%; background:linear-gradient(90deg, var(--violet), var(--magenta)); border-radius:4px; }
+  .pipeline-row .num{ font-family:var(--font-mono); font-size:12px; color:var(--text); width:14px; text-align:right; }
+
+  .alert-item{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--glass-border); font-size:13px; }
+  .alert-item:last-child{ border-bottom:none; }
+  .alert-left{ display:flex; flex-direction:column; }
+  .alert-left .veh{ font-weight:500; }
+  .alert-left .doc-type{ font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .alert-dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:8px; flex-shrink:0; }
+  .dot-warn{ background:var(--warn); } .dot-danger{ background:var(--danger); }
+  .plate{ font-family:var(--font-mono); color:var(--text-muted); font-size:12px; }
+
+  .gauge-row{ display:flex; gap:16px; margin-top:16px; flex-wrap:wrap; }
+  .gauge-card{ flex:1; min-width:140px; padding:18px; text-align:center; }
+  .gauge-card .glabel{ font-size:12px; color:var(--text-muted); margin-bottom:10px; }
+  .gauge-card .gvalue{ font-family:var(--font-display); font-weight:700; font-size:24px; margin-top:6px; }
+
+  .pill{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; padding:5px 11px; border-radius:100px; }
+  .pill::before{ content:''; width:6px; height:6px; border-radius:50%; }
+  .pill.done{ background:rgba(52,211,153,0.15); color:var(--success); } .pill.done::before{ background:var(--success); }
+  .pill.warn{ background:rgba(245,180,0,0.15); color:var(--warn); } .pill.warn::before{ background:var(--warn); }
+  .pill.info{ background:rgba(34,211,238,0.15); color:var(--cyan); } .pill.info::before{ background:var(--cyan); }
+  .pill.muted{ background:rgba(120,120,140,0.12); color:var(--text-muted); } .pill.muted::before{ background:var(--text-muted); }
+
+  .filter-bar{ display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+  .fbtn{ background:var(--glass); border:1px solid var(--glass-border); padding:8px 14px; border-radius:100px; font-size:12.5px; font-weight:500; color:var(--text-muted); }
+  .fbtn.active{ background:linear-gradient(135deg, #8B5CF6, #E8319B); color:#fff; border-color:transparent; }
+  .stock-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media(max-width:1000px){ .stock-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:640px){ .stock-grid{ grid-template-columns:1fr; } }
+  .scard{ overflow:hidden; }
+  .scard-photo{ height:90px; margin:12px 12px 0; border-radius:12px; background:var(--scard-photo-bg); position:relative; }
+  .scard-pill-wrap{ position:absolute; top:8px; left:8px; }
+  .scard-body{ padding:14px; }
+  .scard-title{ font-family:var(--font-display); font-weight:700; font-size:15px; }
+  .scard-meta{ font-family:var(--font-mono); font-size:10.5px; color:var(--text-muted); margin:6px 0 10px; }
+  .scard-foot{ display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--glass-border); padding-top:10px; }
+  .scard-price{ font-family:var(--font-display); font-weight:700; font-size:15px; }
+
+  .kanban{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-items:start; }
+  @media(max-width:900px){ .kanban{ grid-template-columns:1fr; } }
+  .kcol{ padding:12px; }
+  .kcol-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 4px; }
+  .kcol-head h4{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); font-family:var(--font-display); }
+  .kcol-head span{ font-family:var(--font-mono); font-size:11px; background:var(--glass); border:1px solid var(--glass-border); border-radius:100px; padding:1px 8px; }
+  .kcard{ background:var(--kcard-bg); border:1px solid var(--glass-border); border-radius:10px; padding:12px; margin-bottom:10px; }
+  .kcard .name{ font-weight:600; font-size:13px; margin-bottom:3px; }
+  .kcard .car{ font-size:12px; color:var(--text-muted); margin-bottom:8px; }
+
+  table.refined{ width:100%; border-collapse:collapse; }
+  table.refined th{ text-align:left; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); padding:0 10px 12px 0; }
+  table.refined td{ padding:13px 10px 13px 0; font-size:13px; border-top:1px solid var(--glass-border); }
+  .mono{ font-family:var(--font-mono); }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">R</div>
+  <nav>
+    <div class="item active" data-view="panel"><span>&#8962;</span><span class="tip">Panel general</span></div>
+    <div class="item" data-view="stock"><span>&#128663;</span><span class="tip">Stock</span></div>
+    <div class="item" data-view="leads"><span>&#128100;</span><span class="tip">Leads</span></div>
+    <div class="item" data-view="ventas"><span>&#128179;</span><span class="tip">Ventas</span></div>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="agency-select">Agencia: <strong>Agencia Demo</strong> ▾</div>
+    <div class="topbar-right">
+      <div class="theme-toggle">
+        <button id="btnDark" class="active" onclick="setTheme('dark')">🌙 Oscuro</button>
+        <button id="btnLight" onclick="setTheme('light')">☀️ Claro</button>
+      </div>
+      <button class="btn-glow">+ Nuevo vehículo</button>
+      <div class="avatar"></div>
+    </div>
+  </div>
+
+  <div class="view active" id="view-panel">
+    <h1 class="page-title">Panel general</h1>
+    <div class="kpi-row">
+      <div class="kpi-card glass glow-a">
+        <div class="kpi-label">Ventas del mes</div>
+        <div class="kpi-value">$14.200.000</div>
+        <div class="kpi-delta">1 venta cerrada · comisión $710.000</div>
+      </div>
+      <div class="kpi-card glass glow-b">
+        <div class="kpi-label">Pipeline CRM</div>
+        <div class="kpi-value">6 leads</div>
+        <div class="kpi-delta">1 cerrado esta semana</div>
+      </div>
+      <div class="spotlight-card glass">
+        <div class="spotlight-top">
+          <div><div class="spotlight-eyebrow">Stock destacado</div><div class="spotlight-name">Toyota Corolla XEI 2023</div></div>
+          <div class="spotlight-badge">Reservado</div>
+        </div>
+        <div class="car-visual">foto del vehículo</div>
+        <div style="font-size:12px; color:var(--text-muted);">Cliente: Carlos Mendoza — Test drive realizado</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <div class="panel glass">
+        <h2>Pipeline de leads</h2>
+        <div class="subtext">6 leads activos en la cuenta demo</div>
+        <div class="pipeline-list">
+          <div class="pipeline-row"><span class="stage">Nuevo</span><div class="pipeline-bar"><div class="pipeline-fill" style="width:33%"></div></div><span class="num">2</span></div>
+          <div class="pipeline-row"><span class="stage">Contactado</span><div class="pipeline-bar"><div class="pipeline-fill" style="width:33%"></div></div><span class="num">2</span></div>
+          <div class="pipeline-row"><span class="stage">Test drive</span><div class="pipeline-bar"><div class="pipeline-fill" style="width:17%"></div></div><span class="num">1</span></div>
+          <div class="pipeline-row"><span class="stage">Negociación</span><div class="pipeline-bar"><div class="pipeline-fill" style="width:0%"></div></div><span class="num">0</span></div>
+          <div class="pipeline-row"><span class="stage">Cerrado</span><div class="pipeline-bar"><div class="pipeline-fill" style="width:17%"></div></div><span class="num">1</span></div>
+        </div>
+      </div>
+      <div class="panel glass">
+        <h2>Documentación pendiente</h2>
+        <div class="subtext">Sobre 13 vehículos en stock</div>
+        <div class="alert-item"><span class="alert-left"><span class="veh"><span class="alert-dot dot-danger"></span>Ford Ranger 2019</span><span class="doc-type">VTV vencida</span></span><span class="plate">AB123CD</span></div>
+        <div class="alert-item"><span class="alert-left"><span class="veh"><span class="alert-dot dot-warn"></span>VW Vento 2021</span><span class="doc-type">VTV vence en 12 días</span></span><span class="plate">AC456EF</span></div>
+        <div class="alert-item"><span class="alert-left"><span class="veh"><span class="alert-dot dot-warn"></span>Chevrolet Onix 2022</span><span class="doc-type">Informe de dominio pendiente</span></span><span class="plate">AD789GH</span></div>
+      </div>
+    </div>
+
+    <div class="gauge-row">
+      <div class="gauge-card glass">
+        <svg width="120" height="70" viewBox="0 0 120 70"><defs><linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#E8319B"/></linearGradient></defs>
+        <path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="var(--pipeline-track)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M10,65 A50,50 0 0,1 32,24" fill="none" stroke="url(#g1)" stroke-width="10" stroke-linecap="round"/></svg>
+        <div class="glabel">Test drives hoy</div><div class="gvalue">1</div>
+      </div>
+      <div class="gauge-card glass">
+        <svg width="120" height="70" viewBox="0 0 120 70"><path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="var(--pipeline-track)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M10,65 A50,50 0 0,1 45,18" fill="none" stroke="url(#g1)" stroke-width="10" stroke-linecap="round"/></svg>
+        <div class="glabel">Leads convertidos</div><div class="gvalue">17%</div>
+      </div>
+      <div class="gauge-card glass">
+        <svg width="120" height="70" viewBox="0 0 120 70"><path d="M10,65 A50,50 0 0,1 110,65" fill="none" stroke="var(--pipeline-track)" stroke-width="10" stroke-linecap="round"/>
+        <path d="M10,65 A50,50 0 0,1 95,55" fill="none" stroke="url(#g1)" stroke-width="10" stroke-linecap="round"/></svg>
+        <div class="glabel">Comisión del mes</div><div class="gvalue">71%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="view-stock">
+    <h1 class="page-title">Stock</h1>
+    <div class="filter-bar">
+      <button class="fbtn active">Todos (13)</button>
+      <button class="fbtn">Disponibles</button>
+      <button class="fbtn">Reservados</button>
+      <button class="fbtn">Vendidos</button>
+    </div>
+    <div class="stock-grid" id="stockGrid"></div>
+  </div>
+
+  <div class="view" id="view-leads">
+    <h1 class="page-title">Leads</h1>
+    <div class="kanban" id="kanbanBoard"></div>
+  </div>
+
+  <div class="view" id="view-ventas">
+    <h1 class="page-title">Ventas</h1>
+    <div class="panel glass">
+      <table class="refined">
+        <tr><th>Fecha</th><th>Vehículo</th><th>Cliente</th><th>Vendedor</th><th>Precio</th><th>Estado</th></tr>
+        <tr><td class="mono">12/08</td><td>Renault Duster Iconic</td><td>Maria Lopez</td><td>Ángel</td><td class="mono">USD 24.900</td><td><span class="pill done">Cobrado</span></td></tr>
+        <tr><td class="mono">03/08</td><td>Ford Ranger XLT</td><td>D. Herrera</td><td>Martín López</td><td class="mono">USD 31.500</td><td><span class="pill warn">Pendiente</span></td></tr>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+  function setTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('btnDark').classList.toggle('active', t==='dark');
+    document.getElementById('btnLight').classList.toggle('active', t==='light');
+  }
+
+  const stock = [
+    {marca:'Volkswagen', modelo:'Amarok V6', estado:'done', label:'Disponible', anio:2023, km:'8.200', precio:'42.500'},
+    {marca:'Toyota', modelo:'Hilux SRX', estado:'done', label:'Disponible', anio:2024, km:'0', precio:'52.000'},
+    {marca:'Chevrolet', modelo:'Onix Turbo LTZ', estado:'warn', label:'Reservado', anio:2023, km:'21.400', precio:'17.800'},
+    {marca:'Fiat', modelo:'Cronos Precision', estado:'done', label:'Disponible', anio:2024, km:'0', precio:'16.200'},
+    {marca:'Ford', modelo:'Ranger XLT', estado:'done', label:'Disponible', anio:2022, km:'34.600', precio:'31.500'},
+    {marca:'VW', modelo:'Taos Highline', estado:'warn', label:'Reservado', anio:2024, km:'5.100', precio:'34.000'},
+  ];
+  document.getElementById('stockGrid').innerHTML = stock.map(s => `
+    <div class="scard glass">
+      <div class="scard-photo"><span class="scard-pill-wrap"><span class="pill ${s.estado}">${s.label}</span></span></div>
+      <div class="scard-body">
+        <div class="scard-title">${s.marca} ${s.modelo}</div>
+        <div class="scard-meta">${s.anio} · ${s.km} km</div>
+        <div class="scard-foot"><div class="scard-price">USD ${s.precio}</div></div>
+      </div>
+    </div>
+  `).join('');
+
+  const cols = [
+    {name:'Nuevo', leads:[{name:'Lucía Fernandez', car:'Peugeot 208 Feline'}, {name:'Carlos Gomez', car:'Chevrolet Tracker'}]},
+    {name:'Contactado', leads:[{name:'Sofía Ramirez', car:'Ford Ranger XLT'}]},
+    {name:'Test drive', leads:[{name:'Diego Martinez', car:'Fiat Cronos Precision'}]},
+    {name:'Negociación', leads:[{name:'Valentina Torres', car:'Toyota Hilux SRX'}]},
+  ];
+  document.getElementById('kanbanBoard').innerHTML = cols.map(col => `
+    <div class="kcol glass">
+      <div class="kcol-head"><h4>${col.name}</h4><span>${col.leads.length}</span></div>
+      ${col.leads.map(l => `<div class="kcard"><div class="name">${l.name}</div><div class="car">${l.car}</div></div>`).join('')}
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.sidebar .item[data-view]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.sidebar .item[data-view]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const v = btn.dataset.view;
+      document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+      document.getElementById('view-'+v).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

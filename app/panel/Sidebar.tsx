@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./panel.module.css";
 import { FxBox } from "./FxBox";
+import { ThemeToggle } from "../ThemeToggle";
 
 const initials = (name: string) =>
   name
@@ -12,6 +13,8 @@ const initials = (name: string) =>
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase())
     .join("");
+
+const initial = (name: string) => name.trim().charAt(0).toUpperCase() || "?";
 
 export function Sidebar({
   tenantNombre,
@@ -53,9 +56,17 @@ export function Sidebar({
 
   return (
     <aside className={styles.sidebar}>
-      <div className={styles.brand}>
-        <div className={styles.logoMark} />
-        <span className="disp">Rodado</span>
+      <div className={styles.workspace}>
+        <div className={styles.workspaceMark}>{initial(tenantNombre)}</div>
+        <div className={styles.workspaceInfo}>
+          <div className={styles.workspaceName}>{tenantNombre}</div>
+          <div className={styles.workspacePlan}>1 sucursal</div>
+        </div>
+        <div className={styles.workspaceChevron}>▾</div>
+      </div>
+
+      <div className={styles.themeRow}>
+        <ThemeToggle />
       </div>
 
       <FxBox />
@@ -78,7 +89,7 @@ export function Sidebar({
       <div className={styles.sidebarFoot}>
         <div className={styles.avatar}>{initials(userName) || "?"}</div>
         <div>
-          <div>{tenantNombre}</div>
+          <div>{userName}</div>
           <div className={styles.role}>{rol === "DUENIO" ? "Dueño" : rol === "ADMIN" ? "Admin" : "Vendedor"}</div>
         </div>
         <form action={onLogout}>

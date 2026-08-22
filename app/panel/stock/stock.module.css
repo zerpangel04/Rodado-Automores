@@ -5,31 +5,32 @@
 }
 
 .btnPrimary {
-  background: var(--ink);
+  background: var(--accent-grad);
   color: #fff;
   padding: 9px 16px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.35);
 }
 
 .btnPrimary .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--accent);
+  background: #fff;
 }
 
 .btnGhost {
   border: 1px solid var(--line);
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 12.5px;
   font-weight: 600;
-  background: #fff;
+  background: var(--input-bg);
 }
 
 .filterBar {
@@ -47,18 +48,19 @@
 }
 
 .fbtn {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   padding: 8px 14px;
   border-radius: 100px;
   font-size: 12.5px;
   font-weight: 500;
+  color: var(--ink-soft);
 }
 
 .fbtn.active {
-  background: var(--ink);
+  background: var(--accent-grad);
   color: #fff;
-  border-color: var(--ink);
+  border-color: transparent;
 }
 
 .empty {
@@ -85,7 +87,9 @@
 }
 
 .card {
-  background: #fff;
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -97,7 +101,11 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background: #efebe0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--violet) 18%, transparent),
+    color-mix(in srgb, var(--cyan) 12%, transparent)
+  );
 }
 
 .photo svg {
@@ -108,28 +116,6 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  font-family: var(--font-mono), monospace;
-  font-size: 9px;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 100px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.state.disponible {
-  background: #e4f5ec;
-  color: var(--green);
-}
-
-.state.reservado {
-  background: #fff3d6;
-  color: #9a6f00;
-}
-
-.state.vendido {
-  background: #f1eee9;
-  color: #8a8780;
 }
 
 .del {
@@ -139,8 +125,9 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--red);
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  color: var(--danger);
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -174,23 +161,23 @@
 }
 
 .docs.ok {
-  background: #e4f5ec;
-  color: var(--green);
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+  color: var(--success);
 }
 
 .docs.warn {
-  background: #fdeeea;
-  color: var(--red);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
 }
 
 .docs.warnSoon {
-  background: #fff3d6;
-  color: #9a6f00;
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+  color: var(--warn);
 }
 
 .iaBox {
-  background: #fff9ea;
-  border: 1px solid #f0dfa0;
+  background: color-mix(in srgb, var(--cyan) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--cyan) 30%, var(--line));
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 14px;
@@ -208,31 +195,31 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #9a6f00;
+  color: var(--cyan);
   font-weight: 700;
 }
 
 .iaSuggestBtn {
   font-size: 11.5px;
   font-weight: 700;
-  color: #9a6f00;
-  border: 1px solid #e4c464;
+  color: var(--cyan);
+  border: 1px solid color-mix(in srgb, var(--cyan) 40%, var(--line));
   padding: 5px 10px;
   border-radius: 6px;
-  background: #fff;
+  background: var(--input-bg);
 }
 
 .iaResult {
   font-family: var(--font-mono), monospace;
   font-size: 20px;
   font-weight: 600;
-  color: #7a5600;
+  color: var(--ink);
   margin: 4px 0;
 }
 
 .iaNote {
   font-size: 11px;
-  color: #9a8046;
+  color: var(--ink-soft);
   line-height: 1.4;
 }
 
@@ -240,7 +227,7 @@
   margin-top: 6px;
   font-size: 11px;
   font-weight: 700;
-  color: #9a6f00;
+  color: var(--cyan);
   text-decoration: underline;
 }
 
@@ -253,6 +240,7 @@
 }
 
 .price {
+  font-family: var(--font-display), sans-serif;
   font-weight: 700;
   font-size: 15px;
 }
@@ -260,7 +248,9 @@
 .modalBg {
   position: fixed;
   inset: 0;
-  background: rgba(20, 22, 28, 0.5);
+  background: var(--modal-overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -274,7 +264,10 @@
 }
 
 .modal {
-  background: #fff;
+  background: var(--surface-strong);
+  backdrop-filter: blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
+  border: 1px solid var(--line);
   border-radius: 14px;
   padding: 26px;
   width: 100%;
@@ -319,11 +312,13 @@
   border-radius: 8px;
   font-size: 13.5px;
   outline: none;
+  background: var(--input-bg);
+  color: var(--ink);
 }
 
 .field input:focus,
 .field select:focus {
-  border-color: var(--ink);
+  border-color: var(--violet);
 }
 
 .fieldRow {
@@ -364,8 +359,8 @@
 }
 
 .errorBox {
-  background: #fdeeea;
-  color: var(--red);
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 12.5px;
@@ -376,7 +371,7 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: var(--ink);
+  background: var(--accent-grad);
   color: #fff;
   padding: 10px 16px;
   border-radius: 8px;
@@ -386,6 +381,7 @@
   transition: all 0.25s;
   pointer-events: none;
   z-index: 100;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
 }
 
 .toast.show {

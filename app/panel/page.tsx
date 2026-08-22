@@ -2,6 +2,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { diasHastaVtv } from "@/lib/docs";
 import styles from "./panel.module.css";
+import { KpiRing } from "./KpiRing";
+
+const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
 const canalLabel: Record<string, string> = {
   WHATSAPP: "WhatsApp",
@@ -18,35 +21,47 @@ export default async function PanelHome() {
   const ventaFilter =
     rol === "VENDEDOR" ? { tenantId, vendedorId: userId } : { tenantId };
 
-  const [stockActivo, stockTotalValor, leadsAbiertos, ventasCount, ultimosLeads, vehiculosConVtv] =
-    await Promise.all([
-      prisma.vehiculo.count({
-        where: { tenantId, estado: { not: "VENDIDO" } },
-      }),
-      prisma.vehiculo.aggregate({
-        where: { tenantId, estado: { not: "VENDIDO" } },
-        _sum: { precioUsd: true },
-      }),
-      prisma.lead.count({ where: { ...leadFilter, etapa: { not: "CERRADO" } } }),
-      prisma.venta.count({ where: ventaFilter }),
-      prisma.lead.findMany({
-        where: leadFilter,
-        include: { vehiculo: { select: { marca: true, modelo: true } } },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
-      prisma.vehiculo.findMany({
-        where: { tenantId, estado: { not: "VENDIDO" }, vtvVencimiento: { not: null } },
-        select: { id: true, marca: true, modelo: true, vtvVencimiento: true },
-      }),
-    ]);
-
-  const valor = stockTotalValor._sum.precioUsd ?? 0;
+  const [
+    stockActivo,
+    stockDisponible,
+    leadsAbiertos,
+    leadsNegociacion,
+    leadsTotal,
+    ventasCount,
+    ultimosLeads,
+    vehiculosConVtv,
+  ] = await Promise.all([
+    prisma.vehiculo.count({
+      where: { tenantId, estado: { not: "VENDIDO" } },
+    }),
+    prisma.vehiculo.count({
+      where: { tenantId, estado: "DISPONIBLE" },
+    }),
+    prisma.lead.count({ where: { ...leadFilter, etapa: { not: "CERRADO" } } }),
+    prisma.lead.count({ where: { ...leadFilter, etapa: "NEGOCIACION" } }),
+    prisma.lead.count({ where: leadFilter }),
+    prisma.venta.count({ where: ventaFilter }),
+    prisma.lead.findMany({
+      where: leadFilter,
+      include: { vehiculo: { select: { marca: true, modelo: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+    prisma.vehiculo.findMany({
+      where: { tenantId, estado: { not: "VENDIDO" }, vtvVencimiento: { not: null } },
+      select: { id: true, marca: true, modelo: true, vtvVencimiento: true },
+    }),
+  ]);
 
   const alertasVtv = vehiculosConVtv
     .map((v) => ({ ...v, dias: diasHastaVtv(v.vtvVencimiento) }))
     .filter((v) => v.dias !== null && v.dias <= 30)
     .sort((a, b) => (a.dias as number) - (b.dias as number));
+
+  const pctStockDisponible = pct(stockDisponible, stockActivo);
+  const pctLeadsNegociacion = pct(leadsNegociacion, leadsAbiertos);
+  const pctConversion = pct(ventasCount, leadsTotal);
+  const pctDocsPorVencer = pct(alertasVtv.length, stockActivo);
 
   return (
     <>
@@ -59,24 +74,30 @@ export default async function PanelHome() {
 
       <div className={styles.content}>
         <div className={styles.kpiRow}>
-          <div className={styles.kpi}>
-            <div className={styles.l}>Stock activo</div>
-            <div className={`${styles.v} disp`}>{stockActivo}</div>
-          </div>
-          <div className={styles.kpi}>
-            <div className={styles.l}>Leads abiertos</div>
-            <div className={`${styles.v} disp`}>{leadsAbiertos}</div>
-          </div>
-          <div className={styles.kpi}>
-            <div className={styles.l}>Ventas registradas</div>
-            <div className={`${styles.v} disp`}>{ventasCount}</div>
-          </div>
-          <div className={styles.kpi}>
-            <div className={styles.l}>Valor del stock</div>
-            <div className={`${styles.v} disp mono`}>
-              USD {Number(valor).toLocaleString("es-AR")}
-            </div>
-          </div>
+          <KpiRing
+            percent={pctStockDisponible}
+            color="var(--warn)"
+            label="Stock disponible"
+            value={`${stockDisponible} / ${stockActivo}`}
+          />
+          <KpiRing
+            percent={pctLeadsNegociacion}
+            color="var(--cyan)"
+            label="Leads en negociación"
+            value={`${leadsNegociacion} / ${leadsAbiertos}`}
+          />
+          <KpiRing
+            percent={pctConversion}
+            color="var(--success)"
+            label="Conversión lead→venta"
+            value={`${ventasCount} / ${leadsTotal}`}
+          />
+          <KpiRing
+            percent={pctDocsPorVencer}
+            color="var(--danger)"
+            label="Docs. por vencer"
+            value={`${alertasVtv.length} vehículo${alertasVtv.length === 1 ? "" : "s"}`}
+          />
         </div>
 
         <div className={styles.card}>
@@ -137,7 +158,7 @@ export default async function PanelHome() {
                     style={{
                       fontSize: 11,
                       fontWeight: 600,
-                      color: vencida ? "var(--red)" : "#9A6F00",
+                      color: vencida ? "var(--danger)" : "var(--warn)",
                     }}
                   >
                     {vencida

@@ -6,7 +6,9 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -20,7 +22,7 @@
   letter-spacing: 0.04em;
   color: var(--ink-soft);
   padding: 12px 16px;
-  background: var(--bg);
+  background: var(--input-bg);
   border-bottom: 1px solid var(--line);
 }
 

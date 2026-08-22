@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es-AR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<title>Agencia Demo — Catálogo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0A14; --glass:rgba(28,23,48,0.55); --glass-strong:rgba(28,23,48,0.7); --glass-border:rgba(255,255,255,0.08);
+    --violet:#8B5CF6; --magenta:#E8319B; --cyan:#22D3EE;
+    --text:#F4F2FA; --text-muted:#9C97AC; --success:#34D399; --warn:#F5B400;
+    --blob-1: rgba(139,92,246,0.4); --blob-2: rgba(34,211,238,0.3);
+    --scard-bg: linear-gradient(90deg, rgba(139,92,246,0.18), rgba(34,211,238,0.12));
+    --radius:16px; --blur:18px;
+    --font-display:'Rajdhani', sans-serif; --font-body:'Manrope', sans-serif; --font-mono:'JetBrains Mono', monospace;
+  }
+  html[data-theme="light"]{
+    --bg:#F3F1FA; --glass:rgba(255,255,255,0.62); --glass-strong:rgba(255,255,255,0.85); --glass-border:rgba(30,20,60,0.09);
+    --text:#1B1730; --text-muted:#6B6478; --success:#0E9668; --warn:#9A6F00;
+    --blob-1: rgba(139,92,246,0.18); --blob-2: rgba(34,211,238,0.16);
+    --scard-bg: linear-gradient(90deg, rgba(139,92,246,0.13), rgba(34,211,238,0.10));
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ background:var(--bg); color:var(--text); font-family:var(--font-body); position:relative; overflow-x:hidden; transition:background .3s, color .3s; }
+  body::before, body::after{ content:""; position:fixed; border-radius:50%; filter:blur(100px); z-index:0; }
+  body::before{ width:560px; height:560px; background:radial-gradient(circle, var(--blob-1), transparent 70%); top:-140px; left:180px; }
+  body::after{ width:500px; height:500px; background:radial-gradient(circle, var(--blob-2), transparent 70%); bottom:-140px; right:60px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; position:relative; z-index:1; }
+  a,button{ color:inherit; text-decoration:none; font-family:inherit; }
+  button{ cursor:pointer; border:none; background:none; }
+  .disp{ font-family:var(--font-display); } .mono{ font-family:var(--font-mono); }
+  .glass{ background:var(--glass); backdrop-filter:blur(var(--blur)) saturate(150%); -webkit-backdrop-filter:blur(var(--blur)) saturate(150%); border:1px solid var(--glass-border); border-radius:var(--radius); }
+
+  header{ background:var(--glass-strong); backdrop-filter:blur(var(--blur)); border-bottom:1px solid var(--glass-border); padding:18px 0; position:relative; z-index:1; }
+  .header-inner{ display:flex; justify-content:space-between; align-items:center; }
+  .agency{ display:flex; align-items:center; gap:10px; }
+  .agency-mark{ width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,#6D28D9,#C026A3); box-shadow:0 0 16px rgba(192,38,163,0.5); }
+  .agency-name{ font-family:var(--font-display); font-weight:700; font-size:18px; }
+  .agency-sub{ font-size:11px; color:var(--text-muted); }
+  .theme-toggle{ display:flex; gap:4px; background:var(--glass); border:1px solid var(--glass-border); border-radius:100px; padding:4px; }
+  .theme-toggle button{ padding:6px 11px; border-radius:100px; font-size:12px; font-weight:600; color:var(--text-muted); }
+  .theme-toggle button.active{ background:linear-gradient(135deg,#8B5CF6,#E8319B); color:#fff; }
+
+  .view{ display:none; } .view.active{ display:block; }
+  .hero-strip{ padding:30px 0 20px; }
+  .hero-strip h1{ font-family:var(--font-display); font-size:clamp(24px,3.4vw,32px); font-weight:700; }
+  .hero-strip p{ color:var(--text-muted); margin-top:6px; font-size:14px; }
+
+  .filter-bar{ display:flex; gap:10px; margin:18px 0 22px; flex-wrap:wrap; }
+  .filter-bar select, .filter-bar input{ background:var(--glass); border:1px solid var(--glass-border); border-radius:10px; padding:9px 12px; font-size:13px; color:var(--text); }
+
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; padding-bottom:50px; }
+  @media(max-width:900px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:600px){ .grid{ grid-template-columns:1fr; } }
+  .card{ overflow:hidden; cursor:pointer; transition:transform .2s; }
+  .card:hover{ transform:translateY(-3px); }
+  .card-photo{ height:150px; margin:12px 12px 0; border-radius:12px; background:var(--scard-bg); position:relative; }
+  .card-badge{ position:absolute; top:10px; left:10px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; padding:4px 9px; border-radius:100px; font-weight:700; }
+  .card-badge.disponible{ background:rgba(52,211,153,0.15); color:var(--success); }
+  .card-badge.reservado{ background:rgba(245,180,0,0.15); color:var(--warn); }
+  .card-body{ padding:16px; }
+  .card-title{ font-family:var(--font-display); font-weight:700; font-size:16px; }
+  .card-meta{ font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin:6px 0 12px; }
+  .card-foot{ display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--glass-border); padding-top:12px; }
+  .card-price{ font-family:var(--font-display); font-weight:700; font-size:16px; }
+
+  .detail{ padding:26px 0 60px; }
+  .back-btn{ display:inline-flex; gap:6px; font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:20px; }
+  .detail-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:30px; }
+  @media(max-width:860px){ .detail-grid{ grid-template-columns:1fr; } }
+  .gallery-main{ height:320px; border-radius:16px; background:var(--scard-bg); margin-bottom:10px; }
+  .detail-title{ font-family:var(--font-display); font-weight:700; font-size:28px; margin-top:20px; }
+  .detail-badge{ display:inline-block; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; padding:4px 10px; border-radius:100px; font-weight:700; background:rgba(52,211,153,0.15); color:var(--success); margin-bottom:10px; }
+  .spec-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:20px 0; padding:18px; }
+  .spec-item .l{ font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--text-muted); }
+  .spec-item .v{ font-weight:600; font-size:14px; margin-top:2px; }
+
+  .side-card{ padding:22px; position:sticky; top:20px; }
+  .side-price{ font-family:var(--font-display); font-weight:700; font-size:30px; }
+  .side-price small{ display:block; font-family:var(--font-body); font-weight:400; font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .contact-form{ margin-top:20px; border-top:1px solid var(--glass-border); padding-top:18px; }
+  .contact-form h4{ font-family:var(--font-display); font-size:16px; margin-bottom:4px; }
+  .contact-form p{ font-size:12.5px; color:var(--text-muted); margin-bottom:14px; }
+  .field{ margin-bottom:12px; }
+  .field input, .field textarea{ width:100%; padding:10px 12px; border:1px solid var(--glass-border); border-radius:10px; font-size:13.5px; background:rgba(255,255,255,0.03); color:var(--text); outline:none; resize:none; }
+  .submit-btn{ width:100%; background:linear-gradient(135deg,#8B5CF6,#E8319B); color:#fff; padding:12px; border-radius:10px; font-weight:700; font-size:14px; box-shadow:0 0 20px rgba(139,92,246,0.4); }
+  .success-box{ display:none; background:rgba(52,211,153,0.15); color:var(--success); padding:14px; border-radius:10px; font-size:13.5px; font-weight:600; text-align:center; margin-top:14px; }
+  .success-box.show{ display:block; }
+
+  footer{ border-top:1px solid var(--glass-border); padding:26px 0; margin-top:20px; position:relative; z-index:1; }
+  footer p{ color:var(--text-muted); font-size:12.5px; text-align:center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-inner">
+    <div class="agency"><div class="agency-mark"></div><div><div class="agency-name">Agencia Demo</div><div class="agency-sub">Catálogo actualizado en vivo</div></div></div>
+    <div class="theme-toggle"><button class="active" onclick="setTheme('dark')">🌙</button><button onclick="setTheme('light')">☀️</button></div>
+  </div>
+</header>
+
+<div class="view active" id="view-catalog">
+  <div class="wrap">
+    <div class="hero-strip"><h1 class="disp">Vehículos disponibles</h1><p>6 unidades en stock · precios en USD</p></div>
+    <div class="filter-bar">
+      <select><option>Todas las marcas</option></select>
+      <select><option>0km y usados</option></select>
+      <input type="text" placeholder="Precio máx. (USD)">
+    </div>
+    <div class="grid" id="catalogGrid"></div>
+  </div>
+</div>
+
+<div class="view" id="view-detail">
+  <div class="wrap detail">
+    <button class="back-btn" onclick="showCatalog()">← Volver al catálogo</button>
+    <div class="detail-grid">
+      <div>
+        <div class="gallery-main glass"></div>
+        <span class="detail-badge">Disponible</span>
+        <div class="detail-title disp" id="detailTitle">—</div>
+        <div class="spec-grid glass" id="specGrid"></div>
+      </div>
+      <div>
+        <div class="side-card glass">
+          <div class="side-price" id="sidePrice">—</div>
+          <div class="contact-form">
+            <h4>¿Te interesa este auto?</h4>
+            <p>Dejá tus datos y te contactamos en el momento.</p>
+            <div class="field"><input id="leadNombre" type="text" placeholder="Tu nombre"></div>
+            <div class="field"><input type="text" placeholder="Teléfono o WhatsApp"></div>
+            <button class="submit-btn" onclick="sendLead()">Quiero que me contacten →</button>
+            <div class="success-box" id="successBox">✓ ¡Listo! Te vamos a contactar.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer><div class="wrap"><p>Catálogo de Agencia Demo — powered by Rodado</p></div></footer>
+
+<script>
+  function setTheme(t){
+    document.documentElement.setAttribute('data-theme', t);
+    document.querySelectorAll('.theme-toggle button').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='dark')||(i===1&&t==='light')));
+  }
+  const cars = [
+    {id:1, marca:'Volkswagen', modelo:'Amarok V6', estado:'disponible', anio:2023, km:'8.200', caja:'Automática', motor:'3.0 V6 TDI', precio:'42.500'},
+    {id:2, marca:'Toyota', modelo:'Corolla XEI', estado:'disponible', anio:2024, km:'12.000', caja:'CVT', motor:'1.8L 16v', precio:'24.500'},
+    {id:3, marca:'Chevrolet', modelo:'Onix Turbo', estado:'reservado', anio:2023, km:'21.400', caja:'Manual', motor:'1.0 Turbo', precio:'17.800'},
+    {id:4, marca:'Fiat', modelo:'Cronos Drive', estado:'disponible', anio:2024, km:'3.100', caja:'Manual', motor:'1.3L', precio:'16.200'},
+    {id:5, marca:'Ford', modelo:'Ranger XLT', estado:'disponible', anio:2022, km:'34.600', caja:'Automática', motor:'2.0 Bi-Turbo', precio:'31.500'},
+    {id:6, marca:'Peugeot', modelo:'208 Feline', estado:'disponible', anio:2024, km:'6.800', caja:'Manual', motor:'1.6L', precio:'19.900'},
+  ];
+  document.getElementById('catalogGrid').innerHTML = cars.map(c => `
+    <div class="card glass" onclick="showDetail(${c.id})">
+      <div class="card-photo"><span class="card-badge ${c.estado}">${c.estado==='disponible'?'Disponible':'Reservado'}</span></div>
+      <div class="card-body">
+        <div class="card-title">${c.marca} ${c.modelo}</div>
+        <div class="card-meta">${c.anio} · ${c.km} km</div>
+        <div class="card-foot"><div class="card-price">USD ${c.precio}</div></div>
+      </div>
+    </div>
+  `).join('');
+  function showDetail(id){
+    const c = cars.find(x=>x.id===id);
+    document.getElementById('detailTitle').textContent = `${c.marca} ${c.modelo}`;
+    document.getElementById('sidePrice').innerHTML = `USD ${c.precio}<small>Precio de contado, financiación disponible</small>`;
+    document.getElementById('specGrid').innerHTML = `
+      <div class="spec-item"><div class="l">Año</div><div class="v">${c.anio}</div></div>
+      <div class="spec-item"><div class="l">Kilometraje</div><div class="v">${c.km} km</div></div>
+      <div class="spec-item"><div class="l">Transmisión</div><div class="v">${c.caja}</div></div>
+      <div class="spec-item"><div class="l">Motor</div><div class="v">${c.motor}</div></div>`;
+    document.getElementById('successBox').classList.remove('show');
+    document.getElementById('view-catalog').classList.remove('active');
+    document.getElementById('view-detail').classList.add('active');
+    window.scrollTo(0,0);
+  }
+  function showCatalog(){ document.getElementById('view-detail').classList.remove('active'); document.getElementById('view-catalog').classList.add('active'); }
+  function sendLead(){
+    if(!document.getElementById('leadNombre').value.trim()){ alert('Dejanos al menos tu nombre'); return; }
+    document.getElementById('successBox').classList.add('show');
+  }
+</script>
+
+</body>
+</html>

@@ -1,4 +1,5 @@
 import styles from "./public.module.css";
+import { ThemeToggle } from "../ThemeToggle";
 
 export function PublicHeader({ nombre }: { nombre: string }) {
   return (
@@ -11,6 +12,7 @@ export function PublicHeader({ nombre }: { nombre: string }) {
             <div className={styles.agencySub}>Catálogo actualizado en vivo</div>
           </div>
         </div>
+        <ThemeToggle />
       </div>
     </header>
   );
