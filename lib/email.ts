@@ -1,9 +1,9 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM ?? "Rodado <onboarding@resend.dev>";
 
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const { data, error } = await resend.emails.send({
     from: FROM,
     to,
