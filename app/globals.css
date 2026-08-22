@@ -9,6 +9,7 @@
   --modal-overlay: rgba(6, 5, 12, 0.6);
   --tooltip-bg: #1c1730;
   --select-option-bg: #1c1730;
+  --input-autofill-bg: #1c1730;
 
   --violet: #8b5cf6;
   --magenta: #e8319b;
@@ -47,6 +48,7 @@ html[data-theme="light"] {
   --modal-overlay: rgba(30, 20, 60, 0.35);
   --tooltip-bg: #2a2140;
   --select-option-bg: #ffffff;
+  --input-autofill-bg: #ffffff;
 
   --success: #0e9668;
   --warn: #9a6f00;
@@ -129,6 +131,29 @@ input,
 select,
 textarea {
   font-family: inherit;
+}
+
+/* Chrome pinta los campos autocompletados con su propio fondo (blanco u
+   amarillo) ignorando el CSS del sitio. El truco estándar es un
+   box-shadow inset gigante — a diferencia del popup nativo de <option>,
+   esto sí compone bien con colores translúcidos, pero usamos un valor
+   sólido por prolijidad. La transición larga evita el flash del color
+   nativo antes de que se aplique este estilo. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--input-autofill-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--input-autofill-bg) inset !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  caret-color: var(--ink);
+  transition: background-color 9999s ease-in-out 0s, color 9999s ease-in-out 0s;
 }
 
 /* Glass — superficie translúcida compartida por cards, sidebar y modales
