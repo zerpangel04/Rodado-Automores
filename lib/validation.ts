@@ -71,6 +71,21 @@ export const ventaInputSchema = z.object({
   comision: z.coerce.number().min(0),
 });
 
+export const forgotPasswordInputSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Email inválido"),
+});
+
+export const resetPasswordInputSchema = z
+  .object({
+    token: z.string().trim().min(1),
+    password: z.string().min(8, "Mínimo 8 caracteres"),
+    confirmPassword: z.string().min(8, "Mínimo 8 caracteres"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  });
+
 export const rolValues = ["DUENIO", "ADMIN", "VENDEDOR"] as const;
 
 export const usuarioInputSchema = z.object({

@@ -68,8 +68,22 @@ model Usuario {
   rol          Rol      @default(VENDEDOR)
   createdAt    DateTime @default(now())
 
-  leadsAsignados Lead[]  @relation("VendedorAsignado")
-  ventas         Venta[] @relation("VendedorVenta")
+  leadsAsignados      Lead[]               @relation("VendedorAsignado")
+  ventas              Venta[]              @relation("VendedorVenta")
+  passwordResetTokens PasswordResetToken[]
+}
+
+// Token de un solo uso para el flujo de "olvidé mi contraseña".
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  usuarioId String
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([usuarioId])
 }
 
 model Vehiculo {

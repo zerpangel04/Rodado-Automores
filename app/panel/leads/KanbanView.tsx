@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./kanban.module.css";
+import { Pill, type PillColor } from "../Pill";
 
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
@@ -32,6 +33,13 @@ const canalLabel: Record<Canal, string> = {
   MERCADO_LIBRE: "Mercado Libre",
   INSTAGRAM: "Instagram",
   WEB: "Web",
+};
+
+const canalColor: Record<Canal, PillColor> = {
+  WHATSAPP: "green",
+  MERCADO_LIBRE: "amber",
+  INSTAGRAM: "purple",
+  WEB: "blue",
 };
 
 type FormState = {
@@ -180,9 +188,7 @@ export function KanbanView({
                       <div className={styles.vendedor}>Vendedor: {lead.vendedor.nombre}</div>
                     )}
                     <div className={styles.foot}>
-                      <span className={`${styles.chip} ${styles[lead.canal.toLowerCase()]}`}>
-                        {canalLabel[lead.canal]}
-                      </span>
+                      <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
                     </div>
                     <div className={styles.kcardActions}>
                       {next ? (

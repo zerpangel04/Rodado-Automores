@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import styles from "../panel.module.css";
 import ventasStyles from "./ventas.module.css";
+import { Pill } from "../Pill";
 
 export default async function VentasPage() {
   const session = await auth();
@@ -56,7 +57,11 @@ export default async function VentasPage() {
                   {rol !== "VENDEDOR" && <td>{v.vendedor.nombre}</td>}
                   <td className={ventasStyles.num}>USD {Number(v.precioFinal).toLocaleString("es-AR")}</td>
                   <td className={ventasStyles.num}>USD {Number(v.comision).toLocaleString("es-AR")}</td>
-                  <td>{v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente"}</td>
+                  <td>
+                    <Pill color={v.estadoCobro === "COBRADO" ? "green" : "amber"}>
+                      {v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente"}
+                    </Pill>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -6,7 +6,7 @@ import styles from "../auth.module.css";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string; callbackUrl?: string };
+  searchParams: { error?: string; callbackUrl?: string; reset?: string };
 }) {
   const params = searchParams;
 
@@ -41,6 +41,11 @@ export default async function LoginPage({
             Email o contraseña incorrectos.
           </div>
         )}
+        {params.reset === "1" && (
+          <div className={styles.successBox}>
+            Contraseña actualizada. Ya podés iniciar sesión.
+          </div>
+        )}
 
         <form action={loginAction} className={styles.form}>
           <input type="hidden" name="callbackUrl" value={params.callbackUrl ?? ""} />
@@ -57,6 +62,9 @@ export default async function LoginPage({
           </button>
         </form>
 
+        <p className={styles.foot}>
+          <a href="/forgot-password">¿Olvidaste tu contraseña?</a>
+        </p>
         <p className={styles.foot}>
           ¿No tenés cuenta? <a href="/signup">Creá tu agencia</a>
         </p>
