@@ -31,6 +31,7 @@ export default async function CatalogoPublico({
     km: v.km,
     precioUsd: Number(v.precioUsd),
     estado: v.estado as "DISPONIBLE" | "RESERVADO",
+    fotos: v.fotos,
   }));
 
   return (

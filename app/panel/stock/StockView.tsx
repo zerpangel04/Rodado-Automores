@@ -1,10 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Cropper, { type Area } from "react-easy-crop";
 import styles from "./stock.module.css";
 import { docStatus, diasHastaVtv } from "@/lib/docs";
 import { estimarPrecio } from "@/lib/tasacion";
 import { Pill, type PillColor } from "../Pill";
+import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/validation";
+import { getCroppedImageFile } from "@/lib/cropImage";
+
+const FOTO_ASPECT = 4 / 3;
 
 export type EstadoVehiculo = "DISPONIBLE" | "RESERVADO" | "VENDIDO";
 
@@ -24,6 +29,7 @@ export type VehiculoDTO = {
   docDominio: boolean;
   docLibreDeuda: boolean;
   vtvVencimiento: string | null;
+  fotos: string[];
 };
 
 type UsuarioOption = { id: string; nombre: string };
@@ -130,6 +136,92 @@ export function StockView({
 
   const [iaResult, setIaResult] = useState<number | null>(null);
 
+  const [existingFotos, setExistingFotos] = useState<string[]>([]);
+  const [fotoFiles, setFotoFiles] = useState<File[]>([]);
+  const [fotoError, setFotoError] = useState<string | null>(null);
+  const fotoPreviews = useMemo(
+    () => fotoFiles.map((f) => URL.createObjectURL(f)),
+    [fotoFiles]
+  );
+  useEffect(() => {
+    return () => fotoPreviews.forEach((url) => URL.revokeObjectURL(url));
+  }, [fotoPreviews]);
+
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [cropTarget, setCropTarget] = useState<{ file: File; url: string } | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [cropSaving, setCropSaving] = useState(false);
+
+  useEffect(() => {
+    if (cropTarget || cropQueue.length === 0) return;
+    const [next, ...rest] = cropQueue;
+    setCropQueue(rest);
+    setCropTarget({ file: next, url: URL.createObjectURL(next) });
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+  }, [cropQueue, cropTarget]);
+
+  function handleFotosSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    const inFlight = fotoFiles.length + cropQueue.length + (cropTarget ? 1 : 0);
+    const remaining = FOTOS_MAX_COUNT - existingFotos.length - inFlight;
+    const accepted: File[] = [];
+    let error: string | null = null;
+    for (const file of selected) {
+      if (accepted.length >= remaining) {
+        error = `Máximo ${FOTOS_MAX_COUNT} fotos por vehículo`;
+        break;
+      }
+      if (!FOTO_ALLOWED_TYPES.includes(file.type as (typeof FOTO_ALLOWED_TYPES)[number])) {
+        error = `${file.name}: usá JPG, PNG o WEBP`;
+        continue;
+      }
+      if (file.size > FOTO_MAX_BYTES) {
+        error = `${file.name}: pesa más de 5MB`;
+        continue;
+      }
+      accepted.push(file);
+    }
+    setFotoError(error);
+    if (accepted.length > 0) setCropQueue((prev) => [...prev, ...accepted]);
+  }
+
+  function removeExistingFoto(url: string) {
+    setExistingFotos((prev) => prev.filter((u) => u !== url));
+  }
+
+  function removeNewFoto(index: number) {
+    setFotoFiles((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function confirmCrop() {
+    if (!cropTarget || !croppedAreaPixels) return;
+    setCropSaving(true);
+    try {
+      const cropped = await getCroppedImageFile(
+        cropTarget.url,
+        croppedAreaPixels,
+        cropTarget.file.name
+      );
+      setFotoFiles((prev) => [...prev, cropped]);
+    } catch {
+      setFotoError("No se pudo procesar el recorte, probá de nuevo");
+    } finally {
+      URL.revokeObjectURL(cropTarget.url);
+      setCropTarget(null);
+      setCropSaving(false);
+    }
+  }
+
+  function cancelCrop() {
+    if (cropTarget) URL.revokeObjectURL(cropTarget.url);
+    setCropTarget(null);
+  }
+
   const visible = useMemo(
     () => (filter === "todos" ? items : items.filter((i) => i.estado === filter)),
     [items, filter]
@@ -145,6 +237,11 @@ export function StockView({
     setForm(emptyForm);
     setError(null);
     setIaResult(null);
+    setExistingFotos([]);
+    setFotoFiles([]);
+    setFotoError(null);
+    setCropQueue([]);
+    setCropTarget(null);
     setShowModal(true);
   }
 
@@ -182,6 +279,11 @@ export function StockView({
       vtvVencimiento: v.vtvVencimiento ?? "",
     });
     setError(null);
+    setExistingFotos(v.fotos);
+    setFotoFiles([]);
+    setFotoError(null);
+    setCropQueue([]);
+    setCropTarget(null);
     setShowModal(true);
   }
 
@@ -224,11 +326,46 @@ export function StockView({
         setSaving(false);
         return;
       }
-      const saved: VehiculoDTO = await res.json();
+      let saved: VehiculoDTO = await res.json();
+      const isNew = !editingId;
+
+      if (fotoFiles.length > 0 || existingFotos.length !== saved.fotos.length) {
+        const fd = new FormData();
+        fd.append("keep", JSON.stringify(existingFotos));
+        fotoFiles.forEach((f) => fd.append("files", f));
+
+        try {
+          const fotoRes = await fetch(`/api/vehiculos/${saved.id}/fotos`, {
+            method: "POST",
+            body: fd,
+          });
+          if (fotoRes.ok) {
+            saved = await fotoRes.json();
+          } else {
+            const data = await fotoRes.json().catch(() => null);
+            if (isNew) setEditingId(saved.id);
+            setItems((prev) =>
+              isNew ? [saved, ...prev] : prev.map((i) => (i.id === saved.id ? saved : i))
+            );
+            setError(
+              data?.error ?? "El vehículo se guardó pero no se pudieron subir las fotos"
+            );
+            setSaving(false);
+            return;
+          }
+        } catch {
+          if (isNew) setEditingId(saved.id);
+          setItems((prev) =>
+            isNew ? [saved, ...prev] : prev.map((i) => (i.id === saved.id ? saved : i))
+          );
+          setError("El vehículo se guardó pero hubo un error de conexión subiendo las fotos");
+          setSaving(false);
+          return;
+        }
+      }
+
       setItems((prev) =>
-        editingId
-          ? prev.map((i) => (i.id === saved.id ? saved : i))
-          : [saved, ...prev]
+        isNew ? [saved, ...prev] : prev.map((i) => (i.id === saved.id ? saved : i))
       );
       showToast();
       setShowModal(false);
@@ -358,7 +495,7 @@ export function StockView({
             const ds = docStatus(v);
             const vendido = v.estado === "VENDIDO";
             return (
-              <div className={styles.card} key={v.id}>
+              <div className={styles.card} key={v.id} onClick={() => openEdit(v)}>
                 <div className={styles.photo}>
                   <div className={styles.state}>
                     <Pill
@@ -373,20 +510,33 @@ export function StockView({
                       <button
                         className={styles.del}
                         title="Revertir venta"
-                        onClick={() => revertVenta(v)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          revertVenta(v);
+                        }}
                       >
                         ↺
                       </button>
                     )
                   ) : (
-                    <button className={styles.del} onClick={() => handleDelete(v.id)}>
+                    <button
+                      className={styles.del}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(v.id);
+                      }}
+                    >
                       ✕
                     </button>
                   )}
-                  <CarSVG />
+                  {v.fotos.length > 0 ? (
+                    <img className={styles.photoImg} src={v.fotos[0]} alt="" />
+                  ) : (
+                    <CarSVG />
+                  )}
                 </div>
                 <div className={styles.body}>
-                  <div className={`${styles.title} disp`} onClick={() => openEdit(v)}>
+                  <div className={`${styles.title} disp`}>
                     {v.marca} {v.modelo}
                   </div>
                   <div className={`${styles.meta} mono`}>
@@ -400,7 +550,13 @@ export function StockView({
                       USD {v.precioUsd.toLocaleString("es-AR")}
                     </div>
                     {!vendido && (
-                      <button className={styles.btnGhost} onClick={() => openSaleModal(v)}>
+                      <button
+                        className={styles.btnGhost}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openSaleModal(v);
+                        }}
+                      >
                         Vender
                       </button>
                     )}
@@ -412,8 +568,11 @@ export function StockView({
         </div>
       )}
 
-      <div className={`${styles.modalBg} ${showModal ? styles.show : ""}`}>
-        <div className={styles.modal}>
+      <div
+        className={`${styles.modalBg} ${showModal ? styles.show : ""}`}
+        onClick={() => setShowModal(false)}
+      >
+        <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <h3 className="disp">{editingId ? "Editar vehículo" : "Nuevo vehículo"}</h3>
 
           {error && <div className={styles.errorBox} style={{ marginTop: 14 }}>{error}</div>}
@@ -486,6 +645,54 @@ export function StockView({
                 placeholder="1.8L 16v, 3.0 V6 TDI…"
               />
             </div>
+          </div>
+
+          <div className={styles.field}>
+            <label>Fotos (hasta {FOTOS_MAX_COUNT})</label>
+            <p className={styles.fotoTip}>
+              Recomendamos fotos horizontales para mejor visualización.
+            </p>
+            <div className={styles.fotosGrid}>
+              {existingFotos.map((url) => (
+                <div className={styles.fotoThumb} key={url}>
+                  <img src={url} alt="" />
+                  <button
+                    type="button"
+                    className={styles.fotoRemove}
+                    onClick={() => removeExistingFoto(url)}
+                    aria-label="Sacar foto"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {fotoFiles.map((file, i) => (
+                <div className={styles.fotoThumb} key={`${file.name}-${i}`}>
+                  <img src={fotoPreviews[i]} alt="" />
+                  <button
+                    type="button"
+                    className={styles.fotoRemove}
+                    onClick={() => removeNewFoto(i)}
+                    aria-label="Sacar foto"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              {existingFotos.length + fotoFiles.length < FOTOS_MAX_COUNT && (
+                <label className={styles.fotoAddTile}>
+                  +
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    onChange={handleFotosSelected}
+                    hidden
+                  />
+                </label>
+              )}
+            </div>
+            {fotoError && <p className={styles.fotoHint}>{fotoError}</p>}
           </div>
 
           {!editingId && (
@@ -598,6 +805,45 @@ export function StockView({
             </button>
             <button className={styles.btnPrimary} onClick={handleSave} disabled={saving}>
               {saving ? "Guardando…" : "Guardar vehículo"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className={`${styles.modalBg} ${cropTarget ? styles.show : ""}`}>
+        <div className={styles.modal}>
+          <h3 className="disp">Encuadrá la foto</h3>
+          <p className={styles.fotoTip}>Arrastrá para mover y usá el control para hacer zoom.</p>
+
+          <div className={styles.cropArea}>
+            {cropTarget && (
+              <Cropper
+                image={cropTarget.url}
+                crop={crop}
+                zoom={zoom}
+                aspect={FOTO_ASPECT}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
+              />
+            )}
+          </div>
+          <input
+            type="range"
+            min={1}
+            max={3}
+            step={0.05}
+            value={zoom}
+            onChange={(e) => setZoom(Number(e.target.value))}
+            className={styles.cropZoom}
+          />
+
+          <div className={styles.modalActions}>
+            <button className={styles.btnGhost} onClick={cancelCrop}>
+              Cancelar
+            </button>
+            <button className={styles.btnPrimary} onClick={confirmCrop} disabled={cropSaving}>
+              {cropSaving ? "Procesando…" : "Confirmar recorte"}
             </button>
           </div>
         </div>

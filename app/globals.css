@@ -8,6 +8,7 @@
   --input-bg: rgba(255, 255, 255, 0.04);
   --modal-overlay: rgba(6, 5, 12, 0.6);
   --tooltip-bg: #1c1730;
+  --select-option-bg: #1c1730;
 
   --violet: #8b5cf6;
   --magenta: #e8319b;
@@ -45,6 +46,7 @@ html[data-theme="light"] {
   --input-bg: rgba(255, 255, 255, 0.75);
   --modal-overlay: rgba(30, 20, 60, 0.35);
   --tooltip-bg: #2a2140;
+  --select-option-bg: #ffffff;
 
   --success: #0e9668;
   --warn: #9a6f00;

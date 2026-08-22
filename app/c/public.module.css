@@ -134,9 +134,10 @@
 }
 
 .cardPhoto {
-  height: 160px;
+  aspect-ratio: 4 / 3;
   margin: 12px 12px 0;
   border-radius: 12px;
+  overflow: hidden;
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--violet) 18%, transparent),
@@ -150,6 +151,14 @@
 
 .cardPhoto svg {
   width: 65%;
+}
+
+.cardPhotoImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .cardBadge {
@@ -253,7 +262,9 @@
   );
   border: 1px solid var(--line);
   border-radius: 16px;
-  height: 340px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,6 +273,48 @@
 
 .galleryMain svg {
   width: 60%;
+}
+
+.galleryImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galleryThumbs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.galleryThumb {
+  width: 64px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 0;
+  border: 2px solid transparent;
+  background: var(--input-bg);
+  opacity: 0.6;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+
+.galleryThumb:hover {
+  opacity: 1;
+}
+
+.galleryThumbActive {
+  border-color: var(--violet);
+  opacity: 1;
+}
+
+.galleryThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .detailTitle {

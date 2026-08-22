@@ -35,6 +35,7 @@ export default async function StockPage() {
     docDominio: v.docDominio,
     docLibreDeuda: v.docLibreDeuda,
     vtvVencimiento: v.vtvVencimiento ? v.vtvVencimiento.toISOString().slice(0, 10) : null,
+    fotos: v.fotos,
   }));
 
   return (

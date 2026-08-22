@@ -15,6 +15,7 @@ export type VehiculoCatalogoDTO = {
   km: number;
   precioUsd: number;
   estado: EstadoVehiculo;
+  fotos: string[];
 };
 
 const estadoLabel: Record<EstadoVehiculo, string> = {
@@ -82,7 +83,11 @@ export function CatalogoView({
                 <span className={`${styles.cardBadge} ${styles[v.estado.toLowerCase()]}`}>
                   {estadoLabel[v.estado]}
                 </span>
-                <CarSVG />
+                {v.fotos.length > 0 ? (
+                  <img className={styles.cardPhotoImg} src={v.fotos[0]} alt="" />
+                ) : (
+                  <CarSVG />
+                )}
               </div>
               <div className={styles.cardBody}>
                 <div className={`${styles.cardTitle} disp`}>

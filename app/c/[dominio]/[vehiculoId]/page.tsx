@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { CarSVG } from "../../CarSVG";
 import { PublicHeader } from "../../PublicHeader";
+import { PhotoGallery } from "../../PhotoGallery";
 import { ContactForm } from "./ContactForm";
 import styles from "../../public.module.css";
 
@@ -38,9 +38,7 @@ export default async function VehiculoDetalle({
 
         <div className={styles.detailGrid}>
           <div>
-            <div className={styles.galleryMain}>
-              <CarSVG />
-            </div>
+            <PhotoGallery fotos={vehiculo.fotos} />
 
             <span className={`${styles.detailBadge} ${styles[vehiculo.estado.toLowerCase()]}`}>
               {estadoLabel[vehiculo.estado]}

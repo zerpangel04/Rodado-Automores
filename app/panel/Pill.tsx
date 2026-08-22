@@ -15,7 +15,14 @@ export function Pill({
 
   if (onClick) {
     return (
-      <button type="button" className={classes} onClick={onClick}>
+      <button
+        type="button"
+        className={classes}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+      >
         {children}
       </button>
     );

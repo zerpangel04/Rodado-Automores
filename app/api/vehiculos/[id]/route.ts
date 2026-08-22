@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { vehiculoUpdateSchema } from "@/lib/validation";
-
-async function findOwnedVehiculo(id: string, tenantId: string) {
-  const vehiculo = await prisma.vehiculo.findUnique({ where: { id } });
-  if (!vehiculo || vehiculo.tenantId !== tenantId) return null;
-  return vehiculo;
-}
+import { findOwnedVehiculo } from "@/lib/vehiculos";
 
 export async function PATCH(
   req: NextRequest,
