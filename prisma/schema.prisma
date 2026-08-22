@@ -56,6 +56,22 @@ model Tenant {
   vehiculos Vehiculo[]
   leads     Lead[]
   ventas    Venta[]
+
+  mercadoLibreConexion MercadoLibreConexion?
+}
+
+// Conexión OAuth de la agencia con su cuenta de Mercado Libre. Un tenant
+// conecta su propia cuenta (no una cuenta global de Rodado).
+model MercadoLibreConexion {
+  id           String   @id @default(cuid())
+  tenantId     String   @unique
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  mlUserId     String
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Usuario {

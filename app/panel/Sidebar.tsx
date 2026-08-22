@@ -83,6 +83,7 @@ export function Sidebar({
         <div className={styles.navGroup}>
           <span className={styles.navLabel}>Agencia</span>
           {navItem("/panel/equipo", "E", "Equipo")}
+          {navItem("/panel/integraciones", "I", "Integraciones")}
         </div>
       )}
 
