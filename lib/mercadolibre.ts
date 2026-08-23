@@ -136,7 +136,7 @@ export async function getMercadoLibreAddress(
 }
 
 export type MercadoLibreListingResult =
-  | { ok: true; itemId: string; permalink: string }
+  | { ok: true; itemId: string; permalink: string; status: string }
   | { ok: false; error: string };
 
 type MlErrorCause = { code?: string; message?: string; references?: string[] };
@@ -145,7 +145,13 @@ type MlErrorBody = { message?: string; error?: string; cause?: MlErrorCause[] };
 /** Crea una publicación en Mercado Libre. Ver /publica-vehiculos en los
  * docs de ML para el shape del payload — buying_mode:"classified" es
  * obligatorio para vehículos, si no ML devuelve un error confuso sobre
- * un campo "family_name" que no aplica acá. */
+ * un campo "family_name" que no aplica acá.
+ *
+ * Importante: ML puede devolver HTTP 402 (payment_required) con el ítem
+ * YA CREADO en el body — pasa con listing_type_id pagos como "silver"
+ * cuando la cuenta no tiene medio de pago cargado. Hay que chequear si
+ * vino un `id` en el body antes de asumir que un status no-2xx es un
+ * error real, si no perdemos publicaciones que sí se crearon. */
 export async function createMercadoLibreListing(
   accessToken: string,
   payload: Record<string, unknown>
@@ -161,15 +167,15 @@ export async function createMercadoLibreListing(
 
   const data = await res.json().catch(() => null);
 
-  if (!res.ok) {
-    const body = data as MlErrorBody | null;
-    const causeDetail = body?.cause
-      ?.map((c) => c.message ?? c.code)
-      .filter(Boolean)
-      .join("; ");
-    const error = causeDetail || body?.message || `Mercado Libre devolvió HTTP ${res.status}`;
-    return { ok: false, error };
+  if (data?.id && data?.permalink) {
+    return { ok: true, itemId: data.id, permalink: data.permalink, status: data.status ?? "unknown" };
   }
 
-  return { ok: true, itemId: data.id, permalink: data.permalink };
+  const body = data as MlErrorBody | null;
+  const causeDetail = body?.cause
+    ?.map((c) => c.message ?? c.code)
+    .filter(Boolean)
+    .join("; ");
+  const error = causeDetail || body?.message || `Mercado Libre devolvió HTTP ${res.status}`;
+  return { ok: false, error };
 }

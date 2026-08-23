@@ -32,6 +32,7 @@ export type VehiculoDTO = {
   fotos: string[];
   mlItemId: string | null;
   mlPermalink: string | null;
+  mlStatus: string | null;
   mlLastError: string | null;
 };
 
@@ -596,7 +597,9 @@ export function StockView({
                         className={styles.mlLink}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Ver en Mercado Libre ↗
+                        {v.mlStatus === "payment_required"
+                          ? "Ver en Mercado Libre (pendiente de pago) ↗"
+                          : "Ver en Mercado Libre ↗"}
                       </a>
                     ) : (
                       <button

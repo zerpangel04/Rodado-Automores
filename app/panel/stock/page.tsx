@@ -38,6 +38,7 @@ export default async function StockPage() {
     fotos: v.fotos,
     mlItemId: v.mlItemId,
     mlPermalink: v.mlPermalink,
+    mlStatus: v.mlStatus,
     mlLastError: v.mlLastError,
   }));
 

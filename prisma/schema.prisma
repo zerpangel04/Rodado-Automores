@@ -121,6 +121,9 @@ model Vehiculo {
   // Publicación en Mercado Libre (opcional, uno por vehículo)
   mlItemId    String?
   mlPermalink String?
+  // Ej: "active", "payment_required" (creado pero necesita pago del
+  // plan de publicación para salir a la luz)
+  mlStatus    String?
   mlLastError String?       @db.Text
 
   // Documentación

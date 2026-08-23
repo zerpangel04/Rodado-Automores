@@ -96,7 +96,15 @@ export async function POST(
 
   const updated = await prisma.vehiculo.update({
     where: { id },
-    data: { mlItemId: result.itemId, mlPermalink: result.permalink, mlLastError: null },
+    data: {
+      mlItemId: result.itemId,
+      mlPermalink: result.permalink,
+      mlStatus: result.status,
+      mlLastError:
+        result.status === "payment_required"
+          ? 'Publicada, pero requiere pagar el plan "silver" en Mercado Libre para salir a la luz.'
+          : null,
+    },
   });
 
   return NextResponse.json(updated);
