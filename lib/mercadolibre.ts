@@ -6,10 +6,12 @@ import { prisma } from "@/lib/prisma";
 const REDIRECT_URI = "https://rodado-automores.vercel.app/api/mercadolibre/callback";
 const AUTH_URL = "https://auth.mercadolibre.com.ar/authorization";
 const TOKEN_URL = "https://api.mercadolibre.com/oauth/token";
-const SITE_ID = "MLA";
-// Fallback si la predicción de categoría no devuelve nada: "Autos y
-// Camionetas" en Argentina, estable hace años en la API de ML.
-const FALLBACK_CATEGORY_ID = "MLA1744";
+// "Autos y Camionetas" en Argentina, estable hace años en la API de ML.
+// Usamos esta categoría fija en vez del endpoint de domain_discovery: la
+// predicción por texto del título falla con nombres de modelo ambiguos
+// (ej. "Golf GTI" se predijo como palos de golf, no el auto Volkswagen).
+// Como acá TODO lo que publicamos es un vehículo, no hace falta "adivinar".
+export const VEHICLE_CATEGORY_ID = "MLA1744";
 
 // Margen antes de que expire el access_token para disparar el refresh.
 const EXPIRY_BUFFER_MS = 5 * 60 * 1000;
@@ -107,25 +109,6 @@ export async function getValidAccessToken(tenantId: string): Promise<string | nu
   });
 
   return tokens.access_token;
-}
-
-/**
- * Predice la categoría de Mercado Libre a partir de un título, usando el
- * endpoint público de domain discovery. Devuelve el fallback de "Autos y
- * Camionetas" si la predicción no encuentra nada.
- */
-export async function predictMercadoLibreCategory(title: string): Promise<string> {
-  try {
-    const params = new URLSearchParams({ q: title, limit: "1" });
-    const res = await fetch(
-      `https://api.mercadolibre.com/sites/${SITE_ID}/domain_discovery/search?${params.toString()}`
-    );
-    if (!res.ok) return FALLBACK_CATEGORY_ID;
-    const data: Array<{ category_id?: string }> = await res.json();
-    return data[0]?.category_id ?? FALLBACK_CATEGORY_ID;
-  } catch {
-    return FALLBACK_CATEGORY_ID;
-  }
 }
 
 export type MercadoLibreListingResult =

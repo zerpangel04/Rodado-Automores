@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { findOwnedVehiculo } from "@/lib/vehiculos";
 import {
   getValidAccessToken,
-  predictMercadoLibreCategory,
   createMercadoLibreListing,
+  VEHICLE_CATEGORY_ID,
 } from "@/lib/mercadolibre";
 
 export async function POST(
@@ -32,7 +32,6 @@ export async function POST(
   }
 
   const title = `${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio}`.slice(0, 60);
-  const categoryId = await predictMercadoLibreCategory(title);
 
   const attributes: { id: string; value_name: string }[] = [
     { id: "BRAND", value_name: vehiculo.marca },
@@ -47,7 +46,7 @@ export async function POST(
   const payload = {
     title,
     description: `${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio} — ${vehiculo.km.toLocaleString("es-AR")} km. Publicado desde Rodado.`,
-    category_id: categoryId,
+    category_id: VEHICLE_CATEGORY_ID,
     price: Number(vehiculo.precioUsd),
     currency_id: "USD",
     available_quantity: 1,
