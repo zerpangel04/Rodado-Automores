@@ -37,7 +37,7 @@ export async function POST(
     { id: "BRAND", value_name: vehiculo.marca },
     { id: "MODEL", value_name: vehiculo.modelo },
     { id: "VEHICLE_YEAR", value_name: String(vehiculo.anio) },
-    { id: "KILOMETERS", value_name: String(vehiculo.km) },
+    { id: "KILOMETERS", value_name: `${vehiculo.km} km` },
   ];
   if (vehiculo.transmision) {
     attributes.push({ id: "TRANSMISSION", value_name: vehiculo.transmision });
