@@ -77,6 +77,7 @@ export function Sidebar({
         {navItem("/panel/stock", "S", "Stock", stockCount)}
         {navItem("/panel/leads", "L", "Leads", leadsCount)}
         {navItem("/panel/ventas", "V", "Ventas")}
+        {navItem("/panel/reportes", "R", "Reportes")}
       </div>
 
       {rol === "DUENIO" && (

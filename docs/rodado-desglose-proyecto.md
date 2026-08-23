@@ -47,10 +47,13 @@ Objetivo: confirmar que hay 3-5 dueños de agencia dispuestos a probarlo antes d
 Elegimos antes 1-2 focos: **IA + experiencia del catálogo**. Estos son los candidatos, priorizados:
 
 1. **Carga por patente/foto con IA**: sacás una foto, la IA completa ficha técnica y sugiere precio de mercado (esto es lo que hace único a deConcesionarias hoy — replicarlo es tabla stakes, no diferenciador).
-2. **Asistente de WhatsApp con IA**: responde consultas 24/7, califica al lead antes de pasarlo al vendedor (ya lo mostramos en la landing).
-3. **Catálogo público de mejor calidad visual** que el de la competencia — esto ya lo tenés resuelto en diseño.
-4. **Multipublicador** (Mercado Libre + otros portales): funcionalidad cara de construir (requiere certificación con cada portal) pero es lo que más pide el mercado. Evaluar si construirlo propio o integrarlo vía terceros al principio.
-5. **Simulador de financiación en vivo**: ya lo tenés armado en el prototipo.
+2. **Asistente de WhatsApp con IA**: responde consultas 24/7, califica al lead antes de pasarlo al vendedor (ya lo mostramos en la landing). Requiere aprobación de Meta Business API — trámite propio, no solo desarrollo. **Decidido (22/08/2026): se deja para el final del proyecto**, junto con el asistente de IA en el catálogo.
+3. **Asistente de IA en el catálogo web** (más viable primero que el de WhatsApp, sin depender de terceros): chat anclado al stock real de cada agencia, deriva a Lead cuando hay intención de compra real. Brief técnico ya escrito. **Decidido (22/08/2026): se deja para el final del proyecto**, junto con el bot de WhatsApp.
+4. **Catálogo público de mejor calidad visual** que el de la competencia — esto ya lo tenés resuelto en diseño (rediseño completo neón/glass con modo claro/oscuro, hecho el 22/08/2026).
+5. **Multipublicador** (Mercado Libre + otros portales): certificación no es un trámite bloqueante — te registrás como developer gratis e inmediato, construís la integración básica con la API pública, y aplicás a la certificación recién cuando tengas 3 meses de uso real. Ver docs/rodado-brief-tecnico.md para el detalle.
+
+   **Actualización (22/08/2026) — integración construida y probada, con un hallazgo de negocio importante**: la conexión OAuth y la publicación de vehículos ya funcionan de punta a punta (probado contra una cuenta real). PERO Mercado Libre no tiene plan gratuito para publicar vehículos — es una suscripción mensual con cupo de publicaciones (piso ~$45.715/mes interior, ~$91.500/mes CABA/GBA, +IVA), y **no se contrata por API**: cada agencia tiene que hablar con un ejecutivo comercial de Mercado Libre para activar su cuenta como "vendedor de vehículos" antes de poder publicar de verdad. Esto significa: (a) el costo del paquete de ML lo paga cada agencia cliente, no Rodado — hay que comunicarlo con transparencia total, nunca vender esto como "gratis"; (b) cada agencia nueva que quiera usar la función tiene un paso manual de onboarding con Mercado Libre que Rodado no puede saltarse ni automatizar. **Decidido (22/08/2026): pausado el paso de sincronización (precio/estado) — se deja para el final del proyecto**, junto con los asistentes de IA. Se retoma cuando haya un cliente real con el paquete de ML contratado.
+6. **Simulador de financiación en vivo**: ya lo tenés armado en el prototipo.
 
 ### Tecnología adicional
 - Integración con APIs de IA (para fichas automáticas y el bot de WhatsApp).
@@ -66,6 +69,7 @@ Elegimos antes 1-2 focos: **IA + experiencia del catálogo**. Estos son los cand
 - Subastas entre agencias, negocios digitales (seguros, garantías — ingresos por comisión, como hace deConcesionarias).
 - App móvil.
 - Programa de referidos entre concesionarias.
+- **Vista 3D/AR del vehículo real** (idea de largo plazo, agosto 2026): que el cliente pueda "caminar alrededor" del auto real con la cámara del celular antes de ir a verlo en persona. Ningún competidor local lo ofrece — sería un diferenciador fuerte. No viable hoy: requiere un modelo 3D del auto específico (no genérico, para no romper la promesa de "stock verificado, lo que ves es lo que hay"), y escanear cada unidad es caro/lento para un lote que rota seguido. Revisar de nuevo cuando: (a) haya tracción real y presupuesto para invertir en diferenciación, y (b) las apps de escaneo 3D por celular (tipo Polycam/Scaniverse, hoy ya funcionales con LiDAR) maduren lo suficiente como para que una agencia lo haga sola, sin equipo especializado.
 
 ---
 
@@ -90,3 +94,19 @@ Elegimos antes 1-2 focos: **IA + experiencia del catálogo**. Estos son los cand
 ## Próximo paso concreto
 
 Con esto mapeado, el cuello de botella real es **Fase 1 — Tecnología**: pasar de maqueta a app real con datos que persistan. Eso es trabajo de Claude Code, no de esta conversación. El resto (validación, pricing, legal) lo podés ir avanzando en paralelo sin bloquear el desarrollo.
+
+---
+
+## Estado real al 20 de agosto de 2026
+
+Lo de arriba es el plan original. Esto es lo que efectivamente existe hoy:
+
+- **Producción funcionando**: https://rodado-automores.vercel.app
+- **Hecho**: auth + multi-tenant, CRUD de stock con documentación (título/cédula/dominio/libre deuda/VTV con alertas), CRM de leads (kanban de 5 etapas), registro de ventas con comisión, roles (dueño ve todo, vendedor ve lo suyo), cotización de dólar en vivo, tasación con IA simulada, catálogo público con diseño de marca + filtros + página de detalle + formulario que crea Lead real conectado al CRM.
+- **Cuenta demo lista para mostrar**: "Agencia Demo" con 13 vehículos variados, 6 leads repartidos en las 5 etapas, 1 venta cerrada, 1 vendedor de prueba (Martín López) — pensada para mostrarle a dueños de agencia reales sin que se vea vacía ni con datos de test evidentes.
+- **Pendiente: asistente de IA en el catálogo** (decidido dejar para el final, agosto 2026). Brief técnico ya escrito, esperando que se complete el resto del roadmap:
+
+> Quiero agregar un asistente de IA en el catálogo público (`/c/[dominio]`), como un widget de chat flotante. Especificaciones: (1) Anclado a datos reales — recibe el stock actual de esa agencia (marca, modelo, año, km, precio, estado, transmisión, motor) consultado en vivo, nunca inventa autos ni precios. (2) Alcance: disponibilidad, precios, specs, simulación de financiación; deriva a dejar contacto si la consulta excede eso. (3) Si el visitante deja sus datos, crea un Lead real (canal="WEB_IA") conectado al kanban existente. (4) Multi-tenant: cada agencia ve solo su propio stock. (5) API de Anthropic (Claude), key en variable de entorno `ANTHROPIC_API_KEY`.
+
+- **Pendientes de higiene**: rotar la contraseña de la base de Supabase (quedó escrita en el historial de esta conversación durante el debugging).
+- **Pendiente de negocio**: registrarse como developer en Mercado Libre (developers.mercadolibre.com.ar) para arrancar la integración básica — no bloqueante, se puede hacer en paralelo a seguir mostrando la demo.
