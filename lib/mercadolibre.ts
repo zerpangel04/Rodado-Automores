@@ -111,6 +111,30 @@ export async function getValidAccessToken(tenantId: string): Promise<string | nu
   return tokens.access_token;
 }
 
+export type MercadoLibreAddress = {
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+};
+
+/**
+ * Trae la dirección ya cargada en el perfil de Mercado Libre del vendedor
+ * conectado. Las publicaciones de vehículos (clasificados) exigen una
+ * ubicación y no tenemos un campo de dirección de agencia en Rodado, así
+ * que reusamos la que el vendedor ya cargó en su cuenta de ML.
+ */
+export async function getMercadoLibreAddress(
+  accessToken: string
+): Promise<MercadoLibreAddress | null> {
+  const res = await fetch("https://api.mercadolibre.com/users/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data?.address ?? null;
+}
+
 export type MercadoLibreListingResult =
   | { ok: true; itemId: string; permalink: string }
   | { ok: false; error: string };

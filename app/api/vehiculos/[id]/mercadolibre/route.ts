@@ -5,6 +5,7 @@ import { findOwnedVehiculo } from "@/lib/vehiculos";
 import {
   getValidAccessToken,
   createMercadoLibreListing,
+  getMercadoLibreAddress,
   VEHICLE_CATEGORY_ID,
 } from "@/lib/mercadolibre";
 
@@ -38,10 +39,30 @@ export async function POST(
     { id: "MODEL", value_name: vehiculo.modelo },
     { id: "VEHICLE_YEAR", value_name: String(vehiculo.anio) },
     { id: "KILOMETERS", value_name: `${vehiculo.km} km` },
+    // TRIM/FUEL_TYPE/DOORS son obligatorios para esta categoría pero
+    // Rodado no los guarda hoy — van con un valor por defecto razonable
+    // hasta que sumemos esos campos al alta de vehículo.
+    { id: "TRIM", value_name: vehiculo.modelo },
+    { id: "FUEL_TYPE", value_name: "Nafta" },
+    { id: "DOORS", value_name: "4" },
   ];
   if (vehiculo.transmision) {
     attributes.push({ id: "TRANSMISSION", value_name: vehiculo.transmision });
   }
+
+  // Los clasificados de vehículos exigen ubicación; no tenemos dirección
+  // de agencia en Rodado, así que reusamos la que el vendedor ya cargó
+  // en su cuenta de Mercado Libre.
+  const address = await getMercadoLibreAddress(accessToken);
+  const location = address
+    ? {
+        address_line: address.address,
+        zip_code: address.zip_code,
+        country: { name: "Argentina" },
+        state: { name: address.state },
+        city: { name: address.city },
+      }
+    : undefined;
 
   const payload = {
     title,
@@ -57,6 +78,7 @@ export async function POST(
     channels: ["marketplace"],
     pictures: vehiculo.fotos.map((url) => ({ source: url })),
     attributes,
+    ...(location ? { location } : {}),
   };
 
   const result = await createMercadoLibreListing(accessToken, payload);
