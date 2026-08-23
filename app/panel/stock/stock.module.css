@@ -255,6 +255,47 @@
   font-size: 15px;
 }
 
+.mlRow {
+  margin-top: 10px;
+}
+
+.mlBtn {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
+  background: color-mix(in srgb, #ffe600 16%, transparent);
+  color: #b8860b;
+  border: 1px solid color-mix(in srgb, #ffe600 40%, var(--line));
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mlBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.mlLink {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+  color: var(--success);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mlError {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--danger);
+  line-height: 1.4;
+}
+
 .modalBg {
   position: fixed;
   inset: 0;

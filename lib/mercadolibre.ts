@@ -6,6 +6,10 @@ import { prisma } from "@/lib/prisma";
 const REDIRECT_URI = "https://rodado-automores.vercel.app/api/mercadolibre/callback";
 const AUTH_URL = "https://auth.mercadolibre.com.ar/authorization";
 const TOKEN_URL = "https://api.mercadolibre.com/oauth/token";
+const SITE_ID = "MLA";
+// Fallback si la predicción de categoría no devuelve nada: "Autos y
+// Camionetas" en Argentina, estable hace años en la API de ML.
+const FALLBACK_CATEGORY_ID = "MLA1744";
 
 // Margen antes de que expire el access_token para disparar el refresh.
 const EXPIRY_BUFFER_MS = 5 * 60 * 1000;
@@ -103,4 +107,62 @@ export async function getValidAccessToken(tenantId: string): Promise<string | nu
   });
 
   return tokens.access_token;
+}
+
+/**
+ * Predice la categoría de Mercado Libre a partir de un título, usando el
+ * endpoint público de domain discovery. Devuelve el fallback de "Autos y
+ * Camionetas" si la predicción no encuentra nada.
+ */
+export async function predictMercadoLibreCategory(title: string): Promise<string> {
+  try {
+    const params = new URLSearchParams({ q: title, limit: "1" });
+    const res = await fetch(
+      `https://api.mercadolibre.com/sites/${SITE_ID}/domain_discovery/search?${params.toString()}`
+    );
+    if (!res.ok) return FALLBACK_CATEGORY_ID;
+    const data: Array<{ category_id?: string }> = await res.json();
+    return data[0]?.category_id ?? FALLBACK_CATEGORY_ID;
+  } catch {
+    return FALLBACK_CATEGORY_ID;
+  }
+}
+
+export type MercadoLibreListingResult =
+  | { ok: true; itemId: string; permalink: string }
+  | { ok: false; error: string };
+
+type MlErrorCause = { code?: string; message?: string; references?: string[] };
+type MlErrorBody = { message?: string; error?: string; cause?: MlErrorCause[] };
+
+/** Crea una publicación en Mercado Libre. Ver /publica-vehiculos en los
+ * docs de ML para el shape del payload — buying_mode:"classified" es
+ * obligatorio para vehículos, si no ML devuelve un error confuso sobre
+ * un campo "family_name" que no aplica acá. */
+export async function createMercadoLibreListing(
+  accessToken: string,
+  payload: Record<string, unknown>
+): Promise<MercadoLibreListingResult> {
+  const res = await fetch("https://api.mercadolibre.com/items", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    const body = data as MlErrorBody | null;
+    const causeDetail = body?.cause
+      ?.map((c) => c.message ?? c.code)
+      .filter(Boolean)
+      .join("; ");
+    const error = causeDetail || body?.message || `Mercado Libre devolvió HTTP ${res.status}`;
+    return { ok: false, error };
+  }
+
+  return { ok: true, itemId: data.id, permalink: data.permalink };
 }

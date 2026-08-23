@@ -36,6 +36,9 @@ export default async function StockPage() {
     docLibreDeuda: v.docLibreDeuda,
     vtvVencimiento: v.vtvVencimiento ? v.vtvVencimiento.toISOString().slice(0, 10) : null,
     fotos: v.fotos,
+    mlItemId: v.mlItemId,
+    mlPermalink: v.mlPermalink,
+    mlLastError: v.mlLastError,
   }));
 
   return (

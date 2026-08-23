@@ -30,6 +30,9 @@ export type VehiculoDTO = {
   docLibreDeuda: boolean;
   vtvVencimiento: string | null;
   fotos: string[];
+  mlItemId: string | null;
+  mlPermalink: string | null;
+  mlLastError: string | null;
 };
 
 type UsuarioOption = { id: string; nombre: string };
@@ -124,6 +127,7 @@ export function StockView({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
+  const [publishingId, setPublishingId] = useState<string | null>(null);
 
   const [saleTarget, setSaleTarget] = useState<VehiculoDTO | null>(null);
   const [saleForm, setSaleForm] = useState<SaleForm>({
@@ -391,6 +395,27 @@ export function StockView({
     }
   }
 
+  async function publishToMercadoLibre(v: VehiculoDTO) {
+    setPublishingId(v.id);
+    try {
+      const res = await fetch(`/api/vehiculos/${v.id}/mercadolibre`, { method: "POST" });
+      const data = await res.json();
+      const saved: VehiculoDTO | undefined = res.ok ? data : data.vehiculo;
+      if (saved) {
+        setItems((prev) => prev.map((i) => (i.id === saved.id ? saved : i)));
+      }
+      showToast();
+    } catch {
+      setItems((prev) =>
+        prev.map((i) =>
+          i.id === v.id ? { ...i, mlLastError: "Error de conexión, intentá de nuevo" } : i
+        )
+      );
+    } finally {
+      setPublishingId(null);
+    }
+  }
+
   async function handleDelete(id: string) {
     if (!confirm("¿Eliminar este vehículo del stock?")) return;
     const res = await fetch(`/api/vehiculos/${id}`, { method: "DELETE" });
@@ -559,6 +584,34 @@ export function StockView({
                       >
                         Vender
                       </button>
+                    )}
+                  </div>
+
+                  <div className={styles.mlRow}>
+                    {v.mlPermalink ? (
+                      <a
+                        href={v.mlPermalink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={styles.mlLink}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Ver en Mercado Libre ↗
+                      </a>
+                    ) : (
+                      <button
+                        className={styles.mlBtn}
+                        disabled={publishingId === v.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          publishToMercadoLibre(v);
+                        }}
+                      >
+                        {publishingId === v.id ? "Publicando…" : "Publicar en Mercado Libre"}
+                      </button>
+                    )}
+                    {v.mlLastError && (
+                      <p className={styles.mlError}>{v.mlLastError}</p>
                     )}
                   </div>
                 </div>

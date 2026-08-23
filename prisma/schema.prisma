@@ -118,6 +118,11 @@ model Vehiculo {
   fotos      String[]       @default([])
   fechaIngreso DateTime     @default(now())
 
+  // Publicación en Mercado Libre (opcional, uno por vehículo)
+  mlItemId    String?
+  mlPermalink String?
+  mlLastError String?       @db.Text
+
   // Documentación
   docTitulo       Boolean   @default(false)
   docCedula       Boolean   @default(false)
