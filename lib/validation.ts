@@ -7,6 +7,7 @@ export const FOTO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as c
 export const estadoVehiculoValues = ["DISPONIBLE", "RESERVADO", "VENDIDO"] as const;
 
 export const vehiculoInputSchema = z.object({
+  sucursalId: z.string().trim().min(1, "Elegí una sucursal"),
   marca: z.string().trim().min(1, "La marca es obligatoria"),
   modelo: z.string().trim().min(1, "El modelo es obligatorio"),
   anio: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1),
@@ -89,6 +90,14 @@ export const resetPasswordInputSchema = z
     message: "Las contraseñas no coinciden",
     path: ["confirmPassword"],
   });
+
+export const sucursalInputSchema = z.object({
+  nombre: z.string().trim().min(1, "El nombre es obligatorio"),
+  direccion: z.string().trim().optional().nullable(),
+  telefono: z.string().trim().optional().nullable(),
+});
+
+export const sucursalUpdateSchema = sucursalInputSchema.partial();
 
 export const rolValues = ["DUENIO", "ADMIN", "VENDEDOR"] as const;
 

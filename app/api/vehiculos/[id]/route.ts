@@ -41,6 +41,15 @@ export async function PATCH(
     );
   }
 
+  if (parsed.data.sucursalId) {
+    const sucursal = await prisma.sucursal.findUnique({
+      where: { id: parsed.data.sucursalId },
+    });
+    if (!sucursal || sucursal.tenantId !== session.user.tenantId) {
+      return NextResponse.json({ error: "Sucursal inválida" }, { status: 400 });
+    }
+  }
+
   const vehiculo = await prisma.vehiculo.update({
     where: { id },
     data: parsed.data,

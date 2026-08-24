@@ -200,6 +200,13 @@ async function main() {
     throw new Error(`El tenant "${DOMINIO}" no tiene un usuario DUENIO para asignar ventas`);
   }
 
+  let sucursal = await prisma.sucursal.findFirst({ where: { tenantId: tenant.id } });
+  if (!sucursal) {
+    sucursal = await prisma.sucursal.create({
+      data: { tenantId: tenant.id, nombre: "Sucursal Principal" },
+    });
+  }
+
   let creados = 0;
   let vendidos = 0;
 
@@ -210,6 +217,7 @@ async function main() {
       data: {
         ...rest,
         tenantId: tenant.id,
+        sucursalId: sucursal.id,
         estado: estado === "VENDIDO" ? "DISPONIBLE" : estado,
         vtvVencimiento: new Date(vtvVencimiento),
       },

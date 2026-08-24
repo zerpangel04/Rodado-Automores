@@ -52,12 +52,30 @@ model Tenant {
   dominio   String?  @unique
   createdAt DateTime @default(now())
 
-  usuarios  Usuario[]
-  vehiculos Vehiculo[]
-  leads     Lead[]
-  ventas    Venta[]
+  usuarios   Usuario[]
+  vehiculos  Vehiculo[]
+  leads      Lead[]
+  ventas     Venta[]
+  sucursales Sucursal[]
 
   mercadoLibreConexion MercadoLibreConexion?
+}
+
+// Sucursal física de una agencia. Toda agencia tiene al menos una
+// ("Sucursal Principal" por defecto); las agencias con varios locales
+// pueden dar de alta más desde /panel/sucursales.
+model Sucursal {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  nombre    String
+  direccion String?
+  telefono  String?
+  createdAt DateTime @default(now())
+
+  vehiculos Vehiculo[]
+
+  @@index([tenantId])
 }
 
 // Conexión OAuth de la agencia con su cuenta de Mercado Libre. Un tenant
@@ -106,6 +124,8 @@ model Vehiculo {
   id         String         @id @default(cuid())
   tenantId   String
   tenant     Tenant         @relation(fields: [tenantId], references: [id])
+  sucursalId String
+  sucursal   Sucursal       @relation(fields: [sucursalId], references: [id])
   marca      String
   modelo     String
   anio       Int
@@ -137,6 +157,7 @@ model Vehiculo {
   venta Venta?
 
   @@index([tenantId, estado])
+  @@index([sucursalId])
 }
 
 model Lead {

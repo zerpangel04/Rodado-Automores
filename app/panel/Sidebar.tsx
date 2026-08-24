@@ -83,6 +83,7 @@ export function Sidebar({
       {rol === "DUENIO" && (
         <div className={styles.navGroup}>
           <span className={styles.navLabel}>Agencia</span>
+          {navItem("/panel/sucursales", "B", "Sucursales")}
           {navItem("/panel/equipo", "E", "Equipo")}
           {navItem("/panel/integraciones", "I", "Integraciones")}
         </div>

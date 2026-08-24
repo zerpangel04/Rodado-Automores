@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { vehiculoInputSchema } from "@/lib/validation";
+import { sucursalInputSchema } from "@/lib/validation";
 
 export async function GET() {
   const session = await currentSession();
@@ -9,12 +9,12 @@ export async function GET() {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
-  const vehiculos = await prisma.vehiculo.findMany({
+  const sucursales = await prisma.sucursal.findMany({
     where: { tenantId: session.user.tenantId },
-    orderBy: { fechaIngreso: "desc" },
+    orderBy: { createdAt: "asc" },
   });
 
-  return NextResponse.json(vehiculos);
+  return NextResponse.json(sucursales);
 }
 
 export async function POST(req: NextRequest) {
@@ -22,9 +22,12 @@ export async function POST(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
+  if (session.user.rol !== "DUENIO") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
 
   const body = await req.json().catch(() => null);
-  const parsed = vehiculoInputSchema.safeParse(body);
+  const parsed = sucursalInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Datos inválidos", detalles: parsed.error.flatten() },
@@ -32,19 +35,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const sucursal = await prisma.sucursal.findUnique({
-    where: { id: parsed.data.sucursalId },
-  });
-  if (!sucursal || sucursal.tenantId !== session.user.tenantId) {
-    return NextResponse.json({ error: "Sucursal inválida" }, { status: 400 });
-  }
-
-  const vehiculo = await prisma.vehiculo.create({
+  const sucursal = await prisma.sucursal.create({
     data: {
       ...parsed.data,
       tenantId: session.user.tenantId,
     },
   });
 
-  return NextResponse.json(vehiculo, { status: 201 });
+  return NextResponse.json(sucursal, { status: 201 });
 }

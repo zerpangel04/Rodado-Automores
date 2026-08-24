@@ -7,7 +7,7 @@ export default async function StockPage() {
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
 
-  const [vehiculos, usuarios] = await Promise.all([
+  const [vehiculos, usuarios, sucursales] = await Promise.all([
     prisma.vehiculo.findMany({
       where: { tenantId },
       orderBy: { fechaIngreso: "desc" },
@@ -17,10 +17,16 @@ export default async function StockPage() {
       select: { id: true, nombre: true },
       orderBy: { nombre: "asc" },
     }),
+    prisma.sucursal.findMany({
+      where: { tenantId },
+      select: { id: true, nombre: true },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
 
   const items: VehiculoDTO[] = vehiculos.map((v) => ({
     id: v.id,
+    sucursalId: v.sucursalId,
     marca: v.marca,
     modelo: v.modelo,
     anio: v.anio,
@@ -54,6 +60,7 @@ export default async function StockPage() {
         <StockView
           initialItems={items}
           usuarios={usuarios}
+          sucursales={sucursales}
           userId={userId}
           canRevertirVenta={rol !== "VENDEDOR"}
         />

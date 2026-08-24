@@ -54,6 +54,11 @@ export default async function SignupPage({
             rol: "DUENIO",
           },
         },
+        sucursales: {
+          create: {
+            nombre: "Sucursal Principal",
+          },
+        },
       },
     });
 

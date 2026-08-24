@@ -15,6 +15,7 @@ export type EstadoVehiculo = "DISPONIBLE" | "RESERVADO" | "VENDIDO";
 
 export type VehiculoDTO = {
   id: string;
+  sucursalId: string;
   marca: string;
   modelo: string;
   anio: number;
@@ -37,8 +38,10 @@ export type VehiculoDTO = {
 };
 
 type UsuarioOption = { id: string; nombre: string };
+type SucursalOption = { id: string; nombre: string };
 
 type FormState = {
+  sucursalId: string;
   marca: string;
   modelo: string;
   anio: string;
@@ -55,6 +58,7 @@ type FormState = {
 };
 
 const emptyForm: FormState = {
+  sucursalId: "",
   marca: "",
   modelo: "",
   anio: "",
@@ -112,11 +116,13 @@ const docTierClass: Record<string, string> = {
 export function StockView({
   initialItems,
   usuarios,
+  sucursales,
   userId,
   canRevertirVenta,
 }: {
   initialItems: VehiculoDTO[];
   usuarios: UsuarioOption[];
+  sucursales: SucursalOption[];
   userId: string;
   canRevertirVenta: boolean;
 }) {
@@ -239,7 +245,7 @@ export function StockView({
 
   function openCreate() {
     setEditingId(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, sucursalId: sucursales[0]?.id ?? "" });
     setError(null);
     setIaResult(null);
     setExistingFotos([]);
@@ -269,6 +275,7 @@ export function StockView({
   function openEdit(v: VehiculoDTO) {
     setEditingId(v.id);
     setForm({
+      sucursalId: v.sucursalId,
       marca: v.marca,
       modelo: v.modelo,
       anio: String(v.anio),
@@ -297,10 +304,15 @@ export function StockView({
       setError("Completá al menos marca y modelo");
       return;
     }
+    if (!form.sucursalId) {
+      setError("Elegí una sucursal");
+      return;
+    }
     setSaving(true);
     setError(null);
 
     const payload = {
+      sucursalId: form.sucursalId,
       marca: form.marca.trim(),
       modelo: form.modelo.trim(),
       anio: Number(form.anio) || new Date().getFullYear(),
@@ -633,7 +645,23 @@ export function StockView({
 
           {error && <div className={styles.errorBox} style={{ marginTop: 14 }}>{error}</div>}
 
-          <div className={styles.fieldRow} style={{ marginTop: 16 }}>
+          {sucursales.length > 1 && (
+            <div className={styles.field} style={{ marginTop: 16 }}>
+              <label>Sucursal</label>
+              <select
+                value={form.sucursalId}
+                onChange={(e) => setForm({ ...form, sucursalId: e.target.value })}
+              >
+                {sucursales.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className={styles.fieldRow} style={{ marginTop: sucursales.length > 1 ? 0 : 16 }}>
             <div className={styles.field}>
               <label>Marca</label>
               <input
