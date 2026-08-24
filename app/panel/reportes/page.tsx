@@ -10,6 +10,7 @@ const canalLabel: Record<string, string> = {
   MERCADO_LIBRE: "Mercado Libre",
   INSTAGRAM: "Instagram",
   WEB: "Web",
+  WEB_IA: "Asistente IA",
 };
 
 function startOfDay(d: Date) {
@@ -99,7 +100,7 @@ export default async function ReportesPage({
     .map(([fecha, v]) => ({ fecha, ...v }));
 
   // --- Leads por canal + conversión a cerrado ---
-  const canales = ["WHATSAPP", "MERCADO_LIBRE", "INSTAGRAM", "WEB"] as const;
+  const canales = ["WHATSAPP", "MERCADO_LIBRE", "INSTAGRAM", "WEB", "WEB_IA"] as const;
   const leadsPorCanal = canales.map((canal) => {
     const deEsteCanal = leadsEnRango.filter((l) => l.canal === canal);
     const cerrados = deEsteCanal.filter((l) => l.etapa === "CERRADO").length;

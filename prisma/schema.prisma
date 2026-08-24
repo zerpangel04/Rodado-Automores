@@ -29,6 +29,7 @@ enum CanalLead {
   MERCADO_LIBRE
   INSTAGRAM
   WEB
+  WEB_IA
 }
 
 enum EtapaLead {

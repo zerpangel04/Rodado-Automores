@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PublicHeader } from "../PublicHeader";
+import { ChatWidget } from "../ChatWidget";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import styles from "../public.module.css";
 
@@ -54,6 +55,8 @@ export default async function CatalogoPublico({
           <p>Catálogo de {tenant.nombre} — powered by Rodado</p>
         </div>
       </footer>
+
+      <ChatWidget dominio={dominio} nombreAgencia={tenant.nombre} />
     </div>
   );
 }

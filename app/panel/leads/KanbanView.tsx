@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import styles from "./kanban.module.css";
 import { Pill, type PillColor } from "../Pill";
 
-export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB";
+export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
 
 export type LeadDTO = {
@@ -33,6 +33,7 @@ const canalLabel: Record<Canal, string> = {
   MERCADO_LIBRE: "Mercado Libre",
   INSTAGRAM: "Instagram",
   WEB: "Web",
+  WEB_IA: "Asistente IA",
 };
 
 const canalColor: Record<Canal, PillColor> = {
@@ -40,6 +41,7 @@ const canalColor: Record<Canal, PillColor> = {
   MERCADO_LIBRE: "amber",
   INSTAGRAM: "purple",
   WEB: "blue",
+  WEB_IA: "gray",
 };
 
 type FormState = {

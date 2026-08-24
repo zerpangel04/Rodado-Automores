@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { publicLeadInputSchema } from "@/lib/validation";
+import { resolverTenantPublico, crearLeadPublico, LeadPublicoError } from "@/lib/leads";
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -14,33 +14,22 @@ export async function POST(req: NextRequest) {
 
   const { dominio, vehiculoId, nombreCliente, contacto, mensaje } = parsed.data;
 
-  const tenant = await prisma.tenant.findUnique({ where: { dominio } });
-  if (!tenant) {
-    return NextResponse.json({ error: "Agencia no encontrada" }, { status: 404 });
-  }
-
-  const vehiculo = await prisma.vehiculo.findUnique({ where: { id: vehiculoId } });
-  if (!vehiculo || vehiculo.tenantId !== tenant.id) {
-    return NextResponse.json({ error: "Vehículo no encontrado" }, { status: 404 });
-  }
-  if (vehiculo.estado === "VENDIDO") {
-    return NextResponse.json(
-      { error: "Este vehículo ya no está disponible" },
-      { status: 400 }
-    );
-  }
-
-  await prisma.lead.create({
-    data: {
+  try {
+    const tenant = await resolverTenantPublico(dominio);
+    await crearLeadPublico({
       tenantId: tenant.id,
-      vehiculoId: vehiculo.id,
+      vehiculoId,
       nombreCliente,
       contacto,
-      mensaje: mensaje || null,
+      mensaje,
       canal: "WEB",
-      etapa: "NUEVO",
-    },
-  });
+    });
+  } catch (error) {
+    if (error instanceof LeadPublicoError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    throw error;
+  }
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

@@ -35,6 +35,7 @@ export const canalLeadValues = [
   "MERCADO_LIBRE",
   "INSTAGRAM",
   "WEB",
+  "WEB_IA",
 ] as const;
 
 export const etapaLeadValues = [
@@ -59,6 +60,16 @@ export const publicLeadInputSchema = z.object({
   nombreCliente: z.string().trim().min(1, "Dejanos tu nombre"),
   contacto: z.string().trim().min(1, "Dejanos un teléfono o email de contacto"),
   mensaje: z.string().trim().max(1000).optional().nullable(),
+});
+
+export const chatMensajeSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().trim().min(1).max(4000),
+});
+
+export const chatInputSchema = z.object({
+  messages: z.array(chatMensajeSchema).min(1).max(40),
+  vehiculoId: z.string().trim().optional().nullable(),
 });
 
 export const leadUpdateSchema = z.object({

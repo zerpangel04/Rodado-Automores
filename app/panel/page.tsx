@@ -11,6 +11,7 @@ const canalLabel: Record<string, string> = {
   MERCADO_LIBRE: "Mercado Libre",
   INSTAGRAM: "Instagram",
   WEB: "Web",
+  WEB_IA: "Asistente IA",
 };
 
 export default async function PanelHome() {

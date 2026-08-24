@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PublicHeader } from "../../PublicHeader";
 import { PhotoGallery } from "../../PhotoGallery";
+import { ChatWidget } from "../../ChatWidget";
 import { ContactForm } from "./ContactForm";
 import styles from "../../public.module.css";
 
@@ -105,6 +106,8 @@ export default async function VehiculoDetalle({
           <p>Catálogo de {tenant.nombre} — powered by Rodado</p>
         </div>
       </footer>
+
+      <ChatWidget dominio={dominio} nombreAgencia={tenant.nombre} vehiculoId={vehiculo.id} />
     </div>
   );
 }
