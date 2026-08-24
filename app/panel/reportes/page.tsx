@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSucursalActual } from "@/lib/sucursalFiltro";
 import styles from "../panel.module.css";
 import reportStyles from "./reportes.module.css";
 import { ReportesView } from "./ReportesView";
@@ -47,22 +48,28 @@ export default async function ReportesPage({
     from = startOfDay(new Date(now.getTime() - days * 86400000));
   }
 
+  const sucursalActual = await getSucursalActual(tenantId);
+  const sucursalFilter = sucursalActual
+    ? { vehiculo: { sucursalId: sucursalActual.id } }
+    : {};
+
   const vendorFilter = rol === "VENDEDOR" ? { vendedorId: userId } : {};
 
   const [ventasEnRango, leadsEnRango, ventasParaRotacion, usuariosTenant] = await Promise.all([
     prisma.venta.findMany({
-      where: { tenantId, ...vendorFilter, fecha: { gte: from, lte: to } },
+      where: { tenantId, ...vendorFilter, ...sucursalFilter, fecha: { gte: from, lte: to } },
       select: { fecha: true, precioFinal: true },
       orderBy: { fecha: "asc" },
     }),
     prisma.lead.findMany({
-      where: { tenantId, ...vendorFilter, createdAt: { gte: from, lte: to } },
+      where: { tenantId, ...vendorFilter, ...sucursalFilter, createdAt: { gte: from, lte: to } },
       select: { canal: true, etapa: true },
     }),
     // Rotación de stock es una métrica de inventario de toda la agencia,
-    // no de un vendedor puntual — no se filtra por vendedorId.
+    // no de un vendedor puntual — no se filtra por vendedorId, pero sí
+    // por sucursal cuando se está mirando una en particular.
     prisma.venta.findMany({
-      where: { tenantId, fecha: { gte: from, lte: to } },
+      where: { tenantId, ...sucursalFilter, fecha: { gte: from, lte: to } },
       select: {
         fecha: true,
         vehiculo: { select: { marca: true, modelo: true, fechaIngreso: true } },
@@ -133,12 +140,17 @@ export default async function ReportesPage({
     const [leadsGroup, ventasGroup] = await Promise.all([
       prisma.lead.groupBy({
         by: ["vendedorId"],
-        where: { tenantId, createdAt: { gte: from, lte: to }, vendedorId: { not: null } },
+        where: {
+          tenantId,
+          ...sucursalFilter,
+          createdAt: { gte: from, lte: to },
+          vendedorId: { not: null },
+        },
         _count: { _all: true },
       }),
       prisma.venta.groupBy({
         by: ["vendedorId"],
-        where: { tenantId, fecha: { gte: from, lte: to } },
+        where: { tenantId, ...sucursalFilter, fecha: { gte: from, lte: to } },
         _count: { _all: true },
         _sum: { comision: true },
       }),
@@ -166,7 +178,10 @@ export default async function ReportesPage({
       <div className={styles.topbar}>
         <div>
           <h1 className="disp">Reportes</h1>
-          <div className={styles.topbarSub}>Ventas, leads y rotación de stock</div>
+          <div className={styles.topbarSub}>
+            Ventas, leads y rotación de stock
+            {sucursalActual ? ` · ${sucursalActual.nombre}` : ""}
+          </div>
         </div>
       </div>
       <div className={styles.content}>

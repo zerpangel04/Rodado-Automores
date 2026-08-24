@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSucursalActual } from "@/lib/sucursalFiltro";
 import { KanbanView, type LeadDTO } from "./KanbanView";
 import styles from "../panel.module.css";
 
@@ -7,11 +8,14 @@ export default async function LeadsPage() {
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
 
+  const sucursalActual = await getSucursalActual(tenantId);
+
   const [leads, vehiculos, usuarios] = await Promise.all([
     prisma.lead.findMany({
       where: {
         tenantId,
         ...(rol === "VENDEDOR" ? { vendedorId: userId } : {}),
+        ...(sucursalActual ? { vehiculo: { sucursalId: sucursalActual.id } } : {}),
       },
       include: {
         vehiculo: { select: { marca: true, modelo: true } },
@@ -20,7 +24,11 @@ export default async function LeadsPage() {
       orderBy: { createdAt: "desc" },
     }),
     prisma.vehiculo.findMany({
-      where: { tenantId, estado: { not: "VENDIDO" } },
+      where: {
+        tenantId,
+        estado: { not: "VENDIDO" },
+        ...(sucursalActual ? { sucursalId: sucursalActual.id } : {}),
+      },
       select: { id: true, marca: true, modelo: true },
       orderBy: { fechaIngreso: "desc" },
     }),
@@ -50,6 +58,7 @@ export default async function LeadsPage() {
           <h1 className="disp">Leads</h1>
           <div className={styles.topbarSub}>
             {rol === "VENDEDOR" ? "Tus leads asignados" : "Avanzá cada lead por su etapa"}
+            {sucursalActual ? ` · ${sucursalActual.nombre}` : ""}
           </div>
         </div>
       </div>

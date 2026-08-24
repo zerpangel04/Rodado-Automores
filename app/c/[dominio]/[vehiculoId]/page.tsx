@@ -22,10 +22,17 @@ export default async function VehiculoDetalle({
   const tenant = await prisma.tenant.findUnique({ where: { dominio } });
   if (!tenant) notFound();
 
-  const vehiculo = await prisma.vehiculo.findUnique({ where: { id: vehiculoId } });
+  const [vehiculo, sucursalesCount] = await Promise.all([
+    prisma.vehiculo.findUnique({
+      where: { id: vehiculoId },
+      include: { sucursal: { select: { nombre: true } } },
+    }),
+    prisma.sucursal.count({ where: { tenantId: tenant.id } }),
+  ]);
   if (!vehiculo || vehiculo.tenantId !== tenant.id) notFound();
 
   const vendido = vehiculo.estado === "VENDIDO";
+  const mostrarSucursal = sucursalesCount > 1;
 
   return (
     <div className={styles.page}>
@@ -64,6 +71,12 @@ export default async function VehiculoDetalle({
                 <div className={styles.l}>Motor</div>
                 <div className={styles.v}>{vehiculo.motor ?? "—"}</div>
               </div>
+              {mostrarSucursal && (
+                <div className={styles.specItem}>
+                  <div className={styles.l}>Ubicación</div>
+                  <div className={styles.v}>{vehiculo.sucursal.nombre}</div>
+                </div>
+              )}
             </div>
           </div>
 

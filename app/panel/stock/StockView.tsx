@@ -117,16 +117,21 @@ export function StockView({
   initialItems,
   usuarios,
   sucursales,
+  defaultSucursalId,
   userId,
   canRevertirVenta,
 }: {
   initialItems: VehiculoDTO[];
   usuarios: UsuarioOption[];
   sucursales: SucursalOption[];
+  defaultSucursalId: string;
   userId: string;
   canRevertirVenta: boolean;
 }) {
   const [items, setItems] = useState<VehiculoDTO[]>(initialItems);
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   const [filter, setFilter] = useState<"todos" | EstadoVehiculo>("todos");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -245,7 +250,7 @@ export function StockView({
 
   function openCreate() {
     setEditingId(null);
-    setForm({ ...emptyForm, sucursalId: sucursales[0]?.id ?? "" });
+    setForm({ ...emptyForm, sucursalId: defaultSucursalId });
     setError(null);
     setIaResult(null);
     setExistingFotos([]);

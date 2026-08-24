@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSucursalActual } from "@/lib/sucursalFiltro";
 import { StockView, type VehiculoDTO } from "./StockView";
 import styles from "../panel.module.css";
 
@@ -7,9 +8,14 @@ export default async function StockPage() {
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
 
+  const sucursalActual = await getSucursalActual(tenantId);
+
   const [vehiculos, usuarios, sucursales] = await Promise.all([
     prisma.vehiculo.findMany({
-      where: { tenantId },
+      where: {
+        tenantId,
+        ...(sucursalActual ? { sucursalId: sucursalActual.id } : {}),
+      },
       orderBy: { fechaIngreso: "desc" },
     }),
     prisma.usuario.findMany({
@@ -53,7 +59,9 @@ export default async function StockPage() {
       <div className={styles.topbar}>
         <div>
           <h1 className="disp">Stock</h1>
-          <div className={styles.topbarSub}>Tu inventario de vehículos</div>
+          <div className={styles.topbarSub}>
+            Tu inventario de vehículos{sucursalActual ? ` · ${sucursalActual.nombre}` : ""}
+          </div>
         </div>
       </div>
       <div className={styles.content}>
@@ -61,6 +69,7 @@ export default async function StockPage() {
           initialItems={items}
           usuarios={usuarios}
           sucursales={sucursales}
+          defaultSucursalId={sucursalActual?.id ?? sucursales[0]?.id ?? ""}
           userId={userId}
           canRevertirVenta={rol !== "VENDEDOR"}
         />

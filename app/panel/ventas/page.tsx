@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getSucursalActual } from "@/lib/sucursalFiltro";
 import styles from "../panel.module.css";
 import ventasStyles from "./ventas.module.css";
 import { Pill } from "../Pill";
@@ -8,10 +9,13 @@ export default async function VentasPage() {
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
 
+  const sucursalActual = await getSucursalActual(tenantId);
+
   const ventas = await prisma.venta.findMany({
     where: {
       tenantId,
       ...(rol === "VENDEDOR" ? { vendedorId: userId } : {}),
+      ...(sucursalActual ? { vehiculo: { sucursalId: sucursalActual.id } } : {}),
     },
     include: {
       vehiculo: { select: { marca: true, modelo: true } },
@@ -27,6 +31,7 @@ export default async function VentasPage() {
           <h1 className="disp">Ventas</h1>
           <div className={styles.topbarSub}>
             Se completa automáticamente al marcar un vehículo como vendido en Stock
+            {sucursalActual ? ` · ${sucursalActual.nombre}` : ""}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./kanban.module.css";
 import { Pill, type PillColor } from "../Pill";
 
@@ -72,6 +72,9 @@ export function KanbanView({
   userId: string;
 }) {
   const [items, setItems] = useState<LeadDTO[]>(initialItems);
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
