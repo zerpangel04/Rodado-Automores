@@ -23,6 +23,10 @@
   background: var(--input-bg);
 }
 
+.mobileHint {
+  display: none;
+}
+
 .kanban {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -36,9 +40,33 @@
   }
 }
 
+/* Mobile: en vez de apilar las 5 columnas (obligaría a scrollear todos
+   los leads de "Nuevo" antes de ver "Cerrado"), el board se vuelve una
+   tira horizontal con scroll-snap — cada columna ocupa casi todo el
+   ancho y se ve una porción de la siguiente como pista de que hay más. */
 @media (max-width: 700px) {
+  .mobileHint {
+    display: block;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+
   .kanban {
-    grid-template-columns: 1fr;
+    display: flex;
+    grid-template-columns: unset;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 16px;
+    padding-bottom: 6px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .kcol {
+    flex: 0 0 86vw;
+    scroll-snap-align: start;
   }
 }
 
@@ -154,6 +182,13 @@
 
 .modalBg.show {
   display: flex;
+}
+
+@media (max-width: 640px) {
+  .modalBg {
+    align-items: flex-start;
+    padding: 14px;
+  }
 }
 
 .modal {

@@ -18,6 +18,94 @@
   z-index: 1;
 }
 
+/* Mobile: la sidebar se convierte en un drawer que entra desde la
+   izquierda (top bar con hamburguesa la abre) en vez de quedar fija
+   angosta y comerse el ancho de pantalla. */
+.mobileTopbar {
+  display: none;
+}
+
+.mobileOverlay {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .app {
+    display: block;
+  }
+
+  .mobileTopbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface-strong);
+    backdrop-filter: blur(var(--blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--blur)) saturate(140%);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 220;
+  }
+
+  .hamburger {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    font-size: 16px;
+  }
+
+  .mobileTopbarName {
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobileTopbarSub {
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  .mobileOverlay.open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: var(--modal-overlay);
+    z-index: 230;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    max-width: 82vw;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 240;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
+    overflow-y: auto;
+  }
+
+  .sidebar.mobileOpen {
+    transform: translateX(0);
+  }
+
+  .main {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 /* Selector de sucursal (workspace switcher): deja elegir "Todas las
    sucursales" (vista consolidada) o una sucursal puntual para filtrar
    Stock, Leads, Ventas y Reportes. */
@@ -351,6 +439,7 @@
 .content {
   padding: 26px 28px;
   flex: 1;
+  min-width: 0;
 }
 
 .kpiRow {
@@ -363,6 +452,30 @@
 @media (max-width: 900px) {
   .kpiRow {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .kpiRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 16px 14px;
+  }
+
+  .topbar {
+    padding: 12px 16px;
+  }
+
+  .topbar h1 {
+    font-size: 17px;
+  }
+
+  .card {
+    padding: 14px;
   }
 }
 

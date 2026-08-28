@@ -77,6 +77,13 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 20px 22px;
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 14px;
+  }
 }
 
 .card h2 {
@@ -153,8 +160,14 @@
   margin-top: 4px;
 }
 
+.tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .table {
   width: 100%;
+  min-width: 420px;
   border-collapse: collapse;
   margin-top: 18px;
   font-size: 13px;

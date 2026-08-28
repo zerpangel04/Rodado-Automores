@@ -113,34 +113,36 @@ export function EquipoView({
         </button>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((u) => (
-            <tr key={u.id}>
-              <td>{u.nombre}</td>
-              <td>{u.email}</td>
-              <td>
-                <span className={styles.rolBadge}>{rolLabel[u.rol]}</span>
-              </td>
-              <td>
-                {u.id !== userId && (
-                  <button className={styles.mini} onClick={() => handleDelete(u.id)}>
-                    Eliminar
-                  </button>
-                )}
-              </td>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map((u) => (
+              <tr key={u.id}>
+                <td>{u.nombre}</td>
+                <td>{u.email}</td>
+                <td>
+                  <span className={styles.rolBadge}>{rolLabel[u.rol]}</span>
+                </td>
+                <td>
+                  {u.id !== userId && (
+                    <button className={styles.mini} onClick={() => handleDelete(u.id)}>
+                      Eliminar
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <div className={`${styles.modalBg} ${showModal ? styles.show : ""}`}>
         <div className={styles.modal}>

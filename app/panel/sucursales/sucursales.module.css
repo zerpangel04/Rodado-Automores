@@ -25,6 +25,7 @@
 
 .table {
   width: 100%;
+  min-width: 540px;
   border-collapse: collapse;
   background: var(--surface);
   backdrop-filter: blur(var(--blur)) saturate(150%);
@@ -87,6 +88,18 @@
 
 .modalBg.show {
   display: flex;
+}
+
+@media (max-width: 640px) {
+  .modalBg {
+    align-items: flex-start;
+    padding: 14px;
+  }
+}
+
+.tableWrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal {

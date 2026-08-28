@@ -166,6 +166,8 @@ export function KanbanView({
         </button>
       </div>
 
+      <p className={styles.mobileHint}>Deslizá para ver las demás etapas →</p>
+
       <div className={styles.kanban}>
         {stages.map((stage) => {
           const stageItems = items.filter((l) => l.etapa === stage.key);

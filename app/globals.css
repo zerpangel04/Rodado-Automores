@@ -133,6 +133,18 @@ textarea {
   font-family: inherit;
 }
 
+/* iOS Safari hace zoom automático al enfocar un input con font-size
+   menor a 16px. En mobile forzamos 16px en todos los campos para que
+   el teclado no dispare ese zoom (independiente del tamaño que cada
+   .module.css defina para desktop). */
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Chrome pinta los campos autocompletados con su propio fondo (blanco u
    amarillo) ignorando el CSS del sitio. El truco estándar es un
    box-shadow inset gigante — a diferencia del popup nativo de <option>,

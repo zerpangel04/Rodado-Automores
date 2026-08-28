@@ -42,6 +42,7 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [, startTransition] = useTransition();
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +56,11 @@ export function Sidebar({
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
+
+  // Cierra el drawer mobile al navegar a otra sección del panel.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   const selectedSucursal = sucursales.find((s) => s.id === selectedSucursalId) ?? null;
   const subtitle = selectedSucursal
@@ -93,7 +99,29 @@ export function Sidebar({
   };
 
   return (
-    <aside className={styles.sidebar}>
+    <>
+      <div className={styles.mobileTopbar}>
+        <button
+          type="button"
+          className={styles.hamburger}
+          onClick={() => setMobileOpen((o) => !o)}
+          aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileOpen}
+        >
+          {mobileOpen ? "✕" : "☰"}
+        </button>
+        <div>
+          <div className={styles.mobileTopbarName}>{tenantNombre}</div>
+          <div className={styles.mobileTopbarSub}>{subtitle}</div>
+        </div>
+      </div>
+
+      <div
+        className={`${styles.mobileOverlay} ${mobileOpen ? styles.open : ""}`}
+        onClick={() => setMobileOpen(false)}
+      />
+
+      <aside className={`${styles.sidebar} ${mobileOpen ? styles.mobileOpen : ""}`}>
       <div className={styles.workspaceWrap} ref={wrapRef}>
         <button
           type="button"
@@ -177,6 +205,7 @@ export function Sidebar({
           </button>
         </form>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

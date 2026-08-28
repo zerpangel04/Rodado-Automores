@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -13,6 +14,22 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import styles from "./reportes.module.css";
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 480px)");
+    setIsMobile(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isMobile;
+}
+
+function truncate(label: string, max: number) {
+  return label.length > max ? `${label.slice(0, max - 1)}…` : label;
+}
 
 type VentaDia = { fecha: string; unidades: number; monto: number };
 type LeadCanal = { canal: string; total: number; cerrados: number; pct: number };
@@ -54,6 +71,7 @@ export function ReportesView({
   rotacionMax: number | null;
   performanceVendedores: VendedorPerf[] | null;
 }) {
+  const isMobile = useIsMobile();
   const totalUnidades = ventasSerie.reduce((a, v) => a + v.unidades, 0);
   const totalMonto = ventasSerie.reduce((a, v) => a + v.monto, 0);
   const totalLeads = leadsPorCanal.reduce((a, c) => a + c.total, 0);
@@ -226,10 +244,11 @@ export function ReportesView({
                 <YAxis
                   type="category"
                   dataKey="vehiculo"
+                  tickFormatter={(v) => (isMobile ? truncate(String(v), 12) : String(v))}
                   tick={{ fill: "var(--ink-soft)", fontSize: 11.5 }}
                   axisLine={false}
                   tickLine={false}
-                  width={140}
+                  width={isMobile ? 84 : 140}
                 />
                 <Tooltip
                   contentStyle={tooltipStyle}
@@ -264,10 +283,11 @@ export function ReportesView({
                   <YAxis
                     type="category"
                     dataKey="nombre"
+                    tickFormatter={(v) => (isMobile ? truncate(String(v), 10) : String(v))}
                     tick={{ fill: "var(--ink-soft)", fontSize: 11.5 }}
                     axisLine={false}
                     tickLine={false}
-                    width={110}
+                    width={isMobile ? 70 : 110}
                   />
                   <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--sidebar-hover)" }} />
                   <Legend wrapperStyle={{ fontSize: 12.5, color: "var(--ink-soft)" }} />
@@ -276,26 +296,28 @@ export function ReportesView({
                 </BarChart>
               </ResponsiveContainer>
 
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Vendedor</th>
-                    <th className={styles.num}>Leads</th>
-                    <th className={styles.num}>Ventas</th>
-                    <th className={styles.num}>Comisión</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {performanceVendedores.map((v) => (
-                    <tr key={v.nombre}>
-                      <td>{v.nombre}</td>
-                      <td className={`${styles.num} mono`}>{v.leads}</td>
-                      <td className={`${styles.num} mono`}>{v.ventas}</td>
-                      <td className={`${styles.num} mono`}>{fmtUsd(v.comision)}</td>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Vendedor</th>
+                      <th className={styles.num}>Leads</th>
+                      <th className={styles.num}>Ventas</th>
+                      <th className={styles.num}>Comisión</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {performanceVendedores.map((v) => (
+                      <tr key={v.nombre}>
+                        <td>{v.nombre}</td>
+                        <td className={`${styles.num} mono`}>{v.leads}</td>
+                        <td className={`${styles.num} mono`}>{v.ventas}</td>
+                        <td className={`${styles.num} mono`}>{fmtUsd(v.comision)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </>
           )}
         </section>

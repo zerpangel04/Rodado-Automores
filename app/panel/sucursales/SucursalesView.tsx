@@ -119,44 +119,46 @@ export function SucursalesView({ initialItems }: { initialItems: SucursalDTO[] }
         </button>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Dirección</th>
-            <th>Teléfono</th>
-            <th>Vehículos</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((s) => (
-            <tr key={s.id}>
-              <td>{s.nombre}</td>
-              <td>{s.direccion || "—"}</td>
-              <td>{s.telefono || "—"}</td>
-              <td>
-                <span className={styles.countBadge}>{s.vehiculosCount}</span>
-              </td>
-              <td>
-                <div className={styles.rowActions}>
-                  <button className={styles.mini} onClick={() => openEdit(s)}>
-                    Editar
-                  </button>
-                  {items.length > 1 && (
-                    <button
-                      className={styles.miniDanger}
-                      onClick={() => handleDelete(s)}
-                    >
-                      Eliminar
-                    </button>
-                  )}
-                </div>
-              </td>
+      <div className={styles.tableWrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th>Vehículos</th>
+              <th></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {items.map((s) => (
+              <tr key={s.id}>
+                <td>{s.nombre}</td>
+                <td>{s.direccion || "—"}</td>
+                <td>{s.telefono || "—"}</td>
+                <td>
+                  <span className={styles.countBadge}>{s.vehiculosCount}</span>
+                </td>
+                <td>
+                  <div className={styles.rowActions}>
+                    <button className={styles.mini} onClick={() => openEdit(s)}>
+                      Editar
+                    </button>
+                    {items.length > 1 && (
+                      <button
+                        className={styles.miniDanger}
+                        onClick={() => handleDelete(s)}
+                      >
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <div className={`${styles.modalBg} ${showModal ? styles.show : ""}`}>
         <div className={styles.modal}>

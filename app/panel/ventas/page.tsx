@@ -41,36 +41,38 @@ export default async function VentasPage() {
             Todavía no hay ventas registradas. Marcá un vehículo como &quot;Vendido&quot; en Stock.
           </p>
         ) : (
-          <table className={ventasStyles.table}>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Vehículo</th>
-                {rol !== "VENDEDOR" && <th>Vendedor</th>}
-                <th>Precio final</th>
-                <th>Comisión</th>
-                <th>Cobro</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ventas.map((v) => (
-                <tr key={v.id}>
-                  <td>{v.fecha.toLocaleDateString("es-AR")}</td>
-                  <td>
-                    {v.vehiculo.marca} {v.vehiculo.modelo}
-                  </td>
-                  {rol !== "VENDEDOR" && <td>{v.vendedor.nombre}</td>}
-                  <td className={ventasStyles.num}>USD {Number(v.precioFinal).toLocaleString("es-AR")}</td>
-                  <td className={ventasStyles.num}>USD {Number(v.comision).toLocaleString("es-AR")}</td>
-                  <td>
-                    <Pill color={v.estadoCobro === "COBRADO" ? "green" : "amber"}>
-                      {v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente"}
-                    </Pill>
-                  </td>
+          <div className={ventasStyles.tableWrap}>
+            <table className={ventasStyles.table}>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Vehículo</th>
+                  {rol !== "VENDEDOR" && <th>Vendedor</th>}
+                  <th>Precio final</th>
+                  <th>Comisión</th>
+                  <th>Cobro</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {ventas.map((v) => (
+                  <tr key={v.id}>
+                    <td>{v.fecha.toLocaleDateString("es-AR")}</td>
+                    <td>
+                      {v.vehiculo.marca} {v.vehiculo.modelo}
+                    </td>
+                    {rol !== "VENDEDOR" && <td>{v.vendedor.nombre}</td>}
+                    <td className={ventasStyles.num}>USD {Number(v.precioFinal).toLocaleString("es-AR")}</td>
+                    <td className={ventasStyles.num}>USD {Number(v.comision).toLocaleString("es-AR")}</td>
+                    <td>
+                      <Pill color={v.estadoCobro === "COBRADO" ? "green" : "amber"}>
+                        {v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente"}
+                      </Pill>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </>

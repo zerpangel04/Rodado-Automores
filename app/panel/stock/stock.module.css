@@ -314,6 +314,13 @@
   display: flex;
 }
 
+@media (max-width: 640px) {
+  .modalBg {
+    align-items: flex-start;
+    padding: 14px;
+  }
+}
+
 .modal {
   background: var(--surface-strong);
   backdrop-filter: blur(var(--blur)) saturate(150%);
