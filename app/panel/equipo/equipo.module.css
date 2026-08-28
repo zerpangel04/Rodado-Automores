@@ -82,7 +82,7 @@
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 300;
   padding: 20px;
   overflow-y: auto;
 }
@@ -199,4 +199,41 @@
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Ajuste fino de mobile: el modal se sentía un poco grande — se achica
+   el padding y la tipografía ~10-15%, sin tocar el font-size de los
+   inputs (ya está fijado a 16px en globals.css para evitar el
+   auto-zoom de iOS al enfocar un campo). Va al final del archivo a
+   propósito: los selectores de acá arriba tienen la misma
+   especificidad, así que en el cascade gana el que aparece último en
+   el archivo, sin importar si el otro está en un @media. */
+@media (max-width: 640px) {
+  .modal {
+    padding: 22px;
+  }
+
+  .modal h3 {
+    font-size: 16.5px;
+    margin-bottom: 13px;
+  }
+
+  .field {
+    margin-bottom: 12px;
+  }
+
+  .field label {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  .field input,
+  .field select {
+    padding: 9px 11px;
+  }
+
+  .modalActions {
+    gap: 9px;
+    margin-top: 16px;
+  }
 }
