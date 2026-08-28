@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "./kanban.module.css";
 import { Pill, type PillColor } from "../Pill";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
@@ -82,6 +83,8 @@ export function KanbanView({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
+
+  useBodyScrollLock(showModal);
 
   function showToast() {
     setToast(true);

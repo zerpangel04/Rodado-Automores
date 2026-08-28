@@ -178,6 +178,7 @@
   z-index: 300;
   padding: 20px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modalBg.show {
@@ -202,6 +203,8 @@
   max-width: 420px;
   max-height: 90vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal h3 {

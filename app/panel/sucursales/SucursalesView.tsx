@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./sucursales.module.css";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 export type SucursalDTO = {
   id: string;
@@ -31,6 +32,8 @@ export function SucursalesView({ initialItems }: { initialItems: SucursalDTO[] }
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
+
+  useBodyScrollLock(showModal);
 
   function showToast() {
     setToast(true);

@@ -8,6 +8,7 @@ import { estimarPrecio } from "@/lib/tasacion";
 import { Pill, type PillColor } from "../Pill";
 import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/validation";
 import { getCroppedImageFile } from "@/lib/cropImage";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 const FOTO_ASPECT = 4 / 3;
 
@@ -169,6 +170,8 @@ export function StockView({
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [cropSaving, setCropSaving] = useState(false);
+
+  useBodyScrollLock(showModal || !!cropTarget || !!saleTarget);
 
   useEffect(() => {
     if (cropTarget || cropQueue.length === 0) return;

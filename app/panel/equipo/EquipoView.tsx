@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./equipo.module.css";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 
 export type Rol = "DUENIO" | "ADMIN" | "VENDEDOR";
 
@@ -45,6 +46,8 @@ export function EquipoView({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
+
+  useBodyScrollLock(showModal);
 
   function showToast() {
     setToast(true);
