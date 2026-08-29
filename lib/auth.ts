@@ -5,8 +5,13 @@ import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
 import { checkRateLimit, recordRateLimitHit, clearRateLimit } from "@/lib/rateLimit";
 
-const LOGIN_MAX_INTENTOS = 5;
-const LOGIN_VENTANA_MS = 15 * 60 * 1000; // 15 minutos
+// Exportadas para que app/login/page.tsx pueda leer el mismo estado de
+// rate limit después de un intento fallido y mostrar el aviso progresivo
+// ("te quedan N intentos" / "esperá M minutos") con los mismos números
+// que usó authorize() acá abajo.
+export const LOGIN_MAX_INTENTOS = 5;
+export const LOGIN_VENTANA_MS = 15 * 60 * 1000; // 15 minutos
+export const loginRateLimitKey = (email: string) => `login:${email.toLowerCase().trim()}`;
 
 // Hash "de relleno" fijo para comparar contra emails que no existen — sin
 // esto, un email inexistente responde instantáneo (no hay hash contra el
@@ -32,16 +37,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const emailNormalizado = email.toLowerCase().trim();
-        const rateLimitKey = `login:${emailNormalizado}`;
+        const rateLimitKey = loginRateLimitKey(emailNormalizado);
 
         const { allowed } = await checkRateLimit(rateLimitKey, {
           max: LOGIN_MAX_INTENTOS,
           windowMs: LOGIN_VENTANA_MS,
         });
         if (!allowed) {
-          // Mismo resultado que credenciales inválidas a propósito: no le
-          // damos a un atacante una señal distinta de "estás bloqueado"
-          // vs. "la contraseña está mal".
+          // authorize() en sí no distingue "bloqueado" de "credenciales
+          // inválidas" — devuelve null en los dos casos, así que nunca
+          // corre bcrypt de más ni cambia de forma el flujo interno de
+          // NextAuth. El aviso de "te quedan N intentos" / "esperá M
+          // minutos" lo arma app/login/page.tsx aparte, leyendo el estado
+          // del rate limit después del intento (ver loginAction).
           return null;
         }
 
