@@ -73,6 +73,12 @@
   margin-bottom: 16px;
 }
 
+.countdown {
+  font-family: var(--font-mono), monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .successBox {
   background: color-mix(in srgb, var(--success) 16%, transparent);
   color: var(--success);
@@ -113,6 +119,11 @@
   border-color: var(--violet);
 }
 
+.field input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .fieldRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -128,6 +139,13 @@
   font-weight: 600;
   margin-top: 6px;
   box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .foot {

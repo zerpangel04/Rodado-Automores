@@ -3,6 +3,7 @@ import Image from "next/image";
 import { AuthError } from "next-auth";
 import { signIn, LOGIN_MAX_INTENTOS, LOGIN_VENTANA_MS, loginRateLimitKey } from "@/lib/auth";
 import { getRateLimitStatus } from "@/lib/rateLimit";
+import { LoginForm } from "./LoginForm";
 import styles from "../auth.module.css";
 
 // A partir de qué intento fallido mostramos el aviso de "te quedan N" en
@@ -10,11 +11,6 @@ import styles from "../auth.module.css";
 // (o sea, ya van 3 fallidos) da margen para reaccionar sin alarmar en el
 // primer error de tipeo.
 const AVISO_DESDE_INTENTOS_RESTANTES = 2;
-
-function formatMinutos(segundos: number) {
-  const minutos = Math.max(1, Math.ceil(segundos / 60));
-  return `${minutos} minuto${minutos === 1 ? "" : "s"}`;
-}
 
 export default async function LoginPage({
   searchParams,
@@ -68,44 +64,19 @@ export default async function LoginPage({
         <h1 className={`disp ${styles.title}`}>Iniciar sesión</h1>
         <p className={styles.subtitle}>Entrá al panel de tu agencia</p>
 
-        {params.error === "bloqueado" && (
-          <div className={styles.errorBox}>
-            Demasiados intentos. Probá de nuevo en{" "}
-            {formatMinutos(Number(params.espera) || LOGIN_VENTANA_MS / 1000)}.
-          </div>
-        )}
-        {params.error === "CredentialsSignin" && params.intentos && (
-          <div className={styles.errorBox}>
-            Email o contraseña incorrectos. Te queda{Number(params.intentos) === 1 ? "" : "n"}{" "}
-            {params.intentos} intento{Number(params.intentos) === 1 ? "" : "s"} antes de
-            bloquear temporalmente el acceso.
-          </div>
-        )}
-        {params.error === "CredentialsSignin" && !params.intentos && (
-          <div className={styles.errorBox}>
-            Email o contraseña incorrectos.
-          </div>
-        )}
         {params.reset === "1" && (
           <div className={styles.successBox}>
             Contraseña actualizada. Ya podés iniciar sesión.
           </div>
         )}
 
-        <form action={loginAction} className={styles.form}>
-          <input type="hidden" name="callbackUrl" value={params.callbackUrl ?? ""} />
-          <div className={styles.field}>
-            <label htmlFor="email">Email</label>
-            <input id="email" name="email" type="email" required placeholder="vos@agencia.com" />
-          </div>
-          <div className={styles.field}>
-            <label htmlFor="password">Contraseña</label>
-            <input id="password" name="password" type="password" required placeholder="••••••••" />
-          </div>
-          <button type="submit" className={styles.submit}>
-            Entrar
-          </button>
-        </form>
+        <LoginForm
+          loginAction={loginAction}
+          callbackUrl={params.callbackUrl ?? ""}
+          errorTipo={params.error}
+          intentos={params.intentos}
+          esperaSegundosInicial={params.espera ? Number(params.espera) : 0}
+        />
 
         <p className={styles.foot}>
           <a href="/forgot-password">¿Olvidaste tu contraseña?</a>
