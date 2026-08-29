@@ -235,15 +235,17 @@ model ActividadLog {
   tipo        TipoActividad
   descripcion String
   leadId      String?
-  lead        Lead?         @relation(fields: [leadId], references: [id])
+  lead        Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
   vehiculoId  String?
-  vehiculo    Vehiculo?     @relation(fields: [vehiculoId], references: [id])
+  vehiculo    Vehiculo?     @relation(fields: [vehiculoId], references: [id], onDelete: SetNull)
   ventaId     String?
-  venta       Venta?        @relation(fields: [ventaId], references: [id])
+  venta       Venta?        @relation(fields: [ventaId], references: [id], onDelete: SetNull)
   vendedorId  String?
-  vendedor    Usuario?      @relation("VendedorActividad", fields: [vendedorId], references: [id])
+  vendedor    Usuario?      @relation("VendedorActividad", fields: [vendedorId], references: [id], onDelete: SetNull)
+  leido       Boolean       @default(false)
   createdAt   DateTime      @default(now())
 
   @@index([tenantId, createdAt])
   @@index([tenantId, vendedorId, createdAt])
+  @@index([tenantId, leido])
 }

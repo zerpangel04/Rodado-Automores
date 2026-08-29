@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import styles from "./panel.module.css";
 import { FxBox } from "./FxBox";
 import { ThemeToggle } from "../ThemeToggle";
+import { NotificationBell } from "./NotificationBell";
 
 const initials = (name: string) =>
   name
@@ -113,6 +114,9 @@ export function Sidebar({
         <div>
           <div className={styles.mobileTopbarName}>{tenantNombre}</div>
           <div className={styles.mobileTopbarSub}>{subtitle}</div>
+        </div>
+        <div className={styles.mobileBell}>
+          <NotificationBell />
         </div>
       </div>
 

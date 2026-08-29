@@ -1,49 +1,66 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { diasHastaVtv } from "@/lib/docs";
+import { canalLabelEs, etapaLabelEs } from "@/lib/labels";
 import styles from "./panel.module.css";
 import { KpiRing } from "./KpiRing";
+import { Pill, type PillColor } from "./Pill";
+import { actividadIcon, actividadColor, formatRelativo } from "./actividadDisplay";
 
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
-const canalLabel: Record<string, string> = {
-  WHATSAPP: "WhatsApp",
-  MERCADO_LIBRE: "Mercado Libre",
-  INSTAGRAM: "Instagram",
-  WEB: "Web",
-  WEB_IA: "Asistente IA",
+const canalColor: Record<string, PillColor> = {
+  WHATSAPP: "green",
+  MERCADO_LIBRE: "amber",
+  INSTAGRAM: "purple",
+  WEB: "blue",
+  WEB_IA: "gray",
 };
 
-const actividadIcon: Record<string, string> = {
-  NUEVO_LEAD: "+",
-  CAMBIO_ETAPA_LEAD: "→",
-  VENTA_REGISTRADA: "$",
-  VEHICULO_VENDIDO: "V",
-  VEHICULO_RESERVADO: "R",
+const etapaColor: Record<string, PillColor> = {
+  NUEVO: "gray",
+  CONTACTADO: "blue",
+  TEST_DRIVE: "purple",
+  NEGOCIACION: "amber",
+  CERRADO: "green",
 };
 
-const actividadColor: Record<string, string> = {
-  NUEVO_LEAD: "var(--cyan)",
-  CAMBIO_ETAPA_LEAD: "var(--violet)",
-  VENTA_REGISTRADA: "var(--success)",
-  VEHICULO_VENDIDO: "var(--ink-soft)",
-  VEHICULO_RESERVADO: "var(--warn)",
-};
+const BUENOS_AIRES_TZ = "America/Argentina/Buenos_Aires";
 
-function formatRelativo(date: Date) {
-  const diffMs = Date.now() - date.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "hace un momento";
-  if (diffMin < 60) return `hace ${diffMin} min`;
-  const diffHoras = Math.floor(diffMin / 60);
-  if (diffHoras < 24) return `hace ${diffHoras} hora${diffHoras === 1 ? "" : "s"}`;
-  const diffDias = Math.floor(diffHoras / 24);
-  return `hace ${diffDias} día${diffDias === 1 ? "" : "s"}`;
+function saludoDelDia() {
+  const hora = Number(
+    new Intl.DateTimeFormat("es-AR", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: BUENOS_AIRES_TZ,
+    }).format(new Date())
+  );
+  if (hora < 12) return "Buenos días";
+  if (hora < 19) return "Buenas tardes";
+  return "Buenas noches";
 }
+
+function fechaDeHoy() {
+  const fecha = new Intl.DateTimeFormat("es-AR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: BUENOS_AIRES_TZ,
+  }).format(new Date());
+  return fecha.charAt(0).toUpperCase() + fecha.slice(1);
+}
+
+type Pendiente = {
+  id: string;
+  label: string;
+  meta: string;
+  urgente: boolean;
+};
 
 export default async function PanelHome() {
   const session = await auth();
-  const { tenantId, id: userId, rol } = session!.user;
+  const { tenantId, id: userId, rol, name } = session!.user;
+  const canAsignar = rol !== "VENDEDOR";
   const leadFilter =
     rol === "VENDEDOR" ? { tenantId, vendedorId: userId } : { tenantId };
   const ventaFilter =
@@ -58,9 +75,11 @@ export default async function PanelHome() {
     leadsNegociacion,
     leadsTotal,
     ventasCount,
-    ultimosLeads,
+    leadsRecientes,
     vehiculosConVtv,
     actividadReciente,
+    leadsNuevos,
+    leadsSinAsignar,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -76,7 +95,7 @@ export default async function PanelHome() {
       where: leadFilter,
       include: { vehiculo: { select: { marca: true, modelo: true } } },
       orderBy: { createdAt: "desc" },
-      take: 5,
+      take: 8,
     }),
     prisma.vehiculo.findMany({
       where: { tenantId, estado: { not: "VENDIDO" }, vtvVencimiento: { not: null } },
@@ -87,6 +106,20 @@ export default async function PanelHome() {
       orderBy: { createdAt: "desc" },
       take: 12,
     }),
+    prisma.lead.findMany({
+      where: { ...leadFilter, etapa: "NUEVO" },
+      select: { id: true, nombreCliente: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+      take: 5,
+    }),
+    canAsignar
+      ? prisma.lead.findMany({
+          where: { tenantId, vendedorId: null, etapa: { not: "CERRADO" } },
+          select: { id: true, nombreCliente: true },
+          orderBy: { createdAt: "asc" },
+          take: 5,
+        })
+      : Promise.resolve([]),
   ]);
 
   const alertasVtv = vehiculosConVtv
@@ -99,12 +132,43 @@ export default async function PanelHome() {
   const pctConversion = pct(ventasCount, leadsTotal);
   const pctDocsPorVencer = pct(alertasVtv.length, stockActivo);
 
+  const pendientes: Pendiente[] = [
+    ...alertasVtv.map((v) => {
+      const vencida = (v.dias as number) < 0;
+      return {
+        id: `vtv-${v.id}`,
+        label: `Renovar VTV — ${v.marca} ${v.modelo}`,
+        meta: vencida
+          ? `Vencida hace ${Math.abs(v.dias as number)} día${Math.abs(v.dias as number) === 1 ? "" : "s"}`
+          : `Vence en ${v.dias} día${v.dias === 1 ? "" : "s"}`,
+        urgente: vencida,
+      };
+    }),
+    ...leadsNuevos.map((l) => ({
+      id: `lead-nuevo-${l.id}`,
+      label: `Contactar a ${l.nombreCliente}`,
+      meta: `Lead sin contactar · ${formatRelativo(l.createdAt)}`,
+      urgente: false,
+    })),
+    ...leadsSinAsignar.map((l) => ({
+      id: `sin-asignar-${l.id}`,
+      label: `Asignar vendedor a ${l.nombreCliente}`,
+      meta: "Sin vendedor asignado",
+      urgente: false,
+    })),
+  ];
+
+  const primerNombre = (name ?? "").trim().split(" ")[0] || "";
+
   return (
     <>
       <div className={styles.topbar}>
         <div>
-          <h1 className="disp">Panel general</h1>
-          <div className={styles.topbarSub}>Vista general de tu negocio</div>
+          <h1 className="disp">
+            {saludoDelDia()}
+            {primerNombre ? `, ${primerNombre}` : ""}
+          </h1>
+          <div className={styles.topbarSub}>{fechaDeHoy()}</div>
         </div>
       </div>
 
@@ -137,7 +201,77 @@ export default async function PanelHome() {
         </div>
 
         <div className={styles.card}>
-          <h3 className="disp">Actividad reciente</h3>
+          <div className={styles.cardHead}>
+            <h3 className="disp">Pendientes de hoy</h3>
+            <span className={styles.cardHeadCount}>{pendientes.length}</span>
+          </div>
+          {pendientes.length === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
+              Sin pendientes — todo al día.
+            </p>
+          ) : (
+            pendientes.slice(0, 8).map((p) => (
+              <div key={p.id} className={styles.taskRow}>
+                <span className={`${styles.taskCheck} ${p.urgente ? styles.urgent : ""}`} />
+                <div className={styles.taskBody}>
+                  <div className={styles.taskLabel}>{p.label}</div>
+                  <div className={`${styles.taskMeta} ${p.urgente ? styles.urgent : ""}`}>
+                    {p.meta}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className={styles.card} style={{ marginTop: 20 }}>
+          <div className={styles.cardHead}>
+            <h3 className="disp">Leads recientes</h3>
+          </div>
+          {leadsRecientes.length === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>Sin leads todavía.</p>
+          ) : (
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Contacto</th>
+                    <th>Vehículo</th>
+                    <th>Canal</th>
+                    <th>Etapa</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leadsRecientes.map((l) => (
+                    <tr key={l.id}>
+                      <td>{l.nombreCliente}</td>
+                      <td className={styles.tableSub}>{l.contacto || "—"}</td>
+                      <td className={styles.tableSub}>
+                        {l.vehiculo ? `${l.vehiculo.marca} ${l.vehiculo.modelo}` : "Sin vehículo"}
+                      </td>
+                      <td>
+                        <Pill color={canalColor[l.canal] ?? "gray"}>
+                          {canalLabelEs[l.canal] ?? l.canal}
+                        </Pill>
+                      </td>
+                      <td>
+                        <Pill color={etapaColor[l.etapa] ?? "gray"}>
+                          {etapaLabelEs[l.etapa] ?? l.etapa}
+                        </Pill>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.card} style={{ marginTop: 20 }}>
+          <div className={styles.cardHead}>
+            <h3 className="disp">Actividad reciente</h3>
+          </div>
           {actividadReciente.length === 0 ? (
             <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
               Sin actividad todavía.
@@ -157,77 +291,6 @@ export default async function PanelHome() {
             ))
           )}
         </div>
-
-        <div className={styles.card} style={{ marginTop: 20 }}>
-          <h3 className="disp">Últimos leads</h3>
-          {ultimosLeads.length === 0 ? (
-            <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
-              Sin leads todavía.
-            </p>
-          ) : (
-            ultimosLeads.map((l) => (
-              <div
-                key={l.id}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "10px 0",
-                  borderBottom: "1px solid var(--line)",
-                  fontSize: 13,
-                }}
-              >
-                <div>
-                  <b>{l.nombreCliente}</b>{" "}
-                  <span style={{ color: "var(--ink-soft)", fontSize: 12 }}>
-                    · {l.vehiculo ? `${l.vehiculo.marca} ${l.vehiculo.modelo}` : "Sin vehículo"}
-                  </span>
-                </div>
-                <span style={{ fontSize: 11, color: "var(--ink-soft)" }}>
-                  {canalLabel[l.canal] ?? l.canal}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-
-        {alertasVtv.length > 0 && (
-          <div className={styles.card} style={{ marginTop: 20 }}>
-            <h3 className="disp">Documentación por vencer</h3>
-            {alertasVtv.map((v) => {
-              const vencida = (v.dias as number) < 0;
-              return (
-                <div
-                  key={v.id}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "10px 0",
-                    borderBottom: "1px solid var(--line)",
-                    fontSize: 13,
-                  }}
-                >
-                  <div>
-                    <b>{v.marca} {v.modelo}</b>{" "}
-                    <span style={{ color: "var(--ink-soft)", fontSize: 12 }}>· VTV</span>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: vencida ? "var(--danger)" : "var(--warn)",
-                    }}
-                  >
-                    {vencida
-                      ? `Vencida hace ${Math.abs(v.dias as number)} día${Math.abs(v.dias as number) === 1 ? "" : "s"}`
-                      : `Vence en ${v.dias} día${v.dias === 1 ? "" : "s"}`}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </>
   );

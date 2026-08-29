@@ -5,6 +5,7 @@ import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SUCURSAL_COOKIE, getSucursalActual } from "@/lib/sucursalFiltro";
 import { Sidebar } from "./Sidebar";
+import { NotificationBell } from "./NotificationBell";
 import styles from "./panel.module.css";
 
 export default async function PanelLayout({
@@ -77,6 +78,9 @@ export default async function PanelLayout({
         onLogout={logoutAction}
         onSelectSucursal={setSucursalAction}
       />
+      <div className={styles.desktopBell}>
+        <NotificationBell />
+      </div>
       <div className={styles.main}>{children}</div>
     </div>
   );
