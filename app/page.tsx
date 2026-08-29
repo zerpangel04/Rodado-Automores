@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import styles from "./landing.module.css";
 import { ThemeToggle } from "./ThemeToggle";
 import { Reveal } from "./Reveal";
+import { LandingMobileMenu } from "./LandingMobileMenu";
 
 export default async function Home() {
   const session = await auth();
@@ -33,6 +34,7 @@ export default async function Home() {
             <a className={styles.btnGlow} href="/signup">
               Pedí tu demo →
             </a>
+            <LandingMobileMenu />
           </div>
         </div>
       </nav>

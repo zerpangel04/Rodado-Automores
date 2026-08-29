@@ -104,15 +104,30 @@
   box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
 }
 
-@media (max-width: 640px) {
+/* Mismo corte que .navLinks: por debajo de esto, "Iniciar sesión" pasa
+   a vivir dentro de la hamburguesa (LandingMobileMenu) en vez de la
+   barra — ahí ya no hay lugar para el link suelto sin volver a
+   apretar el botón "Pedí tu demo". */
+@media (max-width: 800px) {
   .loginLink {
+    display: none;
+  }
+
+  /* El toggle de tema también se muda a la hamburguesa en mobile —
+     entre el logo y "Pedí tu demo" ya no queda lugar para nada más.
+     Combinador directo (>) a propósito: el toggle que vive DENTRO del
+     panel de LandingMobileMenu es descendiente de .navRight también,
+     y ese no se tiene que ocultar. */
+  .navRight > :global(.theme-toggle) {
     display: none;
   }
 
   .navRight {
     gap: 10px;
   }
+}
 
+@media (max-width: 640px) {
   .btnGlow {
     padding: 8px 14px;
     font-size: 12px;
