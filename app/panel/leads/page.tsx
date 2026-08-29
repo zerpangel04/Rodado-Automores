@@ -18,7 +18,9 @@ export default async function LeadsPage() {
         ...(sucursalActual ? { vehiculo: { sucursalId: sucursalActual.id } } : {}),
       },
       include: {
-        vehiculo: { select: { marca: true, modelo: true, estado: true } },
+        vehiculo: {
+          select: { marca: true, modelo: true, estado: true, categoria: true, precioUsd: true },
+        },
         vendedor: { select: { id: true, nombre: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -29,7 +31,7 @@ export default async function LeadsPage() {
         estado: { not: "VENDIDO" },
         ...(sucursalActual ? { sucursalId: sucursalActual.id } : {}),
       },
-      select: { id: true, marca: true, modelo: true },
+      select: { id: true, marca: true, modelo: true, categoria: true, precioUsd: true, estado: true },
       orderBy: { fechaIngreso: "desc" },
     }),
     rol === "VENDEDOR"
@@ -48,9 +50,26 @@ export default async function LeadsPage() {
     mensaje: l.mensaje,
     canal: l.canal,
     etapa: l.etapa,
-    vehiculo: l.vehiculo,
+    vehiculo: l.vehiculo
+      ? {
+          marca: l.vehiculo.marca,
+          modelo: l.vehiculo.modelo,
+          estado: l.vehiculo.estado,
+          categoria: l.vehiculo.categoria,
+          precioUsd: Number(l.vehiculo.precioUsd),
+        }
+      : null,
     vendedor: l.vendedor,
     createdAt: l.createdAt.toISOString(),
+  }));
+
+  const vehiculoOptions = vehiculos.map((v) => ({
+    id: v.id,
+    marca: v.marca,
+    modelo: v.modelo,
+    categoria: v.categoria,
+    precioUsd: Number(v.precioUsd),
+    estado: v.estado,
   }));
 
   return (
@@ -67,7 +86,7 @@ export default async function LeadsPage() {
       <div className={styles.content}>
         <KanbanView
           initialItems={items}
-          vehiculos={vehiculos}
+          vehiculos={vehiculoOptions}
           usuarios={usuarios}
           canAsignar={rol !== "VENDEDOR"}
           userId={userId}

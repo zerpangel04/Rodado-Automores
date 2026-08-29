@@ -8,6 +8,8 @@ import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
 
+export type EstadoVehiculo = "DISPONIBLE" | "RESERVADO" | "VENDIDO";
+
 export type LeadDTO = {
   id: string;
   nombreCliente: string;
@@ -15,12 +17,25 @@ export type LeadDTO = {
   mensaje?: string | null;
   canal: Canal;
   etapa: Etapa;
-  vehiculo: { marca: string; modelo: string; estado?: "DISPONIBLE" | "RESERVADO" | "VENDIDO" } | null;
+  vehiculo: {
+    marca: string;
+    modelo: string;
+    estado?: EstadoVehiculo;
+    categoria?: string | null;
+    precioUsd?: number;
+  } | null;
   vendedor: { id: string; nombre: string } | null;
   createdAt?: string;
 };
 
-type VehiculoOption = { id: string; marca: string; modelo: string };
+type VehiculoOption = {
+  id: string;
+  marca: string;
+  modelo: string;
+  categoria: string | null;
+  precioUsd: number;
+  estado: EstadoVehiculo;
+};
 type UsuarioOption = { id: string; nombre: string };
 
 const stages: { key: Etapa; label: string }[] = [
@@ -99,8 +114,64 @@ export function KanbanView({
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadDTO | null>(null);
+  const [showReassignInModal, setShowReassignInModal] = useState(false);
 
   useBodyScrollLock(showModal || !!selectedLead);
+
+  function openLeadDetail(lead: LeadDTO) {
+    setSelectedLead(lead);
+    setShowReassignInModal(false);
+  }
+
+  function closeLeadDetail() {
+    setSelectedLead(null);
+    setShowReassignInModal(false);
+  }
+
+  // Mismo criterio que en Stock: primero vehículos disponibles de la misma
+  // categoría, después por precio más cercano al del auto vendido.
+  function suggestedVehiculosFor(
+    target: { categoria?: string | null; precioUsd?: number } | null | undefined
+  ) {
+    const disponibles = vehiculos.filter((v) => v.estado === "DISPONIBLE");
+    if (!target) return disponibles;
+    return disponibles.slice().sort((a, b) => {
+      const aSame = a.categoria === target.categoria ? 0 : 1;
+      const bSame = b.categoria === target.categoria ? 0 : 1;
+      if (aSame !== bSame) return aSame - bSame;
+      return Math.abs(a.precioUsd - (target.precioUsd ?? 0)) - Math.abs(b.precioUsd - (target.precioUsd ?? 0));
+    });
+  }
+
+  async function handleReassignSelected(newVehiculoId: string) {
+    if (!selectedLead || !newVehiculoId) return;
+    const target = vehiculos.find((v) => v.id === newVehiculoId);
+    if (!target) return;
+
+    const res = await fetch(`/api/leads/${selectedLead.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vehiculoId: newVehiculoId }),
+    });
+    if (!res.ok) {
+      setShowReassignInModal(false);
+      return;
+    }
+
+    const nuevoVehiculo = {
+      marca: target.marca,
+      modelo: target.modelo,
+      estado: target.estado,
+      categoria: target.categoria,
+      precioUsd: target.precioUsd,
+    };
+    setItems((prev) =>
+      prev.map((l) => (l.id === selectedLead.id ? { ...l, vehiculo: nuevoVehiculo } : l))
+    );
+    setSelectedLead((prev) => (prev ? { ...prev, vehiculo: nuevoVehiculo } : prev));
+    setShowReassignInModal(false);
+    showToast();
+  }
 
   function showToast() {
     setToast(true);
@@ -208,11 +279,11 @@ export function KanbanView({
                     key={lead.id}
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSelectedLead(lead)}
+                    onClick={() => openLeadDetail(lead)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setSelectedLead(lead);
+                        openLeadDetail(lead);
                       }
                     }}
                   >
@@ -343,7 +414,7 @@ export function KanbanView({
         </div>
       </div>
 
-      <div className={`${styles.modalBg} ${selectedLead ? styles.show : ""}`} onClick={() => setSelectedLead(null)}>
+      <div className={`${styles.modalBg} ${selectedLead ? styles.show : ""}`} onClick={closeLeadDetail}>
         {selectedLead && (
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <h3 className="disp">{selectedLead.nombreCliente}</h3>
@@ -360,6 +431,51 @@ export function KanbanView({
                   : "Sin vehículo asignado"}
               </span>
             </div>
+
+            {selectedLead.vehiculo?.estado === "VENDIDO" && selectedLead.etapa !== "CERRADO" && (
+              <div className={styles.soldAlert}>
+                <span>
+                  ⚠ El {selectedLead.vehiculo.marca} {selectedLead.vehiculo.modelo} que le
+                  interesaba a este lead ya fue vendido.
+                </span>
+                {showReassignInModal ? (
+                  <div className={styles.reassignRow}>
+                    <select
+                      className={styles.reassignSelect}
+                      autoFocus
+                      defaultValue=""
+                      onChange={(e) => handleReassignSelected(e.target.value)}
+                    >
+                      <option value="" disabled>
+                        Elegí un vehículo…
+                      </option>
+                      {suggestedVehiculosFor(selectedLead.vehiculo).map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.marca} {v.modelo} — USD {v.precioUsd.toLocaleString("es-AR")}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className={styles.reassignCancel}
+                      onClick={() => setShowReassignInModal(false)}
+                      aria-label="Cancelar reasignación"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.reassignBtn}
+                    onClick={() => setShowReassignInModal(true)}
+                  >
+                    Reasignar a otro vehículo
+                  </button>
+                )}
+              </div>
+            )}
+
             <div className={styles.detailRow}>
               <span className={styles.detailLabel}>Canal de origen</span>
               <span className={styles.detailValue}>
@@ -397,7 +513,7 @@ export function KanbanView({
             </div>
 
             <div className={styles.modalActions}>
-              <button className={styles.btnGhost} onClick={() => setSelectedLead(null)}>
+              <button className={styles.btnGhost} onClick={closeLeadDetail}>
                 Cerrar
               </button>
             </div>
