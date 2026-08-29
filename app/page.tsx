@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { auth } from "@/lib/auth";
 import styles from "./landing.module.css";
 import { ThemeToggle } from "./ThemeToggle";
@@ -12,7 +13,9 @@ export default async function Home() {
       <nav className={styles.nav}>
         <div className={styles.navInner}>
           <div className={styles.logo}>
-            <div className={styles.logoMark} />
+            <div className={styles.logoMark}>
+              <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+            </div>
             <div className={`${styles.logoText} disp`}>Rodado</div>
           </div>
           <div className={styles.navLinks}>
@@ -138,7 +141,9 @@ export default async function Home() {
       <footer className={styles.footer}>
         <div className={`${styles.wrap} ${styles.footerInner}`}>
           <div className={styles.logo}>
-            <div className={styles.logoMark} />
+            <div className={styles.logoMark}>
+              <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+            </div>
             <div className="disp" style={{ fontSize: 16, fontWeight: 700 }}>
               Rodado
             </div>

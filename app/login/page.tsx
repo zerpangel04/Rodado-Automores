@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { AuthError } from "next-auth";
 import { signIn } from "@/lib/auth";
 import styles from "../auth.module.css";
@@ -30,7 +31,9 @@ export default async function LoginPage({
     <div className={styles.authScreen}>
       <div className={styles.authCard}>
         <div className={styles.brand}>
-          <div className={styles.logoMark} />
+          <div className={styles.logoMark}>
+            <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+          </div>
           <span className="disp">Rodado</span>
         </div>
         <h1 className={`disp ${styles.title}`}>Iniciar sesión</h1>

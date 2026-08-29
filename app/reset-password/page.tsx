@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { resetPasswordInputSchema } from "@/lib/validation";
 import styles from "../auth.module.css";
@@ -65,7 +66,9 @@ export default async function ResetPasswordPage({
     <div className={styles.authScreen}>
       <div className={styles.authCard}>
         <div className={styles.brand}>
-          <div className={styles.logoMark} />
+          <div className={styles.logoMark}>
+            <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+          </div>
           <span className="disp">Rodado</span>
         </div>
         <h1 className={`disp ${styles.title}`}>Elegir nueva contraseña</h1>

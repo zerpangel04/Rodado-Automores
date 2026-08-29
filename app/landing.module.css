@@ -35,8 +35,19 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: linear-gradient(135deg, #6d28d9, #c026a3);
-  box-shadow: 0 0 16px rgba(192, 38, 163, 0.5);
+  background: #0a0b16;
+  box-shadow: 0 0 16px rgba(192, 38, 163, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  overflow: hidden;
+}
+
+.logoMark img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
 }
 
 .logoText {
