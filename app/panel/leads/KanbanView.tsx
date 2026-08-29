@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./kanban.module.css";
 import { Pill, type PillColor } from "../Pill";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
@@ -115,6 +115,28 @@ export function KanbanView({
   const [toast, setToast] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadDTO | null>(null);
   const [showReassignInModal, setShowReassignInModal] = useState(false);
+
+  const [filterVendedorId, setFilterVendedorId] = useState("");
+  const [filterCanal, setFilterCanal] = useState<Canal | "">("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return items.filter((l) => {
+      if (filterVendedorId && l.vendedor?.id !== filterVendedorId) return false;
+      if (filterCanal && l.canal !== filterCanal) return false;
+      if (q && !l.nombreCliente.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [items, filterVendedorId, filterCanal, searchQuery]);
+
+  const filtrosActivos = !!(filterVendedorId || filterCanal || searchQuery);
+
+  function clearFiltros() {
+    setFilterVendedorId("");
+    setFilterCanal("");
+    setSearchQuery("");
+  }
 
   useBodyScrollLock(showModal || !!selectedLead);
 
@@ -256,11 +278,52 @@ export function KanbanView({
         </button>
       </div>
 
+      <div className={styles.filterBar}>
+        <input
+          className={styles.searchInput}
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Buscar por nombre…"
+        />
+        <select
+          className={styles.filterSelect}
+          value={filterCanal}
+          onChange={(e) => setFilterCanal(e.target.value as Canal | "")}
+        >
+          <option value="">Todos los canales</option>
+          <option value="WHATSAPP">WhatsApp</option>
+          <option value="MERCADO_LIBRE">Mercado Libre</option>
+          <option value="INSTAGRAM">Instagram</option>
+          <option value="WEB">Web</option>
+          <option value="WEB_IA">Asistente IA</option>
+        </select>
+        {canAsignar && (
+          <select
+            className={styles.filterSelect}
+            value={filterVendedorId}
+            onChange={(e) => setFilterVendedorId(e.target.value)}
+          >
+            <option value="">Todos los vendedores</option>
+            {usuarios.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nombre}
+              </option>
+            ))}
+          </select>
+        )}
+        {filtrosActivos && (
+          <button type="button" className={styles.filterClear} onClick={clearFiltros}>
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+
       <p className={styles.mobileHint}>Deslizá para ver las demás etapas →</p>
 
       <div className={styles.kanban}>
         {stages.map((stage) => {
-          const stageItems = items.filter((l) => l.etapa === stage.key);
+          const stageItems = filteredItems.filter((l) => l.etapa === stage.key);
           return (
             <div className={styles.kcol} key={stage.key}>
               <div className={styles.kcolHead}>
@@ -268,7 +331,9 @@ export function KanbanView({
                 <span>{stageItems.length}</span>
               </div>
               {stageItems.length === 0 && (
-                <p className={styles.empty}>Sin leads</p>
+                <p className={styles.empty}>
+                  {filtrosActivos ? "Sin resultados con estos filtros" : "Sin leads"}
+                </p>
               )}
               {stageItems.map((lead) => {
                 const idx = stages.findIndex((s) => s.key === lead.etapa);
@@ -292,6 +357,10 @@ export function KanbanView({
                       {lead.vehiculo
                         ? `${lead.vehiculo.marca} ${lead.vehiculo.modelo}`
                         : "Sin vehículo asignado"}
+                    </div>
+
+                    <div className={styles.metaRow}>
+                      <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
                       {lead.vehiculo?.estado === "VENDIDO" && lead.etapa !== "CERRADO" && (
                         <span
                           className={styles.soldWarning}
@@ -301,13 +370,12 @@ export function KanbanView({
                         </span>
                       )}
                     </div>
+
                     {canAsignar && lead.vendedor && (
                       <div className={styles.vendedor}>Vendedor: {lead.vendedor.nombre}</div>
                     )}
                     {lead.mensaje && <div className={styles.msgPreview}>“{lead.mensaje}”</div>}
-                    <div className={styles.foot}>
-                      <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
-                    </div>
+
                     <div className={styles.kcardActions}>
                       {next ? (
                         <button

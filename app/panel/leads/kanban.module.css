@@ -23,6 +23,81 @@
   background: var(--input-bg);
 }
 
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 180px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12.5px;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--ink);
+}
+
+.searchInput::placeholder {
+  color: var(--ink-soft);
+}
+
+.searchInput:focus {
+  border-color: var(--violet);
+}
+
+.filterSelect {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12.5px;
+  outline: none;
+  background: var(--input-bg);
+  color: var(--ink);
+  min-width: 150px;
+}
+
+.filterSelect option {
+  background: var(--select-option-bg);
+  color: var(--ink);
+}
+
+.filterSelect:focus {
+  border-color: var(--violet);
+}
+
+.filterClear {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.filterClear:hover {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--line));
+}
+
+@media (max-width: 700px) {
+  .filterBar {
+    margin-bottom: 12px;
+  }
+
+  .searchInput,
+  .filterSelect {
+    min-width: 0;
+    flex: 1 1 140px;
+  }
+}
+
 .mobileHint {
   display: none;
 }
@@ -125,14 +200,23 @@
 }
 
 .kcard .name {
-  font-weight: 600;
-  font-size: 13px;
-  margin-bottom: 3px;
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 4px;
 }
 
 .kcard .car {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.kcard .metaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 8px;
 }
 
@@ -154,9 +238,8 @@
   font-size: 9.5px;
   font-weight: 800;
   font-style: normal;
-  margin-left: 6px;
+  flex: none;
   cursor: help;
-  vertical-align: middle;
 }
 
 .soldAlert {
@@ -227,10 +310,10 @@
 }
 
 .msgPreview {
-  font-size: 11.5px;
+  font-size: 11px;
   color: var(--ink-soft);
   font-style: italic;
-  margin-bottom: 8px;
+  opacity: 0.72;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -238,17 +321,12 @@
   -webkit-box-orient: vertical;
 }
 
-.kcard .foot {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
-}
-
 .kcardActions {
   display: flex;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
   flex-wrap: wrap;
 }
 
