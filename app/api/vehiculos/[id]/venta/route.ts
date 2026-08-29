@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { ventaInputSchema } from "@/lib/validation";
+import { registrarActividad } from "@/lib/actividad";
 
 export async function POST(
   req: NextRequest,
@@ -70,6 +71,15 @@ export async function POST(
       data: { estado: "VENDIDO" },
     }),
   ]);
+
+  await registrarActividad({
+    tenantId,
+    tipo: "VENTA_REGISTRADA",
+    descripcion: `${vehiculo.marca} ${vehiculo.modelo} — venta registrada por ${vendedor.nombre}`,
+    vehiculoId: id,
+    ventaId: venta.id,
+    vendedorId,
+  });
 
   return NextResponse.json(venta, { status: 201 });
 }

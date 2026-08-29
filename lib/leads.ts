@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { CanalLead } from "@prisma/client";
+import { registrarActividad } from "@/lib/actividad";
+import { canalLabelEs } from "@/lib/labels";
 
 // Lógica de creación de leads compartida entre el formulario de contacto
 // público (/api/public/leads) y el asistente de IA (/api/[dominio]/chat) —
@@ -42,7 +44,7 @@ export async function crearLeadPublico(params: {
     vehiculoIdFinal = vehiculo.id;
   }
 
-  return prisma.lead.create({
+  const lead = await prisma.lead.create({
     data: {
       tenantId,
       vehiculoId: vehiculoIdFinal,
@@ -53,4 +55,13 @@ export async function crearLeadPublico(params: {
       etapa: "NUEVO",
     },
   });
+
+  await registrarActividad({
+    tenantId,
+    tipo: "NUEVO_LEAD",
+    descripcion: `${nombreCliente} — nuevo lead vía ${canalLabelEs[canal]}`,
+    leadId: lead.id,
+  });
+
+  return lead;
 }

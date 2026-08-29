@@ -3,6 +3,7 @@ import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { vehiculoUpdateSchema } from "@/lib/validation";
 import { findOwnedVehiculo } from "@/lib/vehiculos";
+import { registrarActividad } from "@/lib/actividad";
 
 export async function PATCH(
   req: NextRequest,
@@ -54,6 +55,15 @@ export async function PATCH(
     where: { id },
     data: parsed.data,
   });
+
+  if (parsed.data.estado === "RESERVADO" && existente.estado !== "RESERVADO") {
+    await registrarActividad({
+      tenantId: session.user.tenantId,
+      tipo: "VEHICULO_RESERVADO",
+      descripcion: `${vehiculo.marca} ${vehiculo.modelo} — reservado`,
+      vehiculoId: vehiculo.id,
+    });
+  }
 
   return NextResponse.json(vehiculo);
 }

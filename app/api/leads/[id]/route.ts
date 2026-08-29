@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { leadUpdateSchema } from "@/lib/validation";
+import { registrarActividad } from "@/lib/actividad";
+import { etapaLabelEs } from "@/lib/labels";
 
 async function findVisibleLead(id: string, tenantId: string, userId: string, rol: string) {
   const lead = await prisma.lead.findUnique({ where: { id } });
@@ -65,6 +67,16 @@ export async function PATCH(
       vendedor: { select: { id: true, nombre: true } },
     },
   });
+
+  if (data.etapa && data.etapa !== existente.etapa) {
+    await registrarActividad({
+      tenantId,
+      tipo: "CAMBIO_ETAPA_LEAD",
+      descripcion: `${lead.nombreCliente} pasó a ${etapaLabelEs[data.etapa]}`,
+      leadId: lead.id,
+      vendedorId: lead.vendedorId,
+    });
+  }
 
   return NextResponse.json(lead);
 }

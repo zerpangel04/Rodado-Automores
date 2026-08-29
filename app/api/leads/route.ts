@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { leadInputSchema } from "@/lib/validation";
+import { registrarActividad } from "@/lib/actividad";
+import { canalLabelEs } from "@/lib/labels";
 
 export async function GET() {
   const session = await currentSession();
@@ -72,6 +74,14 @@ export async function POST(req: NextRequest) {
       vehiculo: { select: { marca: true, modelo: true } },
       vendedor: { select: { id: true, nombre: true } },
     },
+  });
+
+  await registrarActividad({
+    tenantId,
+    tipo: "NUEVO_LEAD",
+    descripcion: `${lead.nombreCliente} — nuevo lead vía ${canalLabelEs[lead.canal]}`,
+    leadId: lead.id,
+    vendedorId: lead.vendedorId,
   });
 
   return NextResponse.json(lead, { status: 201 });

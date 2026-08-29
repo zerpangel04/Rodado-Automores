@@ -14,12 +14,41 @@ const canalLabel: Record<string, string> = {
   WEB_IA: "Asistente IA",
 };
 
+const actividadIcon: Record<string, string> = {
+  NUEVO_LEAD: "+",
+  CAMBIO_ETAPA_LEAD: "→",
+  VENTA_REGISTRADA: "$",
+  VEHICULO_VENDIDO: "V",
+  VEHICULO_RESERVADO: "R",
+};
+
+const actividadColor: Record<string, string> = {
+  NUEVO_LEAD: "var(--cyan)",
+  CAMBIO_ETAPA_LEAD: "var(--violet)",
+  VENTA_REGISTRADA: "var(--success)",
+  VEHICULO_VENDIDO: "var(--ink-soft)",
+  VEHICULO_RESERVADO: "var(--warn)",
+};
+
+function formatRelativo(date: Date) {
+  const diffMs = Date.now() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "hace un momento";
+  if (diffMin < 60) return `hace ${diffMin} min`;
+  const diffHoras = Math.floor(diffMin / 60);
+  if (diffHoras < 24) return `hace ${diffHoras} hora${diffHoras === 1 ? "" : "s"}`;
+  const diffDias = Math.floor(diffHoras / 24);
+  return `hace ${diffDias} día${diffDias === 1 ? "" : "s"}`;
+}
+
 export default async function PanelHome() {
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
   const leadFilter =
     rol === "VENDEDOR" ? { tenantId, vendedorId: userId } : { tenantId };
   const ventaFilter =
+    rol === "VENDEDOR" ? { tenantId, vendedorId: userId } : { tenantId };
+  const actividadFilter =
     rol === "VENDEDOR" ? { tenantId, vendedorId: userId } : { tenantId };
 
   const [
@@ -31,6 +60,7 @@ export default async function PanelHome() {
     ventasCount,
     ultimosLeads,
     vehiculosConVtv,
+    actividadReciente,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -51,6 +81,11 @@ export default async function PanelHome() {
     prisma.vehiculo.findMany({
       where: { tenantId, estado: { not: "VENDIDO" }, vtvVencimiento: { not: null } },
       select: { id: true, marca: true, modelo: true, vtvVencimiento: true },
+    }),
+    prisma.actividadLog.findMany({
+      where: actividadFilter,
+      orderBy: { createdAt: "desc" },
+      take: 12,
     }),
   ]);
 
@@ -102,6 +137,28 @@ export default async function PanelHome() {
         </div>
 
         <div className={styles.card}>
+          <h3 className="disp">Actividad reciente</h3>
+          {actividadReciente.length === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
+              Sin actividad todavía.
+            </p>
+          ) : (
+            actividadReciente.map((a) => (
+              <div key={a.id} className={styles.activityRow}>
+                <span
+                  className={styles.activityIcon}
+                  style={{ background: actividadColor[a.tipo] ?? "var(--ink-soft)" }}
+                >
+                  {actividadIcon[a.tipo] ?? "•"}
+                </span>
+                <span className={styles.activityText}>{a.descripcion}</span>
+                <span className={styles.activityTime}>{formatRelativo(a.createdAt)}</span>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className={styles.card} style={{ marginTop: 20 }}>
           <h3 className="disp">Últimos leads</h3>
           {ultimosLeads.length === 0 ? (
             <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>

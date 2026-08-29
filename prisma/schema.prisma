@@ -45,6 +45,14 @@ enum EstadoCobro {
   COBRADO
 }
 
+enum TipoActividad {
+  NUEVO_LEAD
+  CAMBIO_ETAPA_LEAD
+  VENTA_REGISTRADA
+  VEHICULO_VENDIDO
+  VEHICULO_RESERVADO
+}
+
 // Cada concesionaria = un tenant. Todo dato cuelga de un tenant_id.
 model Tenant {
   id        String   @id @default(cuid())
@@ -60,6 +68,7 @@ model Tenant {
   sucursales Sucursal[]
 
   mercadoLibreConexion MercadoLibreConexion?
+  actividades          ActividadLog[]
 }
 
 // Sucursal física de una agencia. Toda agencia tiene al menos una
@@ -103,9 +112,10 @@ model Usuario {
   rol          Rol      @default(VENDEDOR)
   createdAt    DateTime @default(now())
 
-  leadsAsignados      Lead[]               @relation("VendedorAsignado")
-  ventas              Venta[]              @relation("VendedorVenta")
-  passwordResetTokens PasswordResetToken[]
+  leadsAsignados          Lead[]               @relation("VendedorAsignado")
+  ventas                  Venta[]              @relation("VendedorVenta")
+  passwordResetTokens     PasswordResetToken[]
+  actividadesComoVendedor ActividadLog[]       @relation("VendedorActividad")
 }
 
 // Token de un solo uso para el flujo de "olvidé mi contraseña".
@@ -134,22 +144,22 @@ model RateLimitHit {
 }
 
 model Vehiculo {
-  id         String         @id @default(cuid())
-  tenantId   String
-  tenant     Tenant         @relation(fields: [tenantId], references: [id])
-  sucursalId String
-  sucursal   Sucursal       @relation(fields: [sucursalId], references: [id])
-  marca      String
-  modelo     String
-  anio       Int
-  km         Int
-  precioUsd  Decimal
-  estado     EstadoVehiculo @default(DISPONIBLE)
-  categoria  String?
-  transmision String?
-  motor      String?
-  fotos      String[]       @default([])
-  fechaIngreso DateTime     @default(now())
+  id           String         @id @default(cuid())
+  tenantId     String
+  tenant       Tenant         @relation(fields: [tenantId], references: [id])
+  sucursalId   String
+  sucursal     Sucursal       @relation(fields: [sucursalId], references: [id])
+  marca        String
+  modelo       String
+  anio         Int
+  km           Int
+  precioUsd    Decimal
+  estado       EstadoVehiculo @default(DISPONIBLE)
+  categoria    String?
+  transmision  String?
+  motor        String?
+  fotos        String[]       @default([])
+  fechaIngreso DateTime       @default(now())
 
   // Publicación en Mercado Libre (opcional, uno por vehículo)
   mlItemId    String?
@@ -157,17 +167,18 @@ model Vehiculo {
   // Ej: "active", "payment_required" (creado pero necesita pago del
   // plan de publicación para salir a la luz)
   mlStatus    String?
-  mlLastError String?       @db.Text
+  mlLastError String? @db.Text
 
   // Documentación
-  docTitulo       Boolean   @default(false)
-  docCedula       Boolean   @default(false)
-  docDominio      Boolean   @default(false)
-  docLibreDeuda   Boolean   @default(false)
-  vtvVencimiento  DateTime?
+  docTitulo      Boolean   @default(false)
+  docCedula      Boolean   @default(false)
+  docDominio     Boolean   @default(false)
+  docLibreDeuda  Boolean   @default(false)
+  vtvVencimiento DateTime?
 
-  leads Lead[]
-  venta Venta?
+  leads       Lead[]
+  venta       Venta?
+  actividades ActividadLog[]
 
   @@index([tenantId, estado])
   @@index([sucursalId])
@@ -188,21 +199,51 @@ model Lead {
   vendedor      Usuario?  @relation("VendedorAsignado", fields: [vendedorId], references: [id])
   createdAt     DateTime  @default(now())
 
+  actividades ActividadLog[]
+
   @@index([tenantId, etapa])
 }
 
 model Venta {
-  id           String      @id @default(cuid())
-  tenantId     String
-  tenant       Tenant      @relation(fields: [tenantId], references: [id])
-  vehiculoId   String      @unique
-  vehiculo     Vehiculo    @relation(fields: [vehiculoId], references: [id])
-  vendedorId   String
-  vendedor     Usuario     @relation("VendedorVenta", fields: [vendedorId], references: [id])
-  precioFinal  Decimal
-  comision     Decimal
-  estadoCobro  EstadoCobro @default(PENDIENTE)
-  fecha        DateTime    @default(now())
+  id          String      @id @default(cuid())
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  vehiculoId  String      @unique
+  vehiculo    Vehiculo    @relation(fields: [vehiculoId], references: [id])
+  vendedorId  String
+  vendedor    Usuario     @relation("VendedorVenta", fields: [vendedorId], references: [id])
+  precioFinal Decimal
+  comision    Decimal
+  estadoCobro EstadoCobro @default(PENDIENTE)
+  fecha       DateTime    @default(now())
+
+  actividades ActividadLog[]
 
   @@index([tenantId, fecha])
+}
+
+// Historial cronológico de eventos de la agencia para el widget "Actividad
+// reciente" del Panel general — se genera solo en cada punto donde ya pasa
+// algo (nuevo lead, cambio de etapa, venta, vehículo reservado), nunca a
+// mano. vendedorId es quien "es dueño" del evento a fines de scoping: un
+// VENDEDOR solo ve actividad con su propio vendedorId; queda null en
+// eventos que no están atados a una persona (ej. reservar un auto).
+model ActividadLog {
+  id          String        @id @default(cuid())
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  tipo        TipoActividad
+  descripcion String
+  leadId      String?
+  lead        Lead?         @relation(fields: [leadId], references: [id])
+  vehiculoId  String?
+  vehiculo    Vehiculo?     @relation(fields: [vehiculoId], references: [id])
+  ventaId     String?
+  venta       Venta?        @relation(fields: [ventaId], references: [id])
+  vendedorId  String?
+  vendedor    Usuario?      @relation("VendedorActividad", fields: [vendedorId], references: [id])
+  createdAt   DateTime      @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, vendedorId, createdAt])
 }

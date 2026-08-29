@@ -550,3 +550,59 @@
   font-size: 15.5px;
   margin-bottom: 14px;
 }
+
+.activityRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.activityRow:last-child {
+  border-bottom: none;
+}
+
+.activityIcon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+  flex: none;
+}
+
+.activityText {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink);
+}
+
+.activityTime {
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  flex: none;
+}
+
+@media (max-width: 560px) {
+  .activityRow {
+    flex-wrap: wrap;
+  }
+
+  .activityText {
+    flex: 1 1 100%;
+    order: 2;
+    margin-top: 2px;
+  }
+
+  .activityTime {
+    order: 3;
+    margin-left: 36px;
+  }
+}
