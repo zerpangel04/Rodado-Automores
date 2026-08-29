@@ -93,14 +93,12 @@ export default async function Home() {
           <div className={styles.modGrid}>
             <Reveal delayMs={0}>
               <div className={styles.mcard}>
-                <div className={styles.icon}>S</div>
                 <h4 className="disp">e-Stock</h4>
                 <p>Inventario en tiempo real, siempre actualizado.</p>
               </div>
             </Reveal>
             <Reveal delayMs={60}>
               <div className={styles.mcard}>
-                <div className={styles.icon}>C</div>
                 <h4 className="disp">e-CRM</h4>
                 <p>Cliente y vehículo en una sola pantalla.</p>
               </div>
@@ -131,14 +129,12 @@ export default async function Home() {
             </Reveal>
             <Reveal delayMs={240}>
               <div className={styles.mcard} id="ia">
-                <div className={styles.icon}>F</div>
                 <h4 className="disp">Financiación</h4>
                 <p>Simulador de cuota en cada ficha.</p>
               </div>
             </Reveal>
             <Reveal delayMs={300}>
               <div className={styles.mcard}>
-                <div className={styles.icon}>R</div>
                 <h4 className="disp">Reportes</h4>
                 <p>KPIs reales de stock, ventas y leads.</p>
               </div>
