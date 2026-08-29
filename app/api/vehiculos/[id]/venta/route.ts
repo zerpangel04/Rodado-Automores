@@ -49,6 +49,12 @@ export async function POST(
     return NextResponse.json({ error: "Vendedor inválido" }, { status: 400 });
   }
 
+  // Los leads vinculados a este vehículo que sigan en una etapa activa NO
+  // se tocan acá: cerrarlos automáticamente los hacía desaparecer del
+  // Kanban sin que nadie decidiera qué pasó con esa persona (¿se le ofrece
+  // otro auto? ¿se descarta?). Esa decisión queda en manos del dueño — el
+  // front ya le muestra una alerta con la lista antes de confirmar la
+  // venta si hay leads activos para este vehículo.
   const [venta] = await prisma.$transaction([
     prisma.venta.create({
       data: {
@@ -62,10 +68,6 @@ export async function POST(
     prisma.vehiculo.update({
       where: { id },
       data: { estado: "VENDIDO" },
-    }),
-    prisma.lead.updateMany({
-      where: { tenantId, vehiculoId: id, etapa: { not: "CERRADO" } },
-      data: { etapa: "CERRADO" },
     }),
   ]);
 

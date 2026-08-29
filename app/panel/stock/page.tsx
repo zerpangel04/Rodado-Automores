@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
-import { StockView, type VehiculoDTO } from "./StockView";
+import { StockView, type VehiculoDTO, type LeadActivoDTO } from "./StockView";
 import styles from "../panel.module.css";
 
 export default async function StockPage() {
@@ -10,7 +10,7 @@ export default async function StockPage() {
 
   const sucursalActual = await getSucursalActual(tenantId);
 
-  const [vehiculos, usuarios, sucursales] = await Promise.all([
+  const [vehiculos, usuarios, sucursales, leadsActivos] = await Promise.all([
     prisma.vehiculo.findMany({
       where: {
         tenantId,
@@ -27,6 +27,18 @@ export default async function StockPage() {
       where: { tenantId },
       select: { id: true, nombre: true },
       orderBy: { createdAt: "asc" },
+    }),
+    // Leads en cualquier etapa activa (todo menos Cerrado) vinculados a un
+    // vehículo — sirve tanto para el badge "N interesados" en cada tarjeta
+    // como para la alerta al marcar un vehículo como vendido.
+    prisma.lead.findMany({
+      where: {
+        tenantId,
+        vehiculoId: { not: null },
+        etapa: { not: "CERRADO" },
+        ...(sucursalActual ? { vehiculo: { sucursalId: sucursalActual.id } } : {}),
+      },
+      select: { id: true, nombreCliente: true, contacto: true, etapa: true, vehiculoId: true },
     }),
   ]);
 
@@ -54,6 +66,16 @@ export default async function StockPage() {
     mlLastError: v.mlLastError,
   }));
 
+  const leadsActivosItems: LeadActivoDTO[] = leadsActivos
+    .filter((l): l is typeof l & { vehiculoId: string } => l.vehiculoId !== null)
+    .map((l) => ({
+      id: l.id,
+      nombreCliente: l.nombreCliente,
+      contacto: l.contacto,
+      etapa: l.etapa,
+      vehiculoId: l.vehiculoId,
+    }));
+
   return (
     <>
       <div className={styles.topbar}>
@@ -72,6 +94,7 @@ export default async function StockPage() {
           defaultSucursalId={sucursalActual?.id ?? sucursales[0]?.id ?? ""}
           userId={userId}
           canRevertirVenta={rol !== "VENDEDOR"}
+          leadsActivos={leadsActivosItems}
         />
       </div>
     </>

@@ -126,12 +126,44 @@
   position: absolute;
   top: 10px;
   left: 10px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: calc(100% - 44px);
+}
+
+.interesados {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 100px;
+  background: var(--surface-strong);
+  backdrop-filter: blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
+  border: 1px solid var(--line);
+  color: var(--violet);
+  white-space: nowrap;
+}
+
+.interesados::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--violet);
+  flex: none;
 }
 
 .del {
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 2;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -516,6 +548,57 @@
   padding: 10px 12px;
   font-size: 12.5px;
   margin-bottom: 14px;
+}
+
+.warnText {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 14px 0 14px;
+}
+
+.warnList {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.warnLeadRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+.warnLeadName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.warnLeadContacto {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.warnLeadEtapa {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  flex: none;
 }
 
 .toast {

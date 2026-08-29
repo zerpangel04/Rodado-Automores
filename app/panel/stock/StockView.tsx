@@ -38,8 +38,23 @@ export type VehiculoDTO = {
   mlLastError: string | null;
 };
 
+export type LeadActivoDTO = {
+  id: string;
+  nombreCliente: string;
+  contacto: string | null;
+  etapa: string;
+  vehiculoId: string;
+};
+
 type UsuarioOption = { id: string; nombre: string };
 type SucursalOption = { id: string; nombre: string };
+
+const etapaLabel: Record<string, string> = {
+  NUEVO: "Nuevo",
+  CONTACTADO: "Contactado",
+  TEST_DRIVE: "Test drive",
+  NEGOCIACION: "Negociación",
+};
 
 type FormState = {
   sucursalId: string;
@@ -121,6 +136,7 @@ export function StockView({
   defaultSucursalId,
   userId,
   canRevertirVenta,
+  leadsActivos,
 }: {
   initialItems: VehiculoDTO[];
   usuarios: UsuarioOption[];
@@ -128,6 +144,7 @@ export function StockView({
   defaultSucursalId: string;
   userId: string;
   canRevertirVenta: boolean;
+  leadsActivos: LeadActivoDTO[];
 }) {
   const [items, setItems] = useState<VehiculoDTO[]>(initialItems);
   useEffect(() => {
@@ -150,6 +167,18 @@ export function StockView({
   });
   const [saleError, setSaleError] = useState<string | null>(null);
   const [saleSaving, setSaleSaving] = useState(false);
+  const [saleWarningLeads, setSaleWarningLeads] = useState<LeadActivoDTO[] | null>(null);
+  const [saleWarningExpanded, setSaleWarningExpanded] = useState(false);
+
+  const leadsPorVehiculo = useMemo(() => {
+    const map = new Map<string, LeadActivoDTO[]>();
+    for (const l of leadsActivos) {
+      const arr = map.get(l.vehiculoId) ?? [];
+      arr.push(l);
+      map.set(l.vehiculoId, arr);
+    }
+    return map;
+  }, [leadsActivos]);
 
   const [iaResult, setIaResult] = useState<number | null>(null);
 
@@ -171,7 +200,7 @@ export function StockView({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [cropSaving, setCropSaving] = useState(false);
 
-  useBodyScrollLock(showModal || !!cropTarget || !!saleTarget);
+  useBodyScrollLock(showModal || !!cropTarget || !!saleTarget || !!saleWarningLeads);
 
   useEffect(() => {
     if (cropTarget || cropQueue.length === 0) return;
@@ -457,14 +486,12 @@ export function StockView({
       comision: "",
     });
     setSaleError(null);
+    setSaleWarningLeads(null);
+    setSaleWarningExpanded(false);
   }
 
-  async function handleSaleSave() {
+  async function submitSale() {
     if (!saleTarget) return;
-    if (!saleForm.vendedorId) {
-      setSaleError("Elegí un vendedor");
-      return;
-    }
     setSaleSaving(true);
     setSaleError(null);
 
@@ -482,6 +509,7 @@ export function StockView({
         const data = await res.json().catch(() => null);
         setSaleError(data?.error ?? "No se pudo registrar la venta");
         setSaleSaving(false);
+        setSaleWarningLeads(null);
         return;
       }
       setItems((prev) =>
@@ -489,11 +517,28 @@ export function StockView({
       );
       showToast();
       setSaleTarget(null);
+      setSaleWarningLeads(null);
     } catch {
       setSaleError("Error de conexión, intentá de nuevo");
+      setSaleWarningLeads(null);
     } finally {
       setSaleSaving(false);
     }
+  }
+
+  function handleConfirmVentaClick() {
+    if (!saleTarget) return;
+    if (!saleForm.vendedorId) {
+      setSaleError("Elegí un vendedor");
+      return;
+    }
+    const activos = leadsPorVehiculo.get(saleTarget.id) ?? [];
+    if (activos.length > 0) {
+      setSaleError(null);
+      setSaleWarningLeads(activos);
+      return;
+    }
+    submitSale();
   }
 
   async function revertVenta(v: VehiculoDTO) {
@@ -550,6 +595,12 @@ export function StockView({
                     >
                       {stateLabel[v.estado]}
                     </Pill>
+                    {(leadsPorVehiculo.get(v.id)?.length ?? 0) > 0 && (
+                      <span className={styles.interesados}>
+                        {leadsPorVehiculo.get(v.id)!.length} interesado
+                        {leadsPorVehiculo.get(v.id)!.length === 1 ? "" : "s"}
+                      </span>
+                    )}
                   </div>
                   {vendido ? (
                     canRevertirVenta && (
@@ -991,8 +1042,62 @@ export function StockView({
             <button className={styles.btnGhost} onClick={() => setSaleTarget(null)}>
               Cancelar
             </button>
-            <button className={styles.btnPrimary} onClick={handleSaleSave} disabled={saleSaving}>
+            <button
+              className={styles.btnPrimary}
+              onClick={handleConfirmVentaClick}
+              disabled={saleSaving}
+            >
               {saleSaving ? "Guardando…" : "Confirmar venta"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className={`${styles.modalBg} ${saleWarningLeads ? styles.show : ""}`}>
+        <div className={styles.modal}>
+          <h3 className="disp">¿Revisar leads antes de vender?</h3>
+
+          <p className={styles.warnText}>
+            Hay {saleWarningLeads?.length ?? 0} lead
+            {(saleWarningLeads?.length ?? 0) === 1 ? "" : "s"} interesado
+            {(saleWarningLeads?.length ?? 0) === 1 ? "" : "s"} en{" "}
+            {saleTarget ? `${saleTarget.marca} ${saleTarget.modelo}` : "este vehículo"} que no se
+            cerraron. ¿Querés revisarlos antes de continuar?
+          </p>
+
+          <button
+            type="button"
+            className={styles.btnGhost}
+            style={{ width: "100%", justifyContent: "center" }}
+            onClick={() => setSaleWarningExpanded((v) => !v)}
+          >
+            {saleWarningExpanded
+              ? "Ocultar leads"
+              : `Ver los ${saleWarningLeads?.length ?? 0} leads`}
+          </button>
+
+          {saleWarningExpanded && (
+            <div className={styles.warnList}>
+              {saleWarningLeads?.map((l) => (
+                <div className={styles.warnLeadRow} key={l.id}>
+                  <div>
+                    <div className={styles.warnLeadName}>{l.nombreCliente}</div>
+                    <div className={styles.warnLeadContacto}>{l.contacto || "Sin contacto"}</div>
+                  </div>
+                  <span className={styles.warnLeadEtapa}>{etapaLabel[l.etapa] ?? l.etapa}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {saleError && <div className={styles.errorBox} style={{ marginTop: 14 }}>{saleError}</div>}
+
+          <div className={styles.modalActions}>
+            <button className={styles.btnGhost} onClick={() => setSaleWarningLeads(null)}>
+              Cancelar
+            </button>
+            <button className={styles.btnPrimary} onClick={submitSale} disabled={saleSaving}>
+              {saleSaving ? "Guardando…" : "Continuar con la venta"}
             </button>
           </div>
         </div>
