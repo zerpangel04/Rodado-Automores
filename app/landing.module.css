@@ -260,12 +260,20 @@
 }
 
 .mcard {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   backdrop-filter: blur(var(--blur)) saturate(150%);
   -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 22px;
+}
+
+.mcard.comingSoon {
+  opacity: 0.72;
 }
 
 .mcard .icon {
@@ -280,6 +288,49 @@
   font-weight: 700;
   margin-bottom: 14px;
   color: #fff;
+}
+
+/* Chip blanco para logos reales de marcas de terceros (Mercado Libre,
+   WhatsApp) — a diferencia de .icon (nuestros propios módulos), estos
+   son logos ajenos y necesitan un fondo neutro fijo para verse bien
+   sin importar el tema del sitio. */
+.brandChip {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.brandChip img {
+  object-fit: contain;
+}
+
+.brandChipWide {
+  width: auto;
+  min-width: 62px;
+  padding: 0 8px;
+}
+
+.comingSoonBadge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-family: var(--font-mono), monospace;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: color-mix(in srgb, var(--warn) 18%, transparent);
+  color: var(--warn);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
 }
 
 .mcard h4 {

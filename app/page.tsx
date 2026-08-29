@@ -3,6 +3,7 @@ import Image from "next/image";
 import { auth } from "@/lib/auth";
 import styles from "./landing.module.css";
 import { ThemeToggle } from "./ThemeToggle";
+import { Reveal } from "./Reveal";
 
 export default async function Home() {
   const session = await auth();
@@ -90,36 +91,58 @@ export default async function Home() {
             <p>Todo comparte el mismo dato — cargás el auto una vez y corre por todo el sistema.</p>
           </div>
           <div className={styles.modGrid}>
-            <div className={styles.mcard}>
-              <div className={styles.icon}>S</div>
-              <h4 className="disp">e-Stock</h4>
-              <p>Inventario en tiempo real, siempre actualizado.</p>
-            </div>
-            <div className={styles.mcard}>
-              <div className={styles.icon}>C</div>
-              <h4 className="disp">e-CRM</h4>
-              <p>Cliente y vehículo en una sola pantalla.</p>
-            </div>
-            <div className={styles.mcard}>
-              <div className={styles.icon}>P</div>
-              <h4 className="disp">Multipublicador</h4>
-              <p>Publicá en Mercado Libre y más canales a la vez.</p>
-            </div>
-            <div className={styles.mcard}>
-              <div className={styles.icon}>W</div>
-              <h4 className="disp">WhatsApp</h4>
-              <p>Catálogo sincronizado, todo en un solo lugar.</p>
-            </div>
-            <div className={styles.mcard} id="ia">
-              <div className={styles.icon}>F</div>
-              <h4 className="disp">Financiación</h4>
-              <p>Simulador de cuota en cada ficha.</p>
-            </div>
-            <div className={styles.mcard}>
-              <div className={styles.icon}>R</div>
-              <h4 className="disp">Reportes</h4>
-              <p>KPIs reales de stock, ventas y leads.</p>
-            </div>
+            <Reveal delayMs={0}>
+              <div className={styles.mcard}>
+                <div className={styles.icon}>S</div>
+                <h4 className="disp">e-Stock</h4>
+                <p>Inventario en tiempo real, siempre actualizado.</p>
+              </div>
+            </Reveal>
+            <Reveal delayMs={60}>
+              <div className={styles.mcard}>
+                <div className={styles.icon}>C</div>
+                <h4 className="disp">e-CRM</h4>
+                <p>Cliente y vehículo en una sola pantalla.</p>
+              </div>
+            </Reveal>
+            <Reveal delayMs={120}>
+              <div className={styles.mcard}>
+                <div className={`${styles.brandChip} ${styles.brandChipWide}`}>
+                  <Image
+                    src="/logos/mercadolibre.svg"
+                    alt="Mercado Libre"
+                    width={72}
+                    height={30}
+                  />
+                </div>
+                <h4 className="disp">Multipublicador</h4>
+                <p>Publicá en Mercado Libre y más canales a la vez.</p>
+              </div>
+            </Reveal>
+            <Reveal delayMs={180}>
+              <div className={`${styles.mcard} ${styles.comingSoon}`}>
+                <span className={styles.comingSoonBadge}>Próximamente</span>
+                <div className={styles.brandChip}>
+                  <Image src="/logos/whatsapp.svg" alt="WhatsApp" width={20} height={20} />
+                </div>
+                <h4 className="disp">WhatsApp</h4>
+                <p>Catálogo sincronizado, todo en un solo lugar.</p>
+              </div>
+            </Reveal>
+            <Reveal delayMs={240}>
+              <div className={styles.mcard} id="ia">
+                <div className={styles.icon}>F</div>
+                <h4 className="disp">Financiación</h4>
+                <p>Simulador de cuota en cada ficha.</p>
+              </div>
+            </Reveal>
+            <Reveal delayMs={300}>
+              <div className={styles.mcard}>
+                <div className={styles.icon}>R</div>
+                <h4 className="disp">Reportes</h4>
+                <p>KPIs reales de stock, ventas y leads.</p>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
