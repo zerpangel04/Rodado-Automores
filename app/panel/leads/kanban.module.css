@@ -113,6 +113,15 @@
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.kcard:hover,
+.kcard:focus-visible {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 1px var(--violet);
+  outline: none;
 }
 
 .kcard .name {
@@ -131,6 +140,18 @@
   font-size: 11px;
   color: var(--ink-soft);
   margin-bottom: 8px;
+}
+
+.msgPreview {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  font-style: italic;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .kcard .foot {
@@ -241,6 +262,61 @@
   border-color: var(--violet);
 }
 
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.detailRow:first-of-type {
+  border-top: 1px solid var(--line);
+}
+
+.detailLabel {
+  color: var(--ink-soft);
+  font-size: 11.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.detailValue {
+  color: var(--ink);
+  text-align: right;
+}
+
+.msgBox {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.msgBoxEmpty {
+  background: var(--input-bg);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.msgHint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
 .modalActions {
   display: flex;
   gap: 10px;
@@ -319,5 +395,20 @@
   .modalActions {
     gap: 9px;
     margin-top: 16px;
+  }
+
+  .detailRow {
+    font-size: 12px;
+    padding: 7px 0;
+  }
+
+  .detailLabel {
+    font-size: 11px;
+  }
+
+  .msgBox,
+  .msgBoxEmpty {
+    font-size: 12px;
+    padding: 10px;
   }
 }

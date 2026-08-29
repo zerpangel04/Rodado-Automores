@@ -12,10 +12,12 @@ export type LeadDTO = {
   id: string;
   nombreCliente: string;
   contacto: string | null;
+  mensaje?: string | null;
   canal: Canal;
   etapa: Etapa;
   vehiculo: { marca: string; modelo: string } | null;
   vendedor: { id: string; nombre: string } | null;
+  createdAt?: string;
 };
 
 type VehiculoOption = { id: string; marca: string; modelo: string };
@@ -61,6 +63,19 @@ const emptyForm: FormState = {
   vendedorId: "",
 };
 
+function formatFecha(iso?: string) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function KanbanView({
   initialItems,
   vehiculos,
@@ -83,8 +98,9 @@ export function KanbanView({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<LeadDTO | null>(null);
 
-  useBodyScrollLock(showModal);
+  useBodyScrollLock(showModal || !!selectedLead);
 
   function showToast() {
     setToast(true);
@@ -187,7 +203,19 @@ export function KanbanView({
                 const idx = stages.findIndex((s) => s.key === lead.etapa);
                 const next = stages[idx + 1];
                 return (
-                  <div className={styles.kcard} key={lead.id}>
+                  <div
+                    className={styles.kcard}
+                    key={lead.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedLead(lead)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedLead(lead);
+                      }
+                    }}
+                  >
                     <div className={styles.name}>{lead.nombreCliente}</div>
                     <div className={styles.car}>
                       {lead.vehiculo
@@ -197,16 +225,29 @@ export function KanbanView({
                     {canAsignar && lead.vendedor && (
                       <div className={styles.vendedor}>Vendedor: {lead.vendedor.nombre}</div>
                     )}
+                    {lead.mensaje && <div className={styles.msgPreview}>“{lead.mensaje}”</div>}
                     <div className={styles.foot}>
                       <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
                     </div>
                     <div className={styles.kcardActions}>
                       {next ? (
-                        <button className={styles.kmini} onClick={() => advance(lead)}>
+                        <button
+                          className={styles.kmini}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            advance(lead);
+                          }}
+                        >
                           → {next.label}
                         </button>
                       ) : null}
-                      <button className={styles.kmini} onClick={() => handleDelete(lead.id)}>
+                      <button
+                        className={styles.kmini}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(lead.id);
+                        }}
+                      >
                         Eliminar
                       </button>
                     </div>
@@ -292,6 +333,68 @@ export function KanbanView({
             </button>
           </div>
         </div>
+      </div>
+
+      <div className={`${styles.modalBg} ${selectedLead ? styles.show : ""}`} onClick={() => setSelectedLead(null)}>
+        {selectedLead && (
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 className="disp">{selectedLead.nombreCliente}</h3>
+
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Contacto</span>
+              <span className={styles.detailValue}>{selectedLead.contacto || "—"}</span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Vehículo de interés</span>
+              <span className={styles.detailValue}>
+                {selectedLead.vehiculo
+                  ? `${selectedLead.vehiculo.marca} ${selectedLead.vehiculo.modelo}`
+                  : "Sin vehículo asignado"}
+              </span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Canal de origen</span>
+              <span className={styles.detailValue}>
+                <Pill color={canalColor[selectedLead.canal]}>{canalLabel[selectedLead.canal]}</Pill>
+              </span>
+            </div>
+            <div className={styles.detailRow}>
+              <span className={styles.detailLabel}>Fecha de creación</span>
+              <span className={styles.detailValue}>{formatFecha(selectedLead.createdAt)}</span>
+            </div>
+            {canAsignar && selectedLead.vendedor && (
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Vendedor asignado</span>
+                <span className={styles.detailValue}>{selectedLead.vendedor.nombre}</span>
+              </div>
+            )}
+
+            <div className={styles.field}>
+              <label>
+                {selectedLead.canal === "WEB_IA"
+                  ? "Mensaje / resumen del asistente IA"
+                  : "Mensaje"}
+              </label>
+              {selectedLead.mensaje ? (
+                <p className={styles.msgBox}>{selectedLead.mensaje}</p>
+              ) : (
+                <p className={styles.msgBoxEmpty}>Este lead no dejó ningún mensaje.</p>
+              )}
+              {selectedLead.canal === "WEB_IA" && (
+                <p className={styles.msgHint}>
+                  No guardamos el historial completo de la conversación con el asistente —
+                  esto es el resumen que generó el lead.
+                </p>
+              )}
+            </div>
+
+            <div className={styles.modalActions}>
+              <button className={styles.btnGhost} onClick={() => setSelectedLead(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={`${styles.toast} ${toast ? styles.show : ""}`}>Guardado ✓</div>

@@ -45,10 +45,12 @@ export default async function LeadsPage() {
     id: l.id,
     nombreCliente: l.nombreCliente,
     contacto: l.contacto,
+    mensaje: l.mensaje,
     canal: l.canal,
     etapa: l.etapa,
     vehiculo: l.vehiculo,
     vendedor: l.vendedor,
+    createdAt: l.createdAt.toISOString(),
   }));
 
   return (
