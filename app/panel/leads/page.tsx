@@ -18,7 +18,7 @@ export default async function LeadsPage() {
         ...(sucursalActual ? { vehiculo: { sucursalId: sucursalActual.id } } : {}),
       },
       include: {
-        vehiculo: { select: { marca: true, modelo: true } },
+        vehiculo: { select: { marca: true, modelo: true, estado: true } },
         vendedor: { select: { id: true, nombre: true } },
       },
       orderBy: { createdAt: "desc" },

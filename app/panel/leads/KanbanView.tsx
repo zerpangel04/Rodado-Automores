@@ -15,7 +15,7 @@ export type LeadDTO = {
   mensaje?: string | null;
   canal: Canal;
   etapa: Etapa;
-  vehiculo: { marca: string; modelo: string } | null;
+  vehiculo: { marca: string; modelo: string; estado?: "DISPONIBLE" | "RESERVADO" | "VENDIDO" } | null;
   vendedor: { id: string; nombre: string } | null;
   createdAt?: string;
 };
@@ -221,6 +221,14 @@ export function KanbanView({
                       {lead.vehiculo
                         ? `${lead.vehiculo.marca} ${lead.vehiculo.modelo}`
                         : "Sin vehículo asignado"}
+                      {lead.vehiculo?.estado === "VENDIDO" && lead.etapa !== "CERRADO" && (
+                        <span
+                          className={styles.soldWarning}
+                          title="El vehículo que le interesaba ya fue vendido"
+                        >
+                          !
+                        </span>
+                      )}
                     </div>
                     {canAsignar && lead.vendedor && (
                       <div className={styles.vendedor}>Vendedor: {lead.vendedor.nombre}</div>

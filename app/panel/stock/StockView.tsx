@@ -46,6 +46,10 @@ export type LeadActivoDTO = {
   vehiculoId: string;
 };
 
+type SaleWarningLead = LeadActivoDTO & {
+  reassignTo?: { id: string; marca: string; modelo: string };
+};
+
 type UsuarioOption = { id: string; nombre: string };
 type SucursalOption = { id: string; nombre: string };
 
@@ -167,18 +171,71 @@ export function StockView({
   });
   const [saleError, setSaleError] = useState<string | null>(null);
   const [saleSaving, setSaleSaving] = useState(false);
-  const [saleWarningLeads, setSaleWarningLeads] = useState<LeadActivoDTO[] | null>(null);
+  const [saleWarningLeads, setSaleWarningLeads] = useState<SaleWarningLead[] | null>(null);
   const [saleWarningExpanded, setSaleWarningExpanded] = useState(false);
+  const [reassigningLeadId, setReassigningLeadId] = useState<string | null>(null);
+
+  const [leadsState, setLeadsState] = useState<LeadActivoDTO[]>(leadsActivos);
+  useEffect(() => {
+    setLeadsState(leadsActivos);
+  }, [leadsActivos]);
 
   const leadsPorVehiculo = useMemo(() => {
     const map = new Map<string, LeadActivoDTO[]>();
-    for (const l of leadsActivos) {
+    for (const l of leadsState) {
       const arr = map.get(l.vehiculoId) ?? [];
       arr.push(l);
       map.set(l.vehiculoId, arr);
     }
     return map;
-  }, [leadsActivos]);
+  }, [leadsState]);
+
+  // Vehículos disponibles para reasignar un lead, priorizando misma
+  // categoría y después precio más cercano al del vehículo que se vendió —
+  // con lo que ya tenemos en `items` alcanza, sin pedir nada nuevo al server.
+  function suggestedVehiculos(target: VehiculoDTO | null): VehiculoDTO[] {
+    if (!target) return [];
+    return items
+      .filter((v) => v.estado === "DISPONIBLE" && v.id !== target.id)
+      .slice()
+      .sort((a, b) => {
+        const aSame = a.categoria === target.categoria ? 0 : 1;
+        const bSame = b.categoria === target.categoria ? 0 : 1;
+        if (aSame !== bSame) return aSame - bSame;
+        return Math.abs(a.precioUsd - target.precioUsd) - Math.abs(b.precioUsd - target.precioUsd);
+      });
+  }
+
+  async function handleReassign(lead: SaleWarningLead, newVehiculoId: string) {
+    if (!newVehiculoId) return;
+    const target = items.find((v) => v.id === newVehiculoId);
+    if (!target) return;
+
+    const res = await fetch(`/api/leads/${lead.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vehiculoId: newVehiculoId }),
+    });
+    if (!res.ok) {
+      setReassigningLeadId(null);
+      return;
+    }
+
+    setLeadsState((prev) =>
+      prev.map((l) => (l.id === lead.id ? { ...l, vehiculoId: newVehiculoId } : l))
+    );
+    setSaleWarningLeads((prev) =>
+      prev
+        ? prev.map((l) =>
+            l.id === lead.id
+              ? { ...l, reassignTo: { id: target.id, marca: target.marca, modelo: target.modelo } }
+              : l
+          )
+        : prev
+    );
+    setReassigningLeadId(null);
+    showToast();
+  }
 
   const [iaResult, setIaResult] = useState<number | null>(null);
 
@@ -488,6 +545,7 @@ export function StockView({
     setSaleError(null);
     setSaleWarningLeads(null);
     setSaleWarningExpanded(false);
+    setReassigningLeadId(null);
   }
 
   async function submitSale() {
@@ -1080,11 +1138,53 @@ export function StockView({
             <div className={styles.warnList}>
               {saleWarningLeads?.map((l) => (
                 <div className={styles.warnLeadRow} key={l.id}>
-                  <div>
-                    <div className={styles.warnLeadName}>{l.nombreCliente}</div>
-                    <div className={styles.warnLeadContacto}>{l.contacto || "Sin contacto"}</div>
+                  <div className={styles.warnLeadMain}>
+                    <div>
+                      <div className={styles.warnLeadName}>{l.nombreCliente}</div>
+                      <div className={styles.warnLeadContacto}>{l.contacto || "Sin contacto"}</div>
+                    </div>
+                    <span className={styles.warnLeadEtapa}>{etapaLabel[l.etapa] ?? l.etapa}</span>
                   </div>
-                  <span className={styles.warnLeadEtapa}>{etapaLabel[l.etapa] ?? l.etapa}</span>
+
+                  {l.reassignTo ? (
+                    <div className={styles.warnReassignedTag}>
+                      ✓ Reasignado a {l.reassignTo.marca} {l.reassignTo.modelo}
+                    </div>
+                  ) : reassigningLeadId === l.id ? (
+                    <div className={styles.warnReassignRow}>
+                      <select
+                        className={styles.warnReassignSelect}
+                        autoFocus
+                        defaultValue=""
+                        onChange={(e) => handleReassign(l, e.target.value)}
+                      >
+                        <option value="" disabled>
+                          Elegí un vehículo…
+                        </option>
+                        {suggestedVehiculos(saleTarget).map((v) => (
+                          <option key={v.id} value={v.id}>
+                            {v.marca} {v.modelo} — USD {v.precioUsd.toLocaleString("es-AR")}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        className={styles.warnReassignCancel}
+                        onClick={() => setReassigningLeadId(null)}
+                        aria-label="Cancelar reasignación"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.warnReassignBtn}
+                      onClick={() => setReassigningLeadId(l.id)}
+                    >
+                      Reasignar a otro vehículo
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -1093,7 +1193,13 @@ export function StockView({
           {saleError && <div className={styles.errorBox} style={{ marginTop: 14 }}>{saleError}</div>}
 
           <div className={styles.modalActions}>
-            <button className={styles.btnGhost} onClick={() => setSaleWarningLeads(null)}>
+            <button
+              className={styles.btnGhost}
+              onClick={() => {
+                setSaleWarningLeads(null);
+                setReassigningLeadId(null);
+              }}
+            >
               Cancelar
             </button>
             <button className={styles.btnPrimary} onClick={submitSale} disabled={saleSaving}>
