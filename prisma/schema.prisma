@@ -121,6 +121,18 @@ model PasswordResetToken {
   @@index([usuarioId])
 }
 
+// Rate limiting genérico (login, formulario de contacto público, chat IA).
+// Cada intento/request relevante inserta una fila; lib/rateLimit.ts cuenta
+// cuántas hay para una "key" dentro de una ventana de tiempo y borra las
+// vencidas de paso, así la tabla no crece sin límite sin necesitar un cron.
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
 model Vehiculo {
   id         String         @id @default(cuid())
   tenantId   String

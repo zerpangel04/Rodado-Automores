@@ -13,6 +13,7 @@ export function ContactForm({
   const [nombre, setNombre] = useState("");
   const [contacto, setContacto] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [sitioWeb, setSitioWeb] = useState(""); // honeypot, ver comentario más abajo
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -35,6 +36,7 @@ export function ContactForm({
           nombreCliente: nombre.trim(),
           contacto: contacto.trim(),
           mensaje: mensaje.trim() || undefined,
+          sitioWeb,
         }),
       });
       if (!res.ok) {
@@ -66,6 +68,19 @@ export function ContactForm({
       ) : (
         <>
           {error && <div className={styles.errorBox}>{error}</div>}
+          {/* Honeypot anti-bot: invisible para una persona (fuera de
+              pantalla, sin tabIndex), pero un bot que autocompleta todos
+              los inputs de un form suele llenarlo igual. */}
+          <input
+            type="text"
+            name="sitioWeb"
+            value={sitioWeb}
+            onChange={(e) => setSitioWeb(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+          />
           <div className={styles.field}>
             <input
               value={nombre}

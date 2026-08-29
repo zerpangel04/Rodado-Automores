@@ -3,6 +3,13 @@ import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { chatInputSchema } from "@/lib/validation";
 import { crearLeadPublico, LeadPublicoError } from "@/lib/leads";
+import { checkRateLimit, recordRateLimitHit, getClientIp } from "@/lib/rateLimit";
+
+// Generoso a propósito: es una conversación de ida y vuelta, no un
+// formulario de un solo envío. El objetivo es cortar abuso/costo
+// descontrolado, no limitar una charla normal con el asistente.
+const MAX_MENSAJES = 30;
+const VENTANA_MS = 10 * 60 * 1000; // 10 minutos
 
 // Modelo pedido explícitamente. No usar Opus por defecto acá: esta ruta se
 // pensó y probó contra claude-sonnet-4-6.
@@ -92,6 +99,19 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { dominio: string } }
 ) {
+  const ip = getClientIp(req);
+  const { allowed } = await checkRateLimit(`chat-ia:${ip}`, {
+    max: MAX_MENSAJES,
+    windowMs: VENTANA_MS,
+  });
+  if (!allowed) {
+    return NextResponse.json({
+      reply: "Estamos recibiendo muchos mensajes desde tu conexión, esperá un rato y probá de nuevo 🙂",
+      disponible: true,
+    });
+  }
+  await recordRateLimitHit(`chat-ia:${ip}`);
+
   const body = await req.json().catch(() => null);
   const parsed = chatInputSchema.safeParse(body);
   if (!parsed.success) {
