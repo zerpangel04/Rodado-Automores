@@ -200,72 +200,74 @@ export default async function PanelHome() {
           />
         </div>
 
-        <div className={styles.card}>
-          <div className={styles.cardHead}>
-            <h3 className="disp">Pendientes de hoy</h3>
-            <span className={styles.cardHeadCount}>{pendientes.length}</span>
-          </div>
-          {pendientes.length === 0 ? (
-            <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
-              Sin pendientes — todo al día.
-            </p>
-          ) : (
-            pendientes.slice(0, 8).map((p) => (
-              <div key={p.id} className={styles.taskRow}>
-                <span className={`${styles.taskCheck} ${p.urgente ? styles.urgent : ""}`} />
-                <div className={styles.taskBody}>
-                  <div className={styles.taskLabel}>{p.label}</div>
-                  <div className={`${styles.taskMeta} ${p.urgente ? styles.urgent : ""}`}>
-                    {p.meta}
+        <div className={styles.dashRow}>
+          <div className={styles.card}>
+            <div className={styles.cardHead}>
+              <h3 className="disp">Pendientes de hoy</h3>
+              <span className={styles.cardHeadCount}>{pendientes.length}</span>
+            </div>
+            {pendientes.length === 0 ? (
+              <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
+                Sin pendientes — todo al día.
+              </p>
+            ) : (
+              pendientes.slice(0, 8).map((p) => (
+                <div key={p.id} className={styles.taskRow}>
+                  <span className={`${styles.taskCheck} ${p.urgente ? styles.urgent : ""}`} />
+                  <div className={styles.taskBody}>
+                    <div className={styles.taskLabel}>{p.label}</div>
+                    <div className={`${styles.taskMeta} ${p.urgente ? styles.urgent : ""}`}>
+                      {p.meta}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className={styles.card} style={{ marginTop: 20 }}>
-          <div className={styles.cardHead}>
-            <h3 className="disp">Leads recientes</h3>
+              ))
+            )}
           </div>
-          {leadsRecientes.length === 0 ? (
-            <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>Sin leads todavía.</p>
-          ) : (
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Contacto</th>
-                    <th>Vehículo</th>
-                    <th>Canal</th>
-                    <th>Etapa</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leadsRecientes.map((l) => (
-                    <tr key={l.id}>
-                      <td>{l.nombreCliente}</td>
-                      <td className={styles.tableSub}>{l.contacto || "—"}</td>
-                      <td className={styles.tableSub}>
-                        {l.vehiculo ? `${l.vehiculo.marca} ${l.vehiculo.modelo}` : "Sin vehículo"}
-                      </td>
-                      <td>
-                        <Pill color={canalColor[l.canal] ?? "gray"}>
-                          {canalLabelEs[l.canal] ?? l.canal}
-                        </Pill>
-                      </td>
-                      <td>
-                        <Pill color={etapaColor[l.etapa] ?? "gray"}>
-                          {etapaLabelEs[l.etapa] ?? l.etapa}
-                        </Pill>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+          <div className={styles.card}>
+            <div className={styles.cardHead}>
+              <h3 className="disp">Leads recientes</h3>
             </div>
-          )}
+            {leadsRecientes.length === 0 ? (
+              <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>Sin leads todavía.</p>
+            ) : (
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Contacto</th>
+                      <th>Vehículo</th>
+                      <th>Canal</th>
+                      <th>Etapa</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leadsRecientes.map((l) => (
+                      <tr key={l.id}>
+                        <td>{l.nombreCliente}</td>
+                        <td className={styles.tableSub}>{l.contacto || "—"}</td>
+                        <td className={styles.tableSub}>
+                          {l.vehiculo ? `${l.vehiculo.marca} ${l.vehiculo.modelo}` : "Sin vehículo"}
+                        </td>
+                        <td>
+                          <Pill color={canalColor[l.canal] ?? "gray"}>
+                            {canalLabelEs[l.canal] ?? l.canal}
+                          </Pill>
+                        </td>
+                        <td>
+                          <Pill color={etapaColor[l.etapa] ?? "gray"}>
+                            {etapaLabelEs[l.etapa] ?? l.etapa}
+                          </Pill>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className={styles.card} style={{ marginTop: 20 }}>

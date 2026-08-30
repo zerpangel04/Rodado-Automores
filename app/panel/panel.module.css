@@ -454,6 +454,20 @@
   }
 }
 
+.dashRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-top: 20px;
+}
+
+@media (min-width: 1024px) {
+  .dashRow {
+    grid-template-columns: minmax(300px, 360px) 1fr;
+  }
+}
+
 @media (max-width: 480px) {
   .kpiRow {
     grid-template-columns: 1fr;
