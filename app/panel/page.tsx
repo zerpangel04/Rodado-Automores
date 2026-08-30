@@ -6,6 +6,7 @@ import styles from "./panel.module.css";
 import { KpiRing } from "./KpiRing";
 import { Pill, type PillColor } from "./Pill";
 import { actividadIcon, actividadColor, formatRelativo } from "./actividadDisplay";
+import { PendientesCard, type Pendiente } from "./PendientesCard";
 
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
@@ -50,13 +51,6 @@ function fechaDeHoy() {
   return fecha.charAt(0).toUpperCase() + fecha.slice(1);
 }
 
-type Pendiente = {
-  id: string;
-  label: string;
-  meta: string;
-  urgente: boolean;
-};
-
 export default async function PanelHome() {
   const session = await auth();
   const { tenantId, id: userId, rol, name } = session!.user;
@@ -80,6 +74,8 @@ export default async function PanelHome() {
     actividadReciente,
     leadsNuevos,
     leadsSinAsignar,
+    vehiculosDisponibles,
+    usuarios,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -108,16 +104,33 @@ export default async function PanelHome() {
     }),
     prisma.lead.findMany({
       where: { ...leadFilter, etapa: "NUEVO" },
-      select: { id: true, nombreCliente: true, createdAt: true },
+      include: {
+        vehiculo: {
+          select: { marca: true, modelo: true, estado: true, categoria: true, precioUsd: true },
+        },
+        vendedor: { select: { id: true, nombre: true } },
+      },
       orderBy: { createdAt: "asc" },
       take: 5,
     }),
     canAsignar
       ? prisma.lead.findMany({
           where: { tenantId, vendedorId: null, etapa: { not: "CERRADO" } },
-          select: { id: true, nombreCliente: true },
+          include: { vehiculo: { select: { marca: true, modelo: true } } },
           orderBy: { createdAt: "asc" },
           take: 5,
+        })
+      : Promise.resolve([]),
+    prisma.vehiculo.findMany({
+      where: { tenantId, estado: { not: "VENDIDO" } },
+      select: { id: true, marca: true, modelo: true, categoria: true, precioUsd: true, estado: true },
+      orderBy: { fechaIngreso: "desc" },
+    }),
+    canAsignar
+      ? prisma.usuario.findMany({
+          where: { tenantId },
+          select: { id: true, nombre: true },
+          orderBy: { nombre: "asc" },
         })
       : Promise.resolve([]),
   ]);
@@ -137,6 +150,7 @@ export default async function PanelHome() {
       const vencida = (v.dias as number) < 0;
       return {
         id: `vtv-${v.id}`,
+        kind: "vtv" as const,
         label: `Renovar VTV — ${v.marca} ${v.modelo}`,
         meta: vencida
           ? `Vencida hace ${Math.abs(v.dias as number)} día${Math.abs(v.dias as number) === 1 ? "" : "s"}`
@@ -146,17 +160,52 @@ export default async function PanelHome() {
     }),
     ...leadsNuevos.map((l) => ({
       id: `lead-nuevo-${l.id}`,
+      kind: "contactar" as const,
       label: `Contactar a ${l.nombreCliente}`,
       meta: `Lead sin contactar · ${formatRelativo(l.createdAt)}`,
       urgente: false,
+      lead: {
+        id: l.id,
+        nombreCliente: l.nombreCliente,
+        contacto: l.contacto,
+        mensaje: l.mensaje,
+        canal: l.canal,
+        etapa: l.etapa,
+        vehiculo: l.vehiculo
+          ? {
+              marca: l.vehiculo.marca,
+              modelo: l.vehiculo.modelo,
+              estado: l.vehiculo.estado,
+              categoria: l.vehiculo.categoria,
+              precioUsd: Number(l.vehiculo.precioUsd),
+            }
+          : null,
+        vendedor: l.vendedor,
+        createdAt: l.createdAt.toISOString(),
+      },
     })),
     ...leadsSinAsignar.map((l) => ({
       id: `sin-asignar-${l.id}`,
+      kind: "asignar" as const,
       label: `Asignar vendedor a ${l.nombreCliente}`,
       meta: "Sin vendedor asignado",
       urgente: false,
+      lead: {
+        id: l.id,
+        nombreCliente: l.nombreCliente,
+        vehiculo: l.vehiculo ? { marca: l.vehiculo.marca, modelo: l.vehiculo.modelo } : null,
+      },
     })),
   ];
+
+  const vehiculoOptions = vehiculosDisponibles.map((v) => ({
+    id: v.id,
+    marca: v.marca,
+    modelo: v.modelo,
+    categoria: v.categoria,
+    precioUsd: Number(v.precioUsd),
+    estado: v.estado,
+  }));
 
   const primerNombre = (name ?? "").trim().split(" ")[0] || "";
 
@@ -201,29 +250,12 @@ export default async function PanelHome() {
         </div>
 
         <div className={styles.dashRow}>
-          <div className={styles.card}>
-            <div className={styles.cardHead}>
-              <h3 className="disp">Pendientes de hoy</h3>
-              <span className={styles.cardHeadCount}>{pendientes.length}</span>
-            </div>
-            {pendientes.length === 0 ? (
-              <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
-                Sin pendientes — todo al día.
-              </p>
-            ) : (
-              pendientes.slice(0, 8).map((p) => (
-                <div key={p.id} className={styles.taskRow}>
-                  <span className={`${styles.taskCheck} ${p.urgente ? styles.urgent : ""}`} />
-                  <div className={styles.taskBody}>
-                    <div className={styles.taskLabel}>{p.label}</div>
-                    <div className={`${styles.taskMeta} ${p.urgente ? styles.urgent : ""}`}>
-                      {p.meta}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <PendientesCard
+            pendientes={pendientes}
+            vehiculos={vehiculoOptions}
+            usuarios={usuarios}
+            canAsignar={canAsignar}
+          />
 
           <div className={styles.card}>
             <div className={styles.cardHead}>

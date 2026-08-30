@@ -875,6 +875,28 @@
   border-bottom: none;
 }
 
+.taskRowClickable {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.taskRowClickable:last-child {
+  border-bottom: none;
+}
+
+.taskRowClickable:hover,
+.taskRowClickable:focus-visible {
+  background: var(--sidebar-hover);
+}
+
 .taskCheck {
   width: 17px;
   height: 17px;
