@@ -496,8 +496,14 @@
 
 .cardPhoto {
   position: relative;
-  height: 208px;
+  height: 260px;
   background: linear-gradient(155deg, #1f242b, #14181e);
+}
+
+@media (max-width: 900px) {
+  .cardPhoto {
+    height: 220px;
+  }
 }
 
 .cardPhotoPlaceholder {

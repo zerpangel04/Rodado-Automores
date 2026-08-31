@@ -62,17 +62,20 @@ export default async function LoginPage({
   return (
     <div className={styles.wrap}>
       <div className={styles.left}>
-        <div className={styles.brand}>
-          <div className={styles.logoMark}>
-            <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+        <div className={styles.headerRow}>
+          <div className={styles.brand}>
+            <div className={styles.logoMark}>
+              <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+            </div>
+            <span className={styles.brandName}>Rodado</span>
           </div>
-          <span className={styles.brandName}>Rodado</span>
+          <span className={styles.panelLabel}>Panel de gestión</span>
         </div>
 
         <div className={styles.formArea}>
           <div className={styles.heading}>
-            <h1>Entrá al panel de tu agencia</h1>
-            <p>Tu stock, tus leads y tus ventas, donde los dejaste.</p>
+            <h1>Bienvenido de nuevo</h1>
+            <p>Entrá con tu cuenta para seguir gestionando tu agencia.</p>
           </div>
 
           {params.reset === "1" && (
@@ -87,31 +90,40 @@ export default async function LoginPage({
             esperaSegundosInicial={params.espera ? Number(params.espera) : 0}
           />
 
-          <div className={styles.divider} />
-
           <p className={authStyles.foot} style={{ margin: 0, textAlign: "left" }}>
             ¿Todavía no tenés cuenta? <a href="/signup">Creá tu agencia →</a>
           </p>
         </div>
 
-        <div className={styles.trustRow}>
-          <span className={styles.trustDot} />
-          Conexión cifrada · Los datos de tu agencia están aislados del resto
+        <div className={styles.footRow}>
+          <div className={styles.trustRow}>
+            <span className={styles.trustDot} />
+            Conexión cifrada · Los datos de tu agencia están aislados del resto
+          </div>
+          <a href="/forgot-password" className={styles.problemsLink}>
+            ¿Problemas para entrar?
+          </a>
         </div>
       </div>
 
       <div className={styles.right}>
         <div className={styles.rightBg} />
         <div className={styles.rightGlow} />
-        <div className={styles.rightLane} />
+        <div className={styles.rightPattern} />
+
+        <div className={styles.rightMark}>
+          <Image src="/logo-rodado.png" alt="" width={40} height={40} aria-hidden="true" />
+        </div>
+
         <div className={styles.rightContent}>
           <div className={styles.rightTitle}>
-            Tu playa,
+            Hola de nuevo,
             <br />
-            ordenada de punta a punta.
+            bienvenido a <span className={styles.hl}>Rodado</span>.
           </div>
           <div className={styles.rightSubtitle}>
-            Stock, documentación y compradores viven en el mismo lugar. Entrás y seguís donde lo dejaste.
+            Dejá el Excel y los mensajes sueltos. Stock, documentación, compradores y ventas de tu
+            concesionaria, ordenados en un solo lugar.
           </div>
           <div className={styles.hitos}>
             {hitos.map((h) => (
@@ -122,6 +134,8 @@ export default async function LoginPage({
             ))}
           </div>
         </div>
+
+        <div className={styles.rightFooter}>© {new Date().getFullYear()} Rodado. Todos los derechos reservados.</div>
       </div>
     </div>
   );

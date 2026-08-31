@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import authStyles from "../auth.module.css";
 import styles from "./login.module.css";
+import { GoogleIcon } from "./GoogleIcon";
+
+const GOOGLE_PRONTO_MSG = "Muy pronto vas a poder entrar con tu cuenta de Google.";
 
 function formatMMSS(totalSeconds: number) {
   const s = Math.max(0, Math.ceil(totalSeconds));
@@ -34,7 +37,19 @@ export function LoginForm({
   const [remember, setRemember] = useState(true);
   const [clientError, setClientError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleNote, setGoogleNote] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const googleNoteTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => clearTimeout(googleNoteTimer.current);
+  }, []);
+
+  function handleGoogleClick() {
+    setGoogleNote(true);
+    clearTimeout(googleNoteTimer.current);
+    googleNoteTimer.current = setTimeout(() => setGoogleNote(false), 3000);
+  }
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -160,6 +175,24 @@ export function LoginForm({
           {bloqueado ? `Bloqueado — ${formatMMSS(secondsLeft)}` : submitting ? "Entrando…" : "Entrar al panel"}
         </button>
       </form>
+
+      <div className={styles.orDivider}>
+        <span className={styles.orLine} />
+        <span className={styles.orCircle}>o</span>
+        <span className={styles.orLine} />
+      </div>
+
+      <button
+        type="button"
+        className={styles.googleBtn}
+        aria-disabled="true"
+        title={GOOGLE_PRONTO_MSG}
+        onClick={handleGoogleClick}
+      >
+        <GoogleIcon />
+        Entrar con Google
+      </button>
+      {googleNote && <div className={styles.googleNote}>{GOOGLE_PRONTO_MSG}</div>}
     </>
   );
 }

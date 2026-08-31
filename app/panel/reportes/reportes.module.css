@@ -232,6 +232,7 @@
 }
 
 .chartBarCol {
+  position: relative;
   flex: 1;
   min-width: 0;
   display: flex;
@@ -271,6 +272,64 @@
 .chartBarDay {
   font-size: 10.5px;
   color: #7d848d;
+  font-variant-numeric: tabular-nums;
+}
+
+.chartTooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 5;
+  min-width: 112px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
+
+.chartBarCol:hover .chartTooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.chartTooltipDate {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.chartTooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.chartTooltipRow + .chartTooltipRow {
+  margin-top: 3px;
+}
+
+.chartTooltipDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.chartTooltipVal {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 

@@ -92,6 +92,19 @@ function VentasChart({ serie }: { serie: VentaDia[] }) {
         <div className={styles.chartBars}>
           {serie.map((s) => (
             <div key={s.fecha} className={styles.chartBarCol}>
+              <div className={styles.chartTooltip}>
+                <div className={styles.chartTooltipDate}>{fmtFecha(s.fecha)}</div>
+                <div className={styles.chartTooltipRow}>
+                  <span className={styles.chartTooltipDot} style={{ background: "#f5b45c" }} />
+                  unidades
+                  <span className={styles.chartTooltipVal}>{s.unidades}</span>
+                </div>
+                <div className={styles.chartTooltipRow}>
+                  <span className={styles.chartTooltipDot} style={{ background: "#86efac" }} />
+                  monto
+                  <span className={styles.chartTooltipVal}>{usd(s.monto)}</span>
+                </div>
+              </div>
               <div className={styles.chartBarWrap}>
                 <div
                   className={styles.chartBar}

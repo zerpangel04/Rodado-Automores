@@ -11,10 +11,10 @@ import {
   Plus,
 } from "lucide-react";
 import styles from "./kanban.module.css";
-import { Pill, type PillColor } from "../Pill";
 import panelStyles from "../panel.module.css";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { LeadDetailModal } from "./LeadDetailModal";
+import { ChannelBadge } from "./ChannelBadge";
 
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
@@ -58,21 +58,8 @@ const stages: { key: Etapa; label: string }[] = [
   { key: "CERRADO", label: "Cerrado" },
 ];
 
-const canalLabel: Record<Canal, string> = {
-  WHATSAPP: "WhatsApp",
-  MERCADO_LIBRE: "Mercado Libre",
-  INSTAGRAM: "Instagram",
-  WEB: "Web",
-  WEB_IA: "Asistente IA",
-};
-
-const canalColor: Record<Canal, PillColor> = {
-  WHATSAPP: "green",
-  MERCADO_LIBRE: "amber",
-  INSTAGRAM: "purple",
-  WEB: "blue",
-  WEB_IA: "gray",
-};
+const COLLAPSED_STORAGE_KEY = "rodado:kanban:columnas-colapsadas";
+const DEFAULT_COLLAPSED: Partial<Record<Etapa, boolean>> = { CERRADO: true };
 
 const stageColor: Record<Etapa, string> = {
   NUEVO: "var(--info)",
@@ -158,6 +145,28 @@ export function KanbanView({
   const [vista, setVista] = useState<"kanban" | "tabla">("kanban");
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useState<Partial<Record<Etapa, boolean>>>(DEFAULT_COLLAPSED);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(COLLAPSED_STORAGE_KEY);
+      if (raw) setCollapsed(JSON.parse(raw));
+    } catch {
+      // localStorage inaccesible (privado, cuota, etc.) — se queda con el default
+    }
+  }, []);
+
+  function toggleCollapsed(stage: Etapa) {
+    setCollapsed((prev) => {
+      const next = { ...prev, [stage]: !prev[stage] };
+      try {
+        localStorage.setItem(COLLAPSED_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // idem
+      }
+      return next;
+    });
+  }
 
   const diasDesde = (iso?: string) =>
     iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 86400000) : 0;
@@ -481,7 +490,7 @@ export function KanbanView({
                       {lead.vehiculo ? `${lead.vehiculo.marca} ${lead.vehiculo.modelo}` : "—"}
                     </td>
                     <td>
-                      <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
+                      <ChannelBadge canal={lead.canal} />
                     </td>
                     <td>
                       <span className={styles.stageChip} style={{ color: stageColor[lead.etapa] }}>
@@ -512,22 +521,47 @@ export function KanbanView({
                 (sum, l) => sum + (l.vehiculo?.precioUsd ?? 0),
                 0
               );
+              const isCollapsed = !!collapsed[stage.key];
               return (
-                <div className={styles.kcol} key={stage.key}>
+                <div
+                  className={`${styles.kcol} ${isCollapsed ? styles.kcolCollapsed : ""}`}
+                  key={stage.key}
+                >
                   <div
                     className={styles.kcolHairline}
                     style={{ background: `linear-gradient(90deg, ${stageColor[stage.key]}, transparent 65%)` }}
                   />
-                  <div className={styles.kcolHead}>
+                  <div
+                    className={`${styles.kcolHead} ${isCollapsed ? styles.kcolHeadCollapsed : ""}`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => toggleCollapsed(stage.key)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleCollapsed(stage.key);
+                      }
+                    }}
+                    aria-expanded={!isCollapsed}
+                  >
                     <span className={styles.kcolDot} style={{ background: stageColor[stage.key] }} />
-                    <h4>{stage.label}</h4>
+                    {isCollapsed ? (
+                      <span className={styles.kcolLabelVertical}>{stage.label}</span>
+                    ) : (
+                      <h4>{stage.label}</h4>
+                    )}
                     <span className={styles.kcolCount}>{stageItems.length}</span>
-                    {valorEnJuego > 0 && (
+                    {!isCollapsed && valorEnJuego > 0 && (
                       <span className={`${styles.kcolValor} mono`}>
                         USD {valorEnJuego.toLocaleString("es-AR")}
                       </span>
                     )}
+                    <ChevronDown
+                      size={13}
+                      className={`${styles.kcolToggle} ${isCollapsed ? styles.kcolToggleCollapsed : ""}`}
+                    />
                   </div>
+                  {!isCollapsed && (
                   <div className={styles.kcolBody}>
                     {stageItems.length === 0 && (
                       <p className={styles.empty}>
@@ -617,7 +651,7 @@ export function KanbanView({
                           )}
 
                           <div className={styles.metaRow}>
-                            <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
+                            <ChannelBadge canal={lead.canal} />
                             <span className={`${styles.antiguedad} ${styles[urg]}`}>
                               hace {dias} día{dias === 1 ? "" : "s"}
                             </span>
@@ -672,6 +706,7 @@ export function KanbanView({
                       );
                     })}
                   </div>
+                  )}
                 </div>
               );
             })}

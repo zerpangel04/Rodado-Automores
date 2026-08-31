@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { X, MessageCircle, Phone, Mail } from "lucide-react";
 import styles from "./kanban.module.css";
-import { Pill, type PillColor } from "../Pill";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import type { LeadDTO, Etapa } from "./KanbanView";
+import { ChannelBadge } from "./ChannelBadge";
 
 export type VehiculoOption = {
   id: string;
@@ -25,22 +25,6 @@ const stages: { key: Etapa; label: string }[] = [
   { key: "NEGOCIACION", label: "Negociación" },
   { key: "CERRADO", label: "Cerrado" },
 ];
-
-const canalLabel: Record<LeadDTO["canal"], string> = {
-  WHATSAPP: "WhatsApp",
-  MERCADO_LIBRE: "Mercado Libre",
-  INSTAGRAM: "Instagram",
-  WEB: "Web",
-  WEB_IA: "Asistente IA",
-};
-
-const canalColor: Record<LeadDTO["canal"], PillColor> = {
-  WHATSAPP: "green",
-  MERCADO_LIBRE: "amber",
-  INSTAGRAM: "purple",
-  WEB: "blue",
-  WEB_IA: "gray",
-};
 
 function formatFecha(iso?: string) {
   if (!iso) return "—";
@@ -327,7 +311,7 @@ export function LeadDetailModal({
         <div className={styles.detailRow}>
           <span className={styles.detailLabel}>Canal de origen</span>
           <span className={styles.detailValue}>
-            <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
+            <ChannelBadge canal={lead.canal} />
           </span>
         </div>
 
