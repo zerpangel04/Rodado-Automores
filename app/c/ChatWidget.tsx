@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Sparkles, X, ArrowRight } from "lucide-react";
 import styles from "./chat.module.css";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const MENSAJE_ERROR_RED =
   "No pudimos conectar con el asistente. Probá de nuevo en un momento.";
+
+const SUGERENCIAS = ["¿Aceptan permuta?", "Busco una SUV", "¿Tienen financiación?", "¿Cuál es el más económico?"];
 
 export function ChatWidget({
   dominio,
@@ -27,8 +30,7 @@ export function ChatWidget({
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open, sending]);
 
-  async function handleSend() {
-    const texto = input.trim();
+  async function enviarTexto(texto: string) {
     if (!texto || sending) return;
 
     const next = [...messages, { role: "user" as const, content: texto }];
@@ -52,6 +54,11 @@ export function ChatWidget({
     }
   }
 
+  function handleSend() {
+    const texto = input.trim();
+    if (texto) enviarTexto(texto);
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -64,9 +71,15 @@ export function ChatWidget({
       {open && (
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
+            <div className={styles.panelIcon}>
+              <Sparkles size={15} />
+            </div>
             <div>
-              <div className={`${styles.panelTitle} disp`}>Asistente de {nombreAgencia}</div>
-              <div className={styles.panelSub}>Responde con el stock en vivo</div>
+              <div className={styles.panelTitle}>Asistente de {nombreAgencia}</div>
+              <div className={styles.panelSub}>
+                <span className={styles.panelDot} />
+                Responde con el stock en vivo
+              </div>
             </div>
             <button
               type="button"
@@ -74,7 +87,7 @@ export function ChatWidget({
               onClick={() => setOpen(false)}
               aria-label="Cerrar chat"
             >
-              ✕
+              <X size={14} />
             </button>
           </div>
 
@@ -96,20 +109,29 @@ export function ChatWidget({
             ))}
 
             {sending && (
-              <div className={`${styles.bubble} ${styles.bubbleAssistant} ${styles.typing}`}>
-                <span />
-                <span />
-                <span />
+              <div className={styles.typingRow}>
+                <span className={styles.typingDot} />
+                Buscando en el stock…
               </div>
             )}
           </div>
+
+          {messages.length === 0 && (
+            <div className={styles.suggestions}>
+              {SUGERENCIAS.map((s) => (
+                <button key={s} type="button" className={styles.suggestionChip} onClick={() => enviarTexto(s)}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className={styles.inputRow}>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Escribí tu consulta…"
+              placeholder="Escribí tu pregunta…"
               rows={1}
               disabled={sending}
             />
@@ -120,20 +142,24 @@ export function ChatWidget({
               disabled={sending || !input.trim()}
               aria-label="Enviar"
             >
-              →
+              <ArrowRight size={16} />
             </button>
           </div>
         </div>
       )}
 
-      <button
-        type="button"
-        className={styles.bubbleBtn}
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Cerrar asistente" : "Abrir asistente"}
-      >
-        {open ? "✕" : "💬"}
-      </button>
+      {!open && (
+        <button type="button" className={styles.bubbleBtn} onClick={() => setOpen(true)}>
+          <span className={styles.bubbleIcon}>
+            <Sparkles size={15} />
+            <span className={styles.bubbleIconDot} />
+          </span>
+          <span className={styles.bubbleText}>
+            <span className={styles.bubbleTitle}>Preguntale al asistente</span>
+            <span className={styles.bubbleSub}>Conoce todo el stock · responde al instante</span>
+          </span>
+        </button>
+      )}
     </div>
   );
 }

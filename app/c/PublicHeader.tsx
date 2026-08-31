@@ -1,14 +1,51 @@
+import { MessageCircle } from "lucide-react";
 import styles from "./public.module.css";
 
-export function PublicHeader({ nombre }: { nombre: string }) {
+function whatsappUrl(telefono: string) {
+  const digits = telefono.replace(/[^\d]/g, "");
+  if (digits.length < 8) return null;
+  return `https://wa.me/${digits.startsWith("54") ? digits : `54${digits}`}`;
+}
+
+export function PublicHeader({
+  nombre,
+  sucursalesCount,
+  telefono,
+}: {
+  nombre: string;
+  sucursalesCount: number;
+  telefono: string | null;
+}) {
+  const wa = telefono ? whatsappUrl(telefono) : null;
+
   return (
     <header className={styles.header}>
       <div className={`${styles.wrap} ${styles.headerInner}`}>
         <div className={styles.agency}>
-          <div className={`${styles.agencyMark} disp`}>{nombre.charAt(0).toUpperCase()}</div>
+          <div className={styles.agencyMark}>{nombre.charAt(0).toUpperCase()}</div>
           <div>
-            <div className={`${styles.agencyName} disp`}>{nombre}</div>
-            <div className={styles.agencySub}>Catálogo actualizado en vivo</div>
+            <div className={styles.agencyName}>{nombre}</div>
+            <div className={styles.agencySub}>
+              <span className={styles.agencyDot} />
+              Stock actualizado hoy
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.headerRight}>
+          {sucursalesCount > 0 && (
+            <div className={styles.headerInfo}>
+              {sucursalesCount} {sucursalesCount === 1 ? "sucursal" : "sucursales"}
+            </div>
+          )}
+          <div className={styles.headerActions}>
+            {telefono && <div className={styles.headerPhone}>{telefono}</div>}
+            {wa && (
+              <a href={wa} target="_blank" rel="noreferrer" className={styles.headerWa}>
+                <MessageCircle size={14} />
+                WhatsApp
+              </a>
+            )}
           </div>
         </div>
       </div>
