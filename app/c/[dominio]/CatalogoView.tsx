@@ -150,7 +150,10 @@ export function CatalogoView({
                     {v.fotos.length} {v.fotos.length === 1 ? "foto" : "fotos"}
                   </span>
                 )}
-                <div className={styles.cardPhotoText}>
+              </div>
+
+              <div className={styles.cardBody}>
+                <div>
                   <div className={styles.cardPhotoModelo}>
                     {v.marca} {v.modelo}
                   </div>
@@ -159,9 +162,7 @@ export function CatalogoView({
                     {v.transmision ? ` · ${v.transmision}` : ""}
                   </div>
                 </div>
-              </div>
 
-              <div className={styles.cardBody}>
                 <div className={styles.cardPriceRow}>
                   <div>
                     <div className={styles.cardPrice}>USD {v.precioUsd.toLocaleString("es-AR")}</div>

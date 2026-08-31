@@ -496,14 +496,8 @@
 
 .cardPhoto {
   position: relative;
-  height: 260px;
+  aspect-ratio: 4 / 3;
   background: linear-gradient(155deg, #1f242b, #14181e);
-}
-
-@media (max-width: 900px) {
-  .cardPhoto {
-    height: 220px;
-  }
 }
 
 .cardPhotoPlaceholder {
@@ -524,13 +518,14 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .cardPhotoOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(11, 13, 16, 0.4) 0%, transparent 34%, rgba(11, 13, 16, 0.5) 100%);
+  background: linear-gradient(180deg, rgba(11, 13, 16, 0.32) 0%, transparent 22%);
+  pointer-events: none;
 }
 
 .cardBadge {
@@ -575,33 +570,26 @@
   backdrop-filter: blur(10px);
 }
 
-.cardPhotoText {
-  position: absolute;
-  bottom: 13px;
-  left: 13px;
-  right: 13px;
-}
-
 .cardPhotoModelo {
-  font-size: 16.5px;
+  font-size: 15.5px;
   font-weight: 700;
-  color: #f7f9fa;
+  color: var(--ink);
   letter-spacing: -0.015em;
   line-height: 1.3;
 }
 
 .cardPhotoSpecs {
   font-size: 11.5px;
-  color: #c3c9cf;
+  color: var(--ink-soft);
   line-height: 1.4;
+  margin-top: 2px;
 }
 
 .cardBody {
-  padding: 15px 16px 16px;
+  padding: 12px 16px 16px;
   display: flex;
   flex-direction: column;
-  gap: 13px;
-  flex: 1;
+  gap: 10px;
 }
 
 .cardPriceRow {
@@ -859,7 +847,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .galleryThumbs {
