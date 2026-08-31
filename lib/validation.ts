@@ -123,3 +123,7 @@ export const usuarioInputSchema = z.object({
   password: z.string().min(8, "Mínimo 8 caracteres").max(200),
   rol: z.enum(rolValues),
 });
+
+export const usuarioRolUpdateSchema = z.object({
+  rol: z.enum(rolValues),
+});
