@@ -2,8 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
 import styles from "../panel.module.css";
-import ventasStyles from "./ventas.module.css";
-import { Pill } from "../Pill";
+import { VentasView } from "./VentasView";
 
 export default async function VentasPage() {
   const session = await auth();
@@ -18,11 +17,25 @@ export default async function VentasPage() {
       ...(sucursalActual ? { vehiculo: { sucursalId: sucursalActual.id } } : {}),
     },
     include: {
-      vehiculo: { select: { marca: true, modelo: true } },
-      vendedor: { select: { nombre: true } },
+      vehiculo: { select: { marca: true, modelo: true, sucursal: { select: { nombre: true } } } },
+      vendedor: { select: { id: true, nombre: true } },
     },
     orderBy: { fecha: "desc" },
   });
+
+  const items = ventas.map((v) => ({
+    id: v.id,
+    fecha: v.fecha.toISOString(),
+    vehiculo: {
+      marca: v.vehiculo.marca,
+      modelo: v.vehiculo.modelo,
+      sucursal: v.vehiculo.sucursal.nombre,
+    },
+    vendedor: v.vendedor,
+    precioFinal: Number(v.precioFinal),
+    comision: Number(v.comision),
+    estadoCobro: v.estadoCobro,
+  }));
 
   return (
     <>
@@ -36,44 +49,7 @@ export default async function VentasPage() {
         </div>
       </div>
       <div className={styles.content}>
-        {ventas.length === 0 ? (
-          <p className={ventasStyles.empty}>
-            Todavía no hay ventas registradas. Marcá un vehículo como &quot;Vendido&quot; en Stock.
-          </p>
-        ) : (
-          <div className={ventasStyles.tableWrap}>
-            <table className={ventasStyles.table}>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Vehículo</th>
-                  {rol !== "VENDEDOR" && <th>Vendedor</th>}
-                  <th>Precio final</th>
-                  <th>Comisión</th>
-                  <th>Cobro</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ventas.map((v) => (
-                  <tr key={v.id}>
-                    <td>{v.fecha.toLocaleDateString("es-AR")}</td>
-                    <td>
-                      {v.vehiculo.marca} {v.vehiculo.modelo}
-                    </td>
-                    {rol !== "VENDEDOR" && <td>{v.vendedor.nombre}</td>}
-                    <td className={ventasStyles.num}>USD {Number(v.precioFinal).toLocaleString("es-AR")}</td>
-                    <td className={ventasStyles.num}>USD {Number(v.comision).toLocaleString("es-AR")}</td>
-                    <td>
-                      <Pill color={v.estadoCobro === "COBRADO" ? "green" : "amber"}>
-                        {v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente"}
-                      </Pill>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <VentasView initialItems={items} verVendedor={rol !== "VENDEDOR"} />
       </div>
     </>
   );

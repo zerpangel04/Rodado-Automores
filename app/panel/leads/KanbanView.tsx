@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   ChevronDown,
@@ -220,10 +220,14 @@ export function KanbanView({
 
   useBodyScrollLock(showModal);
 
+  const menuWrapRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!openMenuId) return;
-    function handleClick() {
-      setOpenMenuId(null);
+    function handleClick(e: MouseEvent) {
+      if (menuWrapRef.current && !menuWrapRef.current.contains(e.target as Node)) {
+        setOpenMenuId(null);
+      }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -556,7 +560,10 @@ export function KanbanView({
                               <div className={styles.name}>{lead.nombreCliente}</div>
                               {lead.contacto && <div className={styles.phone}>{lead.contacto}</div>}
                             </div>
-                            <div className={styles.kcardMenuWrap}>
+                            <div
+                              className={styles.kcardMenuWrap}
+                              ref={openMenuId === lead.id ? menuWrapRef : undefined}
+                            >
                               <button
                                 type="button"
                                 className={styles.kcardMenuBtn}
@@ -569,7 +576,7 @@ export function KanbanView({
                                 ···
                               </button>
                               {openMenuId === lead.id && (
-                                <div className={styles.kcardMenu} onClick={(e) => e.stopPropagation()}>
+                                <div className={styles.kcardMenu}>
                                   <button
                                     type="button"
                                     onClick={() => {

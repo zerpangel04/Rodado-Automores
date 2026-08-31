@@ -1,23 +1,21 @@
 import styles from "./panel.module.css";
 
-export function KpiBar({
+export function KpiSpark({
   color,
-  colorEnd,
   label,
   value,
   unit,
   trend,
-  percent,
+  spark,
 }: {
   color: string;
-  colorEnd?: string;
   label: string;
   value: string;
   unit?: string;
   trend?: { label: string; positive: boolean | "neutral" };
-  percent: number;
+  spark: number[];
 }) {
-  const clamped = Math.max(0, Math.min(100, percent));
+  const max = Math.max(...spark, 1);
   return (
     <div className={styles.kpiBar}>
       <div
@@ -41,11 +39,14 @@ export function KpiBar({
           </span>
         )}
       </div>
-      <div className={styles.kpiBarTrack}>
-        <div
-          className={styles.kpiBarFill}
-          style={{ width: `${clamped}%`, background: `linear-gradient(90deg, ${color}, ${colorEnd ?? color})` }}
-        />
+      <div className={styles.kpiSparkRow}>
+        {spark.map((v, i) => (
+          <div
+            key={i}
+            className={styles.kpiSparkBar}
+            style={{ height: `${Math.max(12, Math.round((v / max) * 100))}%`, background: color, opacity: 0.5 }}
+          />
+        ))}
       </div>
     </div>
   );

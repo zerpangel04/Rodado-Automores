@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
 import styles from "../panel.module.css";
 import reportStyles from "./reportes.module.css";
-import { ReportesView } from "./ReportesView";
+import { ReportesView, type Etapa } from "./ReportesView";
 
 const canalLabel: Record<string, string> = {
   WHATSAPP: "WhatsApp",
@@ -12,6 +12,16 @@ const canalLabel: Record<string, string> = {
   WEB: "Web",
   WEB_IA: "Asistente IA",
 };
+
+const etapaOrder: Record<Etapa, number> = {
+  NUEVO: 0,
+  CONTACTADO: 1,
+  TEST_DRIVE: 2,
+  NEGOCIACION: 3,
+  CERRADO: 4,
+};
+
+const embudoLabels = ["Consultas recibidas", "Contactados", "Test drive", "Negociación", "Cerrados"];
 
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -49,6 +59,12 @@ export default async function ReportesPage({
     from = startOfDay(new Date(now.getTime() - days * 86400000));
   }
 
+  // Período anterior de igual duración, inmediatamente antes de "from" —
+  // usado solo para las tendencias (nunca se muestra un delta inventado).
+  const rangeDurationMs = to.getTime() - from.getTime();
+  const prevTo = new Date(from.getTime() - 1);
+  const prevFrom = new Date(prevTo.getTime() - rangeDurationMs);
+
   const sucursalActual = await getSucursalActual(tenantId);
   const sucursalFilter = sucursalActual
     ? { vehiculo: { sucursalId: sucursalActual.id } }
@@ -56,7 +72,15 @@ export default async function ReportesPage({
 
   const vendorFilter = rol === "VENDEDOR" ? { vendedorId: userId } : {};
 
-  const [ventasEnRango, leadsEnRango, ventasParaRotacion, usuariosTenant] = await Promise.all([
+  const [
+    ventasEnRango,
+    leadsEnRango,
+    ventasParaRotacion,
+    usuariosTenant,
+    ventasPrev,
+    leadsPrev,
+    ventasParaRotacionPrev,
+  ] = await Promise.all([
     prisma.venta.findMany({
       where: { tenantId, ...vendorFilter, ...sucursalFilter, fecha: { gte: from, lte: to } },
       select: { fecha: true, precioFinal: true },
@@ -84,6 +108,18 @@ export default async function ReportesPage({
           orderBy: { nombre: "asc" },
         })
       : Promise.resolve([]),
+    prisma.venta.findMany({
+      where: { tenantId, ...vendorFilter, ...sucursalFilter, fecha: { gte: prevFrom, lte: prevTo } },
+      select: { precioFinal: true },
+    }),
+    prisma.lead.findMany({
+      where: { tenantId, ...vendorFilter, ...sucursalFilter, createdAt: { gte: prevFrom, lte: prevTo } },
+      select: { etapa: true },
+    }),
+    prisma.venta.findMany({
+      where: { tenantId, ...sucursalFilter, fecha: { gte: prevFrom, lte: prevTo } },
+      select: { fecha: true, vehiculo: { select: { fechaIngreso: true } } },
+    }),
   ]);
 
   // --- Ventas en el tiempo: agrupadas por día ---
@@ -99,6 +135,11 @@ export default async function ReportesPage({
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([fecha, v]) => ({ fecha, ...v }));
 
+  const totalUnidades = ventasEnRango.length;
+  const totalMonto = ventasEnRango.reduce((s, v) => s + Number(v.precioFinal), 0);
+  const totalMontoPrev = ventasPrev.reduce((s, v) => s + Number(v.precioFinal), 0);
+  const totalUnidadesPrev = ventasPrev.length;
+
   // --- Leads por canal + conversión a cerrado ---
   const canales = ["WHATSAPP", "MERCADO_LIBRE", "INSTAGRAM", "WEB", "WEB_IA"] as const;
   const leadsPorCanal = canales.map((canal) => {
@@ -111,6 +152,22 @@ export default async function ReportesPage({
       pct: deEsteCanal.length > 0 ? Math.round((cerrados / deEsteCanal.length) * 100) : 0,
     };
   });
+
+  // --- Embudo de conversión: cuenta leads que llegaron a cada etapa o más
+  // allá, asumiendo progresión monótona (no se trackea historial de etapas
+  // intermedias, solo la etapa actual) ---
+  const embudo = embudoLabels.map((label, i) => ({
+    label,
+    n: leadsEnRango.filter((l) => etapaOrder[l.etapa as Etapa] >= i).length,
+  }));
+  const totalLeads = embudo[0].n;
+  const totalCerrados = embudo[4].n;
+  const conversionPct = totalLeads > 0 ? Math.round((totalCerrados / totalLeads) * 100) : 0;
+
+  const totalLeadsPrev = leadsPrev.length;
+  const totalCerradosPrev = leadsPrev.filter((l) => l.etapa === "CERRADO").length;
+  const conversionPctPrev =
+    totalLeadsPrev > 0 ? Math.round((totalCerradosPrev / totalLeadsPrev) * 100) : null;
 
   // --- Rotación de stock: días entre fechaIngreso y la venta ---
   const rotacion = ventasParaRotacion.map((v) => {
@@ -126,14 +183,21 @@ export default async function ReportesPage({
     rotacion.length > 0
       ? Math.round(rotacion.reduce((acc, r) => acc + r.dias, 0) / rotacion.length)
       : null;
-  const rotacionMin = rotacion.length > 0 ? Math.min(...rotacion.map((r) => r.dias)) : null;
-  const rotacionMax = rotacion.length > 0 ? Math.max(...rotacion.map((r) => r.dias)) : null;
+
+  const rotacionPrevDias = ventasParaRotacionPrev.map((v) =>
+    Math.max(0, Math.round((v.fecha.getTime() - v.vehiculo.fechaIngreso.getTime()) / 86400000))
+  );
+  const rotacionPromedioPrev =
+    rotacionPrevDias.length > 0
+      ? Math.round(rotacionPrevDias.reduce((a, b) => a + b, 0) / rotacionPrevDias.length)
+      : null;
 
   // --- Performance por vendedor (solo Dueño) ---
   let performanceVendedores: {
     nombre: string;
     leads: number;
     ventas: number;
+    facturado: number;
     comision: number;
   }[] = [];
 
@@ -153,7 +217,7 @@ export default async function ReportesPage({
         by: ["vendedorId"],
         where: { tenantId, ...sucursalFilter, fecha: { gte: from, lte: to } },
         _count: { _all: true },
-        _sum: { comision: true },
+        _sum: { comision: true, precioFinal: true },
       }),
     ]);
 
@@ -162,16 +226,56 @@ export default async function ReportesPage({
     const comisionPorVendedor = new Map(
       ventasGroup.map((g) => [g.vendedorId, Number(g._sum.comision ?? 0)])
     );
+    const facturadoPorVendedor = new Map(
+      ventasGroup.map((g) => [g.vendedorId, Number(g._sum.precioFinal ?? 0)])
+    );
 
     performanceVendedores = usuariosTenant
       .map((u) => ({
         nombre: u.nombre,
         leads: leadsPorVendedor.get(u.id) ?? 0,
         ventas: ventasPorVendedor.get(u.id) ?? 0,
+        facturado: facturadoPorVendedor.get(u.id) ?? 0,
         comision: comisionPorVendedor.get(u.id) ?? 0,
       }))
       .filter((u) => u.leads > 0 || u.ventas > 0)
       .sort((a, b) => b.ventas - a.ventas || b.comision - a.comision);
+  }
+
+  // --- Lecturas automáticas: solo se generan cuando hay datos reales que
+  // las sustenten, nunca con placeholders ---
+  const lecturas: { tono: "success" | "warn" | "danger"; titulo: string; detalle: string }[] = [];
+
+  const canalesConDatos = leadsPorCanal.filter((c) => c.total > 0);
+  if (canalesConDatos.length > 0) {
+    const mejor = canalesConDatos.slice().sort((a, b) => b.pct - a.pct)[0];
+    lecturas.push({
+      tono: "success",
+      titulo: `${mejor.canal} es tu mejor canal`,
+      detalle: `Cierra el ${mejor.pct}% de sus ${mejor.total} consulta${mejor.total === 1 ? "" : "s"} en este período.`,
+    });
+
+    const peor = canalesConDatos.slice().sort((a, b) => a.pct - b.pct)[0];
+    if (peor.canal !== mejor.canal && peor.pct < 30) {
+      lecturas.push({
+        tono: "warn",
+        titulo: `${peor.canal} no está cerrando`,
+        detalle: `${peor.total} consulta${peor.total === 1 ? "" : "s"} y ${peor.cerrados} venta${
+          peor.cerrados === 1 ? "" : "s"
+        } en el período. Revisá precio y tiempo de respuesta.`,
+      });
+    }
+  }
+
+  if (rotacion.length > 0 && rotacionPromedio !== null) {
+    const lenta = rotacion.slice().sort((a, b) => b.dias - a.dias)[0];
+    if (lenta.dias >= rotacionPromedio * 1.5 && lenta.dias >= 20) {
+      lecturas.push({
+        tono: "danger",
+        titulo: `${lenta.vehiculo} tiene rotación lenta`,
+        detalle: `${lenta.dias} días en stock, contra un promedio de ${rotacionPromedio}. Considerá ajustar el precio o rotarla de sucursal.`,
+      });
+    }
   }
 
   return (
@@ -221,13 +325,20 @@ export default async function ReportesPage({
         </div>
 
         <ReportesView
+          totalUnidades={totalUnidades}
+          totalMonto={totalMonto}
+          totalUnidadesPrev={totalUnidadesPrev}
+          totalMontoPrev={totalMontoPrev}
           ventasSerie={ventasSerie}
+          embudo={embudo}
+          conversionPct={conversionPct}
+          conversionPctPrev={conversionPctPrev}
           leadsPorCanal={leadsPorCanal}
           rotacion={rotacion}
           rotacionPromedio={rotacionPromedio}
-          rotacionMin={rotacionMin}
-          rotacionMax={rotacionMax}
+          rotacionPromedioPrev={rotacionPromedioPrev}
           performanceVendedores={rol === "DUENIO" ? performanceVendedores : null}
+          lecturas={lecturas}
         />
       </div>
     </>

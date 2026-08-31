@@ -513,6 +513,10 @@
   color: var(--danger-text);
 }
 
+.kpiBarTrend.neutral {
+  color: var(--ink-soft);
+}
+
 .kpiBarTrack {
   height: 3px;
   border-radius: 3px;
@@ -523,6 +527,18 @@
 .kpiBarFill {
   height: 100%;
   border-radius: 3px;
+}
+
+.kpiSparkRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 26px;
+}
+
+.kpiSparkBar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
 }
 
 .dashRow {

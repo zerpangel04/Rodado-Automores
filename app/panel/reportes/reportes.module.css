@@ -1,7 +1,7 @@
 .filterBar {
   display: flex;
   gap: 10px;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -20,8 +20,9 @@
 
 .fbtn.active {
   background: var(--accent-grad);
-  color: #fff;
+  color: var(--accent-ink);
   border-color: transparent;
+  font-weight: 600;
 }
 
 .customRange {
@@ -48,36 +49,54 @@
   cursor: pointer;
 }
 
-.grid {
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kpiRow {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 11px;
+}
+
+.topRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.midRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
 }
 
 @media (max-width: 1000px) {
-  .grid {
+  .topRow,
+  .midRow {
     grid-template-columns: 1fr;
   }
 }
 
-.span2 {
-  grid-column: span 2;
-}
-
-@media (max-width: 1000px) {
-  .span2 {
-    grid-column: span 1;
+@media (max-width: 640px) {
+  .kpiRow {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
 .card {
   background: var(--surface);
-  backdrop-filter: blur(var(--blur)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px 22px;
+  border-radius: 13px;
+  padding: 16px 18px 16px;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 @media (max-width: 640px) {
@@ -86,109 +105,586 @@
   }
 }
 
-.card h2 {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
+.cardTitle {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.cardHeadRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .subtext {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  margin-top: 4px;
-  margin-bottom: 16px;
+  font-size: 11.5px;
+  color: #7d848d;
+  margin: 3px 0 0;
+  font-variant-numeric: tabular-nums;
 }
 
-.chartsRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 700px) {
-  .chartsRow {
-    grid-template-columns: 1fr;
-  }
-}
-
-.chartBox {
-  min-width: 0;
-}
-
-.chartLabel {
-  font-family: var(--font-mono), monospace;
+.chartLegend {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-soft);
-  margin-bottom: 8px;
+  color: #8d949e;
+  flex: none;
 }
 
-.empty {
+.chartLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendSwatchBar {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f5b45c, #c9762a);
+}
+
+.legendSwatchLine {
+  width: 12px;
+  height: 2px;
+  background: #86efac;
+}
+
+.chartEmpty {
   color: var(--ink-soft);
   font-size: 13px;
   padding: 40px 0;
   text-align: center;
 }
 
-.statsRow {
+/* --- Ventas en el tiempo: barras + polyline --- */
+
+.chartRow {
   display: flex;
-  gap: 14px;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
 }
 
-.stat {
+.chartScale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #5d656d;
+  font-variant-numeric: tabular-nums;
+  height: 196px;
+  text-align: right;
+  flex: none;
+  padding-bottom: 20px;
+}
+
+.chartArea {
   flex: 1;
-  min-width: 110px;
-  background: var(--input-bg);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 12px 14px;
+  min-width: 0;
+  position: relative;
+  height: 196px;
 }
 
-.statLabel {
-  font-size: 11px;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+.chartGridLines {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 176px;
 }
 
-.statValue {
-  font-size: 20px;
+.gridLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.gridLineMid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.gridLineBase {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.chartBars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.chartBarCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.chartBarWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 176px;
+}
+
+.chartBar {
+  width: 60%;
+  max-width: 46px;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, #f5b45c, #c9762a);
+  position: relative;
+}
+
+.chartBarValue {
+  position: absolute;
+  top: -17px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10.5px;
   font-weight: 700;
-  margin-top: 4px;
+  color: var(--accent-xlight);
+  font-variant-numeric: tabular-nums;
 }
 
-.tableWrap {
+.chartBarDay {
+  font-size: 10.5px;
+  color: #7d848d;
+  font-variant-numeric: tabular-nums;
+}
+
+.chartSvg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 176px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* --- Embudo de conversión --- */
+
+.embudoList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.embudoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.embudoHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.embudoLabel {
+  font-size: 11.5px;
+  color: #c3c9cf;
+}
+
+.embudoN {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.embudoCaida {
+  width: 52px;
+  text-align: right;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.embudoTrack {
+  height: 9px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.embudoFill {
+  height: 100%;
+  border-radius: 5px;
+}
+
+.embudoInsight {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  border-radius: 11px;
+  background: rgba(240, 161, 60, 0.08);
+  border: 1px solid rgba(240, 161, 60, 0.22);
+  font-size: 11.5px;
+  color: #e0d6c7;
+}
+
+/* --- Leads por canal --- */
+
+.canalesSubHead {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: #6a7179;
+  text-align: right;
+  flex: none;
+}
+
+.canalList {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.canalRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.canalHead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.canalDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.canalLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dfe4e9;
+}
+
+.canalDetalle {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: #949ba3;
+  font-variant-numeric: tabular-nums;
+}
+
+.canalConv {
+  width: 46px;
+  text-align: right;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.canalTrack {
+  position: relative;
+  height: 9px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.canalTrackTotal {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 5px;
+  background: rgba(240, 161, 60, 0.34);
+}
+
+.canalTrackCerrados {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #86efac, #22c55e);
+}
+
+/* --- Rotación de stock --- */
+
+.rotPromedio {
+  margin-left: auto;
+  text-align: right;
+  flex: none;
+}
+
+.rotPromedioValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.rotPromedioLabel {
+  font-size: 10.5px;
+  color: #6a7179;
+}
+
+.rotList {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.rotRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.rotLabel {
+  width: 128px;
+  flex: none;
+  font-size: 11.5px;
+  color: #c3c9cf;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rotTrack {
+  flex: 1;
+  min-width: 0;
+  height: 9px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.rotFill {
+  height: 100%;
+  border-radius: 5px;
+}
+
+.rotDias {
+  width: 40px;
+  flex: none;
+  text-align: right;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rotFoot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+  font-size: 11px;
+  color: #6a7179;
+}
+
+.rotFoot span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rotLegendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.rotNota {
+  margin-left: auto;
+}
+
+/* --- Performance por vendedor --- */
+
+.perfTableWrap {
+  display: flex;
+  flex-direction: column;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.table {
-  width: 100%;
-  min-width: 420px;
-  border-collapse: collapse;
-  margin-top: 18px;
-  font-size: 13px;
+.perfHead,
+.perfRow {
+  display: grid;
+  grid-template-columns: 1.35fr 0.7fr 0.7fr 1.5fr 1fr 1fr;
+  gap: 14px;
+  align-items: center;
+  min-width: 560px;
 }
 
-.table th {
-  text-align: left;
-  font-family: var(--font-mono), monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-soft);
-  padding: 0 10px 10px 0;
-  font-weight: 500;
+.perfHead {
+  padding: 11px 4px;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: #6a7179;
+  font-weight: 700;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.table td {
-  padding: 10px 10px 10px 0;
-  border-top: 1px solid var(--line);
+.perfRow {
+  padding: 14px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.table .num {
+.perfRow:last-child {
+  border-bottom: none;
+}
+
+.perfRow:hover {
+  background: rgba(240, 161, 60, 0.055);
+}
+
+.right {
   text-align: right;
+  font-size: 12.5px;
+  color: #c3c9cf;
+  font-variant-numeric: tabular-nums;
+}
+
+.rightPad {
+  text-align: right;
+  padding-right: 18px;
+  font-size: 12.5px;
+  color: #c3c9cf;
+  font-variant-numeric: tabular-nums;
+}
+
+.perfVendedor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent-mark-grad);
+}
+
+.perfNombre {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perfCierre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.perfCierreTrack {
+  flex: 1;
+  min-width: 0;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.perfCierreFill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+/* --- Lecturas automáticas --- */
+
+.lecturas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 11px;
+}
+
+.lecturaCard {
+  display: flex;
+  gap: 12px;
+  padding: 15px 16px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
+}
+
+.lecturaIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lecturaCard.success .lecturaIcon {
+  color: var(--secondary-text);
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.26);
+}
+
+.lecturaCard.warn .lecturaIcon {
+  color: var(--warn-text);
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.26);
+}
+
+.lecturaCard.danger .lecturaIcon {
+  color: var(--danger-text);
+  background: rgba(248, 113, 113, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.26);
+}
+
+.lecturaTitulo {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.lecturaDetalle {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #949ba3;
+  margin-top: 3px;
 }
