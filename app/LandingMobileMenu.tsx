@@ -46,8 +46,11 @@ export function LandingMobileMenu() {
             <a href="#modulos" onClick={close}>
               Módulos
             </a>
-            <a href="#ia" onClick={close}>
-              IA
+            <a href="#movil" onClick={close}>
+              Celular
+            </a>
+            <a href="#catalogo" onClick={close}>
+              Catálogo
             </a>
             <a href="#precios" onClick={close}>
               Precios
