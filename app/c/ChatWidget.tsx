@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X, ArrowRight } from "lucide-react";
 import styles from "./chat.module.css";
+import { ASK_ASSISTANT_EVENT } from "./chatEvents";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -25,15 +26,25 @@ export function ChatWidget({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef(messages);
+  const sendingRef = useRef(sending);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open, sending]);
 
-  async function enviarTexto(texto: string) {
-    if (!texto || sending) return;
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
-    const next = [...messages, { role: "user" as const, content: texto }];
+  useEffect(() => {
+    sendingRef.current = sending;
+  }, [sending]);
+
+  async function enviarTexto(texto: string) {
+    if (!texto || sendingRef.current) return;
+
+    const next = [...messagesRef.current, { role: "user" as const, content: texto }];
     setMessages(next);
     setInput("");
     setSending(true);
@@ -58,6 +69,18 @@ export function ChatWidget({
     const texto = input.trim();
     if (texto) enviarTexto(texto);
   }
+
+  useEffect(() => {
+    function handleAsk(e: Event) {
+      const pregunta = (e as CustomEvent<{ pregunta: string }>).detail?.pregunta;
+      if (!pregunta) return;
+      setOpen(true);
+      enviarTexto(pregunta);
+    }
+    window.addEventListener(ASK_ASSISTANT_EVENT, handleAsk);
+    return () => window.removeEventListener(ASK_ASSISTANT_EVENT, handleAsk);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PublicHeader } from "../PublicHeader";
 import { ChatWidget } from "../ChatWidget";
+import { AskAssistantChips } from "../AskAssistantChips";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import styles from "../public.module.css";
 
@@ -105,6 +106,7 @@ export default async function CatalogoPublico({
                   <div className={styles.vitrinaItemUnit}>km</div>
                 </div>
               </div>
+              <AskAssistantChips />
             </div>
           </div>
 
