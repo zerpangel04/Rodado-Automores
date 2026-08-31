@@ -3,6 +3,7 @@ import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { ventaInputSchema } from "@/lib/validation";
 import { registrarActividad } from "@/lib/actividad";
+import { pausarPublicacionMercadoLibre } from "@/lib/mercadolibre";
 
 export async function POST(
   req: NextRequest,
@@ -80,6 +81,8 @@ export async function POST(
     ventaId: venta.id,
     vendedorId,
   });
+
+  await pausarPublicacionMercadoLibre(tenantId, vehiculo);
 
   return NextResponse.json(venta, { status: 201 });
 }

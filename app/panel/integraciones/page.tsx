@@ -1,13 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { formatRelativo } from "../actividadDisplay";
 import styles from "../panel.module.css";
-import integStyles from "./integraciones.module.css";
-
-const errorLabel: Record<string, string> = {
-  estado_invalido: "La conexión expiró o no pudimos validarla, probá de nuevo.",
-  token_error: "Mercado Libre rechazó la conexión, probá de nuevo.",
-  config: "Falta configurar las credenciales de Mercado Libre del lado del servidor.",
-};
+import { IntegracionesView, type ActividadItem } from "./IntegracionesView";
 
 export default async function IntegracionesPage({
   searchParams,
@@ -34,53 +29,78 @@ export default async function IntegracionesPage({
     );
   }
 
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
   const conexion = await prisma.mercadoLibreConexion.findUnique({ where: { tenantId } });
+
+  let metricas = null;
+  let actividad: ActividadItem[] = [];
+
+  if (conexion) {
+    const [totalVehiculos, publicados, consultasImportadas, atencion, actividadLog] = await Promise.all([
+      prisma.vehiculo.count({ where: { tenantId } }),
+      prisma.vehiculo.count({ where: { tenantId, mlItemId: { not: null } } }),
+      prisma.lead.count({
+        where: { tenantId, canal: "MERCADO_LIBRE", createdAt: { gte: startOfMonth } },
+      }),
+      prisma.vehiculo.findMany({
+        where: { tenantId, mlLastError: { not: null } },
+        select: { marca: true, modelo: true, mlLastError: true },
+        take: 1,
+      }),
+      prisma.actividadLog.findMany({
+        where: { tenantId, tipo: { in: ["ML_ACTUALIZADO", "ML_PAUSADA", "ML_ATENCION"] } },
+        orderBy: { createdAt: "desc" },
+        take: 6,
+        select: { id: true, tipo: true, descripcion: true, createdAt: true },
+      }),
+    ]);
+
+    metricas = {
+      publicacionesActivas: publicados,
+      totalVehiculos,
+      consultasImportadas,
+      requierenAtencion: atencion.length,
+      primeraAtencion: atencion[0]
+        ? `${atencion[0].marca} ${atencion[0].modelo}: ${atencion[0].mlLastError}`
+        : null,
+    };
+
+    actividad = actividadLog.map((a) => ({
+      id: a.id,
+      tipo: a.tipo,
+      texto: a.descripcion,
+      hace: formatRelativo(a.createdAt),
+    }));
+  }
 
   return (
     <>
       <div className={styles.topbar}>
         <div>
           <h1 className="disp">Integraciones</h1>
-          <div className={styles.topbarSub}>Conectá tu agencia con otras plataformas</div>
+          <div className={styles.topbarSub}>Conectá tu agencia con las plataformas donde publicás y vendés</div>
         </div>
       </div>
       <div className={styles.content}>
-        {searchParams.ml_connected === "1" && (
-          <div className={`${integStyles.banner} ${integStyles.bannerSuccess}`}>
-            ✓ Cuenta de Mercado Libre conectada correctamente.
-          </div>
-        )}
-        {searchParams.ml_error && (
-          <div className={`${integStyles.banner} ${integStyles.bannerError}`}>
-            {errorLabel[searchParams.ml_error] ?? "No se pudo conectar con Mercado Libre."}
-          </div>
-        )}
-
-        <div className={`${styles.card} ${integStyles.card}`}>
-          <div className={integStyles.cardHead}>
-            <div className={integStyles.logo}>ML</div>
-            <div>
-              <h3 className="disp">Mercado Libre</h3>
-              <p>Publicá tu stock y sincronizá precios y estado automáticamente</p>
-            </div>
-          </div>
-
-          {conexion ? (
-            <div className={integStyles.statusRow}>
-              <span className="pill pill-green">Conectada</span>
-              Cuenta de Mercado Libre #{conexion.mlUserId}
-            </div>
-          ) : (
-            <div className={integStyles.statusRow}>
-              <span className="pill pill-gray">Sin conectar</span>
-              Todavía no vinculaste una cuenta
-            </div>
-          )}
-
-          <a href="/api/mercadolibre/connect" className={integStyles.btnPrimary}>
-            {conexion ? "Reconectar con Mercado Libre" : "Conectar con Mercado Libre"} →
-          </a>
-        </div>
+        <IntegracionesView
+          conectada={
+            conexion
+              ? {
+                  mlUserId: conexion.mlUserId,
+                  conectadaDesde: conexion.createdAt.toISOString(),
+                  syncPrecios: conexion.syncPrecios,
+                  syncFotos: conexion.syncFotos,
+                  pausarAlVender: conexion.pausarAlVender,
+                }
+              : null
+          }
+          metricas={metricas}
+          actividad={actividad}
+          mlConnected={searchParams.ml_connected === "1"}
+          mlError={searchParams.ml_error ?? null}
+        />
       </div>
     </>
   );

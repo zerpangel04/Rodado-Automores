@@ -1,4 +1,14 @@
-import { UserPlus, ArrowRight, DollarSign, Car, Bookmark, type LucideIcon } from "lucide-react";
+import {
+  UserPlus,
+  ArrowRight,
+  DollarSign,
+  Car,
+  Bookmark,
+  RefreshCw,
+  PauseCircle,
+  AlertTriangle,
+  type LucideIcon,
+} from "lucide-react";
 
 // Compartido entre el widget "Actividad reciente" del Panel general y la
 // campanita de notificaciones — mismo ícono/color por tipo y mismo cálculo
@@ -9,6 +19,9 @@ export const actividadIcon: Record<string, LucideIcon> = {
   VENTA_REGISTRADA: DollarSign,
   VEHICULO_VENDIDO: Car,
   VEHICULO_RESERVADO: Bookmark,
+  ML_ACTUALIZADO: RefreshCw,
+  ML_PAUSADA: PauseCircle,
+  ML_ATENCION: AlertTriangle,
 };
 
 export const actividadColor: Record<string, string> = {
@@ -17,6 +30,9 @@ export const actividadColor: Record<string, string> = {
   VENTA_REGISTRADA: "var(--success)",
   VEHICULO_VENDIDO: "var(--ink-soft)",
   VEHICULO_RESERVADO: "var(--warn)",
+  ML_ACTUALIZADO: "var(--success)",
+  ML_PAUSADA: "var(--info)",
+  ML_ATENCION: "var(--warn)",
 };
 
 export function formatRelativo(date: Date | string) {

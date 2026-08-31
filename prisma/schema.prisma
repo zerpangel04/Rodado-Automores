@@ -51,6 +51,9 @@ enum TipoActividad {
   VENTA_REGISTRADA
   VEHICULO_VENDIDO
   VEHICULO_RESERVADO
+  ML_ACTUALIZADO
+  ML_PAUSADA
+  ML_ATENCION
 }
 
 // Cada concesionaria = un tenant. Todo dato cuelga de un tenant_id.
@@ -98,8 +101,17 @@ model MercadoLibreConexion {
   accessToken  String
   refreshToken String
   expiresAt    DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+
+  // Qué se empuja a Mercado Libre cuando se edita un vehículo publicado.
+  // "Consultas como leads" no está acá todavía: importar preguntas reales
+  // de ML requiere un webhook o polling que no existe hoy — ver README de
+  // Integraciones antes de agregar ese switch.
+  syncPrecios    Boolean @default(true)
+  syncFotos      Boolean @default(true)
+  pausarAlVender Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Usuario {

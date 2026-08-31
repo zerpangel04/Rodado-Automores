@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { vehiculoUpdateSchema } from "@/lib/validation";
 import { findOwnedVehiculo } from "@/lib/vehiculos";
 import { registrarActividad } from "@/lib/actividad";
+import { syncVehiculoAMercadoLibre } from "@/lib/mercadolibre";
 
 export async function PATCH(
   req: NextRequest,
@@ -63,6 +64,10 @@ export async function PATCH(
       descripcion: `${vehiculo.marca} ${vehiculo.modelo} — reservado`,
       vehiculoId: vehiculo.id,
     });
+  }
+
+  if (vehiculo.mlItemId) {
+    await syncVehiculoAMercadoLibre(session.user.tenantId, existente, vehiculo);
   }
 
   return NextResponse.json(vehiculo);

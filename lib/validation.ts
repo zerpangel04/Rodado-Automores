@@ -115,6 +115,14 @@ export const sucursalInputSchema = z.object({
 
 export const sucursalUpdateSchema = sucursalInputSchema.partial();
 
+export const mercadoLibreConexionUpdateSchema = z
+  .object({
+    syncPrecios: z.boolean(),
+    syncFotos: z.boolean(),
+    pausarAlVender: z.boolean(),
+  })
+  .partial();
+
 export const rolValues = ["DUENIO", "ADMIN", "VENDEDOR"] as const;
 
 export const usuarioInputSchema = z.object({

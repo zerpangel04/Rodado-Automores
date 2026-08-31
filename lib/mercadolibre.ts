@@ -1,4 +1,6 @@
+import type { Vehiculo } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { registrarActividad } from "@/lib/actividad";
 
 // El redirect_uri de Mercado Libre tiene que ser un string estático que
 // coincida carácter por carácter con el registrado en el dashboard de la
@@ -171,6 +173,150 @@ export async function createMercadoLibreListing(
     return { ok: true, itemId: data.id, permalink: data.permalink, status: data.status ?? "unknown" };
   }
 
+  const body = data as MlErrorBody | null;
+  const causeDetail = body?.cause
+    ?.map((c) => c.message ?? c.code)
+    .filter(Boolean)
+    .join("; ");
+  const error = causeDetail || body?.message || `Mercado Libre devolvió HTTP ${res.status}`;
+  return { ok: false, error };
+}
+
+/**
+ * Empuja a Mercado Libre lo que cambió al editar un vehículo ya publicado
+ * (precio/stock y fotos/descripción), respetando los switches de la
+ * conexión. Nunca tira: si algo falla, guarda el motivo en mlLastError y
+ * queda registrado en el feed de actividad — la edición del vehículo en
+ * Rodado ya se hizo y no depende de que esto salga bien.
+ */
+export async function syncVehiculoAMercadoLibre(
+  tenantId: string,
+  antes: Vehiculo,
+  despues: Vehiculo
+) {
+  if (!despues.mlItemId) return;
+
+  const conexion = await prisma.mercadoLibreConexion.findUnique({ where: { tenantId } });
+  if (!conexion) return;
+
+  const payload: Record<string, unknown> = {};
+  const cambios: string[] = [];
+
+  if (conexion.syncPrecios && Number(antes.precioUsd) !== Number(despues.precioUsd)) {
+    payload.price = Number(despues.precioUsd);
+    cambios.push("precio");
+  }
+  if (conexion.syncPrecios && antes.estado !== despues.estado && despues.estado !== "VENDIDO") {
+    payload.available_quantity = despues.estado === "DISPONIBLE" ? 1 : 0;
+    cambios.push("disponibilidad");
+  }
+  if (conexion.syncFotos && JSON.stringify(antes.fotos) !== JSON.stringify(despues.fotos)) {
+    payload.pictures = despues.fotos.map((url) => ({ source: url }));
+    cambios.push("fotos");
+  }
+
+  if (Object.keys(payload).length === 0) return;
+
+  try {
+    const accessToken = await getValidAccessToken(tenantId);
+    if (!accessToken) return;
+
+    const resultado = await updateMercadoLibreListing(accessToken, despues.mlItemId, payload);
+
+    if (resultado.ok) {
+      if (despues.mlLastError) {
+        await prisma.vehiculo.update({ where: { id: despues.id }, data: { mlLastError: null } });
+      }
+      await registrarActividad({
+        tenantId,
+        tipo: "ML_ACTUALIZADO",
+        descripcion: `${despues.marca} ${despues.modelo} — ${cambios.join(" y ")} actualizado en Mercado Libre`,
+        vehiculoId: despues.id,
+      });
+    } else {
+      await prisma.vehiculo.update({ where: { id: despues.id }, data: { mlLastError: resultado.error } });
+      await registrarActividad({
+        tenantId,
+        tipo: "ML_ATENCION",
+        descripcion: `${despues.marca} ${despues.modelo} — no se pudo sincronizar con Mercado Libre`,
+        vehiculoId: despues.id,
+      });
+    }
+  } catch (err) {
+    // getValidAccessToken puede tirar si Mercado Libre rechaza el refresh
+    // del token — no debe tumbar la edición del vehículo, que ya se guardó
+    // en Rodado antes de llegar acá.
+    console.error("Error sincronizando con Mercado Libre:", err);
+    await prisma.vehiculo
+      .update({ where: { id: despues.id }, data: { mlLastError: "No se pudo sincronizar con Mercado Libre" } })
+      .catch(() => {});
+  }
+}
+
+/**
+ * Pausa la publicación en Mercado Libre cuando se registra la venta del
+ * vehículo, si el switch "Pausar al vender" está activo. Mismo criterio
+ * de no-fatal que syncVehiculoAMercadoLibre.
+ */
+export async function pausarPublicacionMercadoLibre(tenantId: string, vehiculo: Vehiculo) {
+  if (!vehiculo.mlItemId) return;
+
+  const conexion = await prisma.mercadoLibreConexion.findUnique({ where: { tenantId } });
+  if (!conexion || !conexion.pausarAlVender) return;
+
+  try {
+    const accessToken = await getValidAccessToken(tenantId);
+    if (!accessToken) return;
+
+    const resultado = await updateMercadoLibreListing(accessToken, vehiculo.mlItemId, {
+      status: "paused",
+    });
+
+    if (resultado.ok) {
+      await registrarActividad({
+        tenantId,
+        tipo: "ML_PAUSADA",
+        descripcion: `${vehiculo.marca} ${vehiculo.modelo} — publicación pausada en Mercado Libre por venta`,
+        vehiculoId: vehiculo.id,
+      });
+    } else {
+      await prisma.vehiculo.update({ where: { id: vehiculo.id }, data: { mlLastError: resultado.error } });
+      await registrarActividad({
+        tenantId,
+        tipo: "ML_ATENCION",
+        descripcion: `${vehiculo.marca} ${vehiculo.modelo} — no se pudo pausar la publicación en Mercado Libre`,
+        vehiculoId: vehiculo.id,
+      });
+    }
+  } catch (err) {
+    console.error("Error pausando la publicación en Mercado Libre:", err);
+    await prisma.vehiculo
+      .update({ where: { id: vehiculo.id }, data: { mlLastError: "No se pudo pausar la publicación en Mercado Libre" } })
+      .catch(() => {});
+  }
+}
+
+export type MercadoLibreUpdateResult = { ok: true } | { ok: false; error: string };
+
+/** Actualiza una publicación existente (precio, fotos, estado pausado,
+ * etc.) — PUT parcial, solo hace falta mandar los campos que cambian. */
+export async function updateMercadoLibreListing(
+  accessToken: string,
+  itemId: string,
+  payload: Record<string, unknown>
+): Promise<MercadoLibreUpdateResult> {
+  const res = await fetch(`https://api.mercadolibre.com/items/${itemId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (res.ok) return { ok: true };
+
+  const data = await res.json().catch(() => null);
   const body = data as MlErrorBody | null;
   const causeDetail = body?.cause
     ?.map((c) => c.message ?? c.code)
