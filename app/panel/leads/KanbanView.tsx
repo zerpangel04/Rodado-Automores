@@ -1,8 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  ChevronDown,
+  MessageCircle,
+  Table2,
+  LayoutGrid,
+  AlertTriangle,
+  Plus,
+} from "lucide-react";
 import styles from "./kanban.module.css";
 import { Pill, type PillColor } from "../Pill";
+import panelStyles from "../panel.module.css";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { LeadDetailModal } from "./LeadDetailModal";
 
@@ -19,6 +29,7 @@ export type LeadDTO = {
   canal: Canal;
   etapa: Etapa;
   vehiculo: {
+    id?: string;
     marca: string;
     modelo: string;
     estado?: EstadoVehiculo;
@@ -63,6 +74,40 @@ const canalColor: Record<Canal, PillColor> = {
   WEB_IA: "gray",
 };
 
+const stageColor: Record<Etapa, string> = {
+  NUEVO: "var(--info)",
+  CONTACTADO: "var(--accent)",
+  TEST_DRIVE: "var(--secondary)",
+  NEGOCIACION: "var(--warn)",
+  CERRADO: "var(--success)",
+};
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
+// Solo se marca urgencia mientras el lead sigue "Nuevo" — una vez
+// contactado, la antigüedad deja de ser una señal de alarma.
+function urgenciaColor(etapa: Etapa, dias: number): "red" | "amber" | "gray" {
+  if (etapa !== "NUEVO") return "gray";
+  if (dias >= 15) return "red";
+  if (dias >= 7) return "amber";
+  return "gray";
+}
+
+function whatsappUrl(contacto: string | null) {
+  if (!contacto) return null;
+  const digits = contacto.replace(/[^\d]/g, "");
+  if (digits.length < 8) return null;
+  const withCountry = digits.startsWith("54") ? digits : `54${digits}`;
+  return `https://wa.me/${withCountry}`;
+}
+
 type FormState = {
   nombreCliente: string;
   contacto: string;
@@ -105,27 +150,84 @@ export function KanbanView({
 
   const [filterVendedorId, setFilterVendedorId] = useState("");
   const [filterCanal, setFilterCanal] = useState<Canal | "">("");
+  const [filterVehiculoId, setFilterVehiculoId] = useState("");
+  const [filterQuick, setFilterQuick] = useState<"todos" | "sin_contactar" | "sin_vendedor">(
+    "todos"
+  );
+  const [soloUrgentes, setSoloUrgentes] = useState(false);
+  const [vista, setVista] = useState<"kanban" | "tabla">("kanban");
   const [searchQuery, setSearchQuery] = useState("");
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const diasDesde = (iso?: string) =>
+    iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 86400000) : 0;
+
+  const staleLeads = useMemo(
+    () => items.filter((l) => l.etapa === "NUEVO" && diasDesde(l.createdAt) >= 7),
+    [items]
+  );
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return items.filter((l) => {
       if (filterVendedorId && l.vendedor?.id !== filterVendedorId) return false;
       if (filterCanal && l.canal !== filterCanal) return false;
+      if (filterVehiculoId && l.vehiculo?.id !== filterVehiculoId) return false;
+      if (filterQuick === "sin_contactar" && l.etapa !== "NUEVO") return false;
+      if (filterQuick === "sin_vendedor" && l.vendedor) return false;
+      if (soloUrgentes && !(l.etapa === "NUEVO" && diasDesde(l.createdAt) >= 7)) return false;
       if (q && !l.nombreCliente.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [items, filterVendedorId, filterCanal, searchQuery]);
+  }, [items, filterVendedorId, filterCanal, filterVehiculoId, filterQuick, soloUrgentes, searchQuery]);
 
-  const filtrosActivos = !!(filterVendedorId || filterCanal || searchQuery);
+  const filtrosActivos = !!(
+    filterVendedorId ||
+    filterCanal ||
+    filterVehiculoId ||
+    filterQuick !== "todos" ||
+    soloUrgentes ||
+    searchQuery
+  );
 
   function clearFiltros() {
     setFilterVendedorId("");
     setFilterCanal("");
+    setFilterVehiculoId("");
+    setFilterQuick("todos");
+    setSoloUrgentes(false);
     setSearchQuery("");
   }
 
+  // Vehículos con al menos un lead, con conteo y cuántos ya avanzaron de
+  // "Nuevo" — se derivan de los leads reales, no del catálogo completo.
+  const vehiculosConLeads = useMemo(() => {
+    const map = new Map<string, { id: string; label: string; total: number; avanzados: number }>();
+    for (const l of items) {
+      if (!l.vehiculo?.id) continue;
+      const entry = map.get(l.vehiculo.id) ?? {
+        id: l.vehiculo.id,
+        label: `${l.vehiculo.marca} ${l.vehiculo.modelo}`,
+        total: 0,
+        avanzados: 0,
+      };
+      entry.total += 1;
+      if (l.etapa !== "NUEVO") entry.avanzados += 1;
+      map.set(l.vehiculo.id, entry);
+    }
+    return Array.from(map.values()).sort((a, b) => b.total - a.total);
+  }, [items]);
+
   useBodyScrollLock(showModal);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    function handleClick() {
+      setOpenMenuId(null);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [openMenuId]);
 
   function openLeadDetail(lead: LeadDTO) {
     setSelectedLead(lead);
@@ -219,138 +321,356 @@ export function KanbanView({
   return (
     <>
       <div className={styles.topActions}>
-        <button className={styles.btnGhost} onClick={openCreate}>
-          + Nuevo lead
+        <button className={styles.btnPrimary} onClick={openCreate}>
+          <Plus size={14} />
+          Nuevo lead
         </button>
       </div>
 
+      {staleLeads.length > 0 && (
+        <div className={styles.alertBanner}>
+          <AlertTriangle size={15} />
+          <span>
+            {staleLeads.length} lead{staleLeads.length === 1 ? "" : "s"} sin contactar hace más de
+            una semana
+          </span>
+          <button
+            type="button"
+            className={styles.alertBtn}
+            onClick={() => {
+              setSoloUrgentes(true);
+              setVista("kanban");
+            }}
+          >
+            Ver
+          </button>
+        </div>
+      )}
+
       <div className={styles.filterBar}>
-        <input
-          className={styles.searchInput}
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar por nombre…"
-        />
-        <select
-          className={styles.filterSelect}
-          value={filterCanal}
-          onChange={(e) => setFilterCanal(e.target.value as Canal | "")}
-        >
-          <option value="">Todos los canales</option>
-          <option value="WHATSAPP">WhatsApp</option>
-          <option value="MERCADO_LIBRE">Mercado Libre</option>
-          <option value="INSTAGRAM">Instagram</option>
-          <option value="WEB">Web</option>
-          <option value="WEB_IA">Asistente IA</option>
-        </select>
-        {canAsignar && (
+        <div className={styles.filterLeft}>
+          {(
+            [
+              ["todos", "Todos"],
+              ["sin_contactar", "Sin contactar"],
+              ["sin_vendedor", "Sin vendedor"],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              className={filterQuick === key ? styles.active : ""}
+              onClick={() => setFilterQuick(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.searchWrap}>
+          <Search size={14} />
+          <input
+            className={styles.searchInput}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por nombre…"
+          />
+        </div>
+
+        <div className={styles.dropdownWrap}>
           <select
             className={styles.filterSelect}
-            value={filterVendedorId}
-            onChange={(e) => setFilterVendedorId(e.target.value)}
+            value={filterVehiculoId}
+            onChange={(e) => setFilterVehiculoId(e.target.value)}
           >
-            <option value="">Todos los vendedores</option>
-            {usuarios.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nombre}
+            <option value="">Todos los vehículos</option>
+            {vehiculosConLeads.map((v) => (
+              <option key={v.id} value={v.id}>
+                {v.label} ({v.total}, {v.avanzados} avanzados)
               </option>
             ))}
           </select>
+          <ChevronDown size={12} />
+        </div>
+
+        <div className={styles.dropdownWrap}>
+          <select
+            className={styles.filterSelect}
+            value={filterCanal}
+            onChange={(e) => setFilterCanal(e.target.value as Canal | "")}
+          >
+            <option value="">Todos los canales</option>
+            <option value="WHATSAPP">WhatsApp</option>
+            <option value="MERCADO_LIBRE">Mercado Libre</option>
+            <option value="INSTAGRAM">Instagram</option>
+            <option value="WEB">Web</option>
+            <option value="WEB_IA">Asistente IA</option>
+          </select>
+          <ChevronDown size={12} />
+        </div>
+
+        {canAsignar && (
+          <div className={styles.dropdownWrap}>
+            <select
+              className={styles.filterSelect}
+              value={filterVendedorId}
+              onChange={(e) => setFilterVendedorId(e.target.value)}
+            >
+              <option value="">Todos los vendedores</option>
+              {usuarios.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.nombre}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={12} />
+          </div>
         )}
+
         {filtrosActivos && (
           <button type="button" className={styles.filterClear} onClick={clearFiltros}>
             Limpiar filtros
           </button>
         )}
+
+        <div className={styles.viewToggle}>
+          <button
+            type="button"
+            className={vista === "kanban" ? styles.active : ""}
+            onClick={() => setVista("kanban")}
+            title="Kanban"
+          >
+            <LayoutGrid size={14} />
+          </button>
+          <button
+            type="button"
+            className={vista === "tabla" ? styles.active : ""}
+            onClick={() => setVista("tabla")}
+            title="Tabla"
+          >
+            <Table2 size={14} />
+          </button>
+        </div>
       </div>
 
-      <p className={styles.mobileHint}>Deslizá para ver las demás etapas →</p>
-
-      <div className={styles.kanban}>
-        {stages.map((stage) => {
-          const stageItems = filteredItems.filter((l) => l.etapa === stage.key);
-          return (
-            <div className={styles.kcol} key={stage.key}>
-              <div className={styles.kcolHead}>
-                <h4>{stage.label}</h4>
-                <span>{stageItems.length}</span>
-              </div>
-              {stageItems.length === 0 && (
-                <p className={styles.empty}>
-                  {filtrosActivos ? "Sin resultados con estos filtros" : "Sin leads"}
-                </p>
-              )}
-              {stageItems.map((lead) => {
-                const idx = stages.findIndex((s) => s.key === lead.etapa);
-                const next = stages[idx + 1];
+      {vista === "tabla" ? (
+        <div className={panelStyles.tableWrap}>
+          <table className={panelStyles.table}>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Vehículo</th>
+                <th>Canal</th>
+                <th>Etapa</th>
+                <th>Vendedor</th>
+                <th>Antigüedad</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems.map((lead) => {
+                const dias = diasDesde(lead.createdAt);
+                const urg = urgenciaColor(lead.etapa, dias);
                 return (
-                  <div
-                    className={styles.kcard}
-                    key={lead.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => openLeadDetail(lead)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        openLeadDetail(lead);
-                      }
-                    }}
-                  >
-                    <div className={styles.name}>{lead.nombreCliente}</div>
-                    <div className={styles.car}>
-                      {lead.vehiculo
-                        ? `${lead.vehiculo.marca} ${lead.vehiculo.modelo}`
-                        : "Sin vehículo asignado"}
-                    </div>
-
-                    <div className={styles.metaRow}>
+                  <tr key={lead.id} onClick={() => openLeadDetail(lead)} style={{ cursor: "pointer" }}>
+                    <td>{lead.nombreCliente}</td>
+                    <td className={panelStyles.tableSub}>
+                      {lead.vehiculo ? `${lead.vehiculo.marca} ${lead.vehiculo.modelo}` : "—"}
+                    </td>
+                    <td>
                       <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
-                      {lead.vehiculo?.estado === "VENDIDO" && lead.etapa !== "CERRADO" && (
-                        <span
-                          className={styles.soldWarning}
-                          title="El vehículo que le interesaba ya fue vendido"
-                        >
-                          !
-                        </span>
-                      )}
-                    </div>
-
-                    {canAsignar && lead.vendedor && (
-                      <div className={styles.vendedor}>Vendedor: {lead.vendedor.nombre}</div>
-                    )}
-                    {lead.mensaje && <div className={styles.msgPreview}>“{lead.mensaje}”</div>}
-
-                    <div className={styles.kcardActions}>
-                      {next ? (
-                        <button
-                          className={styles.kmini}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            advance(lead);
-                          }}
-                        >
-                          → {next.label}
-                        </button>
-                      ) : null}
-                      <button
-                        className={styles.kmini}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(lead.id);
-                        }}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
+                    </td>
+                    <td>
+                      <span className={styles.stageChip} style={{ color: stageColor[lead.etapa] }}>
+                        <span style={{ background: stageColor[lead.etapa] }} />
+                        {stages.find((s) => s.key === lead.etapa)?.label}
+                      </span>
+                    </td>
+                    <td className={panelStyles.tableSub}>{lead.vendedor?.nombre ?? "Sin asignar"}</td>
+                    <td>
+                      <span className={`${styles.antiguedad} ${styles[urg]}`}>
+                        hace {dias} día{dias === 1 ? "" : "s"}
+                      </span>
+                    </td>
+                  </tr>
                 );
               })}
-            </div>
-          );
-        })}
-      </div>
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <>
+          <p className={styles.mobileHint}>Deslizá para ver las demás etapas →</p>
+
+          <div className={styles.kanban}>
+            {stages.map((stage) => {
+              const stageItems = filteredItems.filter((l) => l.etapa === stage.key);
+              const valorEnJuego = stageItems.reduce(
+                (sum, l) => sum + (l.vehiculo?.precioUsd ?? 0),
+                0
+              );
+              return (
+                <div className={styles.kcol} key={stage.key}>
+                  <div
+                    className={styles.kcolHairline}
+                    style={{ background: `linear-gradient(90deg, ${stageColor[stage.key]}, transparent 65%)` }}
+                  />
+                  <div className={styles.kcolHead}>
+                    <span className={styles.kcolDot} style={{ background: stageColor[stage.key] }} />
+                    <h4>{stage.label}</h4>
+                    <span className={styles.kcolCount}>{stageItems.length}</span>
+                    {valorEnJuego > 0 && (
+                      <span className={`${styles.kcolValor} mono`}>
+                        USD {valorEnJuego.toLocaleString("es-AR")}
+                      </span>
+                    )}
+                  </div>
+                  <div className={styles.kcolBody}>
+                    {stageItems.length === 0 && (
+                      <p className={styles.empty}>
+                        {filtrosActivos ? "Sin resultados con estos filtros" : "Sin leads en esta etapa"}
+                      </p>
+                    )}
+                    {stageItems.map((lead) => {
+                      const idx = stages.findIndex((s) => s.key === lead.etapa);
+                      const next = stages[idx + 1];
+                      const dias = diasDesde(lead.createdAt);
+                      const urg = urgenciaColor(lead.etapa, dias);
+                      const wa = whatsappUrl(lead.contacto);
+                      return (
+                        <div
+                          className={`${styles.kcard} ${urg === "red" ? styles.kcardUrgent : ""}`}
+                          key={lead.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => openLeadDetail(lead)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              openLeadDetail(lead);
+                            }
+                          }}
+                        >
+                          <div className={styles.kcardHead}>
+                            <div className={styles.avatar}>{initials(lead.nombreCliente) || "?"}</div>
+                            <div className={styles.kcardHeadInfo}>
+                              <div className={styles.name}>{lead.nombreCliente}</div>
+                              {lead.contacto && <div className={styles.phone}>{lead.contacto}</div>}
+                            </div>
+                            <div className={styles.kcardMenuWrap}>
+                              <button
+                                type="button"
+                                className={styles.kcardMenuBtn}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenMenuId((id) => (id === lead.id ? null : lead.id));
+                                }}
+                                aria-label="Más acciones"
+                              >
+                                ···
+                              </button>
+                              {openMenuId === lead.id && (
+                                <div className={styles.kcardMenu} onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      handleDelete(lead.id);
+                                    }}
+                                  >
+                                    Eliminar
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className={styles.car}>
+                            {lead.vehiculo ? (
+                              <>
+                                {lead.vehiculo.marca} {lead.vehiculo.modelo}
+                                {typeof lead.vehiculo.precioUsd === "number" && (
+                                  <span className={styles.carPrice}>
+                                    USD {lead.vehiculo.precioUsd.toLocaleString("es-AR")}
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              "Sin vehículo asignado"
+                            )}
+                          </div>
+
+                          {lead.mensaje && (
+                            <div className={styles.msgPreview}>
+                              “
+                              {lead.mensaje.length > 62
+                                ? `${lead.mensaje.slice(0, 62)}…`
+                                : lead.mensaje}
+                              ”
+                            </div>
+                          )}
+
+                          <div className={styles.metaRow}>
+                            <Pill color={canalColor[lead.canal]}>{canalLabel[lead.canal]}</Pill>
+                            <span className={`${styles.antiguedad} ${styles[urg]}`}>
+                              hace {dias} día{dias === 1 ? "" : "s"}
+                            </span>
+                            {lead.vehiculo?.estado === "VENDIDO" && lead.etapa !== "CERRADO" && (
+                              <span
+                                className={styles.soldWarning}
+                                title="El vehículo que le interesaba ya fue vendido"
+                              >
+                                !
+                              </span>
+                            )}
+                          </div>
+
+                          <div className={styles.kcardFoot}>
+                            <div className={styles.footVendedor}>
+                              <span className={styles.vendedorAvatar}>
+                                {lead.vendedor ? initials(lead.vendedor.nombre) || "?" : "?"}
+                              </span>
+                              {canAsignar && (
+                                <span className={styles.vendedorName}>
+                                  {lead.vendedor?.nombre ?? "Sin asignar"}
+                                </span>
+                              )}
+                            </div>
+                            <div className={styles.footActions}>
+                              {wa && (
+                                <a
+                                  href={wa}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className={styles.waBtn}
+                                  onClick={(e) => e.stopPropagation()}
+                                  title="WhatsApp"
+                                >
+                                  <MessageCircle size={14} />
+                                </a>
+                              )}
+                              {next && (
+                                <button
+                                  className={styles.kmini}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    advance(lead);
+                                  }}
+                                >
+                                  → {next.label}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <div className={`${styles.modalBg} ${showModal ? styles.show : ""}`}>
         <div className={styles.modal}>
@@ -432,6 +752,7 @@ export function KanbanView({
         <LeadDetailModal
           lead={selectedLead}
           vehiculos={vehiculos}
+          usuarios={usuarios}
           canAsignar={canAsignar}
           onClose={closeLeadDetail}
           onUpdated={handleLeadUpdated}

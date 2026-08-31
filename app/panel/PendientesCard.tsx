@@ -97,6 +97,7 @@ export function PendientesCard({
         <LeadDetailModal
           lead={contactarLead}
           vehiculos={vehiculos}
+          usuarios={usuarios}
           canAsignar={canAsignar}
           onClose={() => setContactarLead(null)}
           onUpdated={handleContactarUpdated}

@@ -71,7 +71,9 @@ export async function POST(req: NextRequest) {
       vendedorId,
     },
     include: {
-      vehiculo: { select: { marca: true, modelo: true } },
+      vehiculo: {
+        select: { id: true, marca: true, modelo: true, estado: true, categoria: true, precioUsd: true },
+      },
       vendedor: { select: { id: true, nombre: true } },
     },
   });
@@ -84,5 +86,13 @@ export async function POST(req: NextRequest) {
     vendedorId: lead.vendedorId,
   });
 
-  return NextResponse.json(lead, { status: 201 });
+  return NextResponse.json(
+    {
+      ...lead,
+      vehiculo: lead.vehiculo
+        ? { ...lead.vehiculo, precioUsd: Number(lead.vehiculo.precioUsd) }
+        : null,
+    },
+    { status: 201 }
+  );
 }

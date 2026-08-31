@@ -63,7 +63,9 @@ export async function PATCH(
     where: { id },
     data,
     include: {
-      vehiculo: { select: { marca: true, modelo: true } },
+      vehiculo: {
+        select: { id: true, marca: true, modelo: true, estado: true, categoria: true, precioUsd: true },
+      },
       vendedor: { select: { id: true, nombre: true } },
     },
   });
@@ -78,7 +80,12 @@ export async function PATCH(
     });
   }
 
-  return NextResponse.json(lead);
+  return NextResponse.json({
+    ...lead,
+    vehiculo: lead.vehiculo
+      ? { ...lead.vehiculo, precioUsd: Number(lead.vehiculo.precioUsd) }
+      : null,
+  });
 }
 
 export async function DELETE(

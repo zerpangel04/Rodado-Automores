@@ -19,7 +19,14 @@ export default async function LeadsPage() {
       },
       include: {
         vehiculo: {
-          select: { marca: true, modelo: true, estado: true, categoria: true, precioUsd: true },
+          select: {
+            id: true,
+            marca: true,
+            modelo: true,
+            estado: true,
+            categoria: true,
+            precioUsd: true,
+          },
         },
         vendedor: { select: { id: true, nombre: true } },
       },
@@ -52,6 +59,7 @@ export default async function LeadsPage() {
     etapa: l.etapa,
     vehiculo: l.vehiculo
       ? {
+          id: l.vehiculo.id,
           marca: l.vehiculo.marca,
           modelo: l.vehiculo.modelo,
           estado: l.vehiculo.estado,
