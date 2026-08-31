@@ -64,11 +64,14 @@ export function CatalogoView({
       return true;
     });
     const ordenKey = ordenes[ordenIdx].key;
-    lista = lista.slice().sort((a, b) => {
-      if (ordenKey === "precio") return a.precioUsd - b.precioUsd;
-      if (ordenKey === "km") return a.km - b.km;
-      return b.anio - a.anio;
-    });
+    if (ordenKey === "precio") {
+      lista = lista.slice().sort((a, b) => a.precioUsd - b.precioUsd);
+    } else if (ordenKey === "km") {
+      lista = lista.slice().sort((a, b) => a.km - b.km);
+    }
+    // "nuevos": ya viene ordenado desde el server por fechaIngreso desc
+    // (ver app/c/[dominio]/page.tsx), y filter() preserva ese orden — no
+    // hace falta (ni conviene) re-ordenar acá por año del modelo.
     return lista;
   }, [items, marca, busqueda, ordenIdx]);
 
