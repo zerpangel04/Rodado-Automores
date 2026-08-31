@@ -64,7 +64,12 @@ export default async function StockPage() {
     mlPermalink: v.mlPermalink,
     mlStatus: v.mlStatus,
     mlLastError: v.mlLastError,
+    fechaIngreso: v.fechaIngreso.toISOString(),
   }));
+
+  const inventarioUsd = vehiculos
+    .filter((v) => v.estado !== "VENDIDO")
+    .reduce((sum, v) => sum + Number(v.precioUsd), 0);
 
   const leadsActivosItems: LeadActivoDTO[] = leadsActivos
     .filter((l): l is typeof l & { vehiculoId: string } => l.vehiculoId !== null)
@@ -82,7 +87,14 @@ export default async function StockPage() {
         <div>
           <h1 className="disp">Stock</h1>
           <div className={styles.topbarSub}>
-            Tu inventario de vehículos{sucursalActual ? ` · ${sucursalActual.nombre}` : ""}
+            {vehiculos.length} vehículo{vehiculos.length === 1 ? "" : "s"}
+            {sucursalActual
+              ? ` · ${sucursalActual.nombre}`
+              : sucursales.length > 1
+              ? ` · ${sucursales.length} sucursales`
+              : ""}
+            {" · inventario USD "}
+            {inventarioUsd.toLocaleString("es-AR")}
           </div>
         </div>
       </div>

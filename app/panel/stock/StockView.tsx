@@ -2,10 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
+import {
+  X,
+  RotateCcw,
+  Plus,
+  Sparkles,
+  LayoutGrid,
+  Table2,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+} from "lucide-react";
 import styles from "./stock.module.css";
+import panelStyles from "../panel.module.css";
 import { docStatus, diasHastaVtv } from "@/lib/docs";
 import { estimarPrecio } from "@/lib/tasacion";
-import { Pill, type PillColor } from "../Pill";
+import { KpiBar } from "../KpiBar";
 import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/validation";
 import { getCroppedImageFile } from "@/lib/cropImage";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
@@ -36,6 +49,7 @@ export type VehiculoDTO = {
   mlPermalink: string | null;
   mlStatus: string | null;
   mlLastError: string | null;
+  fechaIngreso: string;
 };
 
 export type LeadActivoDTO = {
@@ -106,11 +120,19 @@ const stateLabel: Record<EstadoVehiculo, string> = {
   VENDIDO: "Vendido",
 };
 
-const stateColor: Record<EstadoVehiculo, PillColor> = {
-  DISPONIBLE: "green",
-  RESERVADO: "amber",
-  VENDIDO: "gray",
+const stateColor: Record<EstadoVehiculo, string> = {
+  DISPONIBLE: "var(--success)",
+  RESERVADO: "var(--warn)",
+  VENDIDO: "var(--ink-soft)",
 };
+
+const steps = [
+  { key: "fotos", label: "Fotos" },
+  { key: "datos", label: "Datos" },
+  { key: "precio", label: "Precio" },
+  { key: "docs", label: "Documentación" },
+] as const;
+type StepKey = (typeof steps)[number]["key"];
 
 function CarSVG() {
   return (
@@ -155,8 +177,11 @@ export function StockView({
     setItems(initialItems);
   }, [initialItems]);
   const [filter, setFilter] = useState<"todos" | EstadoVehiculo>("todos");
+  const [orden, setOrden] = useState<"reciente" | "precio" | "dias">("reciente");
+  const [vista, setVista] = useState<"grilla" | "tabla">("grilla");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [step, setStep] = useState<StepKey>("fotos");
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -327,10 +352,48 @@ export function StockView({
     setCropTarget(null);
   }
 
-  const visible = useMemo(
-    () => (filter === "todos" ? items : items.filter((i) => i.estado === filter)),
-    [items, filter]
-  );
+  const ordenLabel: Record<typeof orden, string> = {
+    reciente: "Más reciente",
+    precio: "Mayor precio",
+    dias: "Más días en stock",
+  };
+
+  function cycleOrden() {
+    setOrden((o) => (o === "reciente" ? "precio" : o === "precio" ? "dias" : "reciente"));
+  }
+
+  const diasEnStock = (v: VehiculoDTO) =>
+    Math.floor((Date.now() - new Date(v.fechaIngreso).getTime()) / 86400000);
+
+  const visible = useMemo(() => {
+    const base = filter === "todos" ? items : items.filter((i) => i.estado === filter);
+    return base.slice().sort((a, b) => {
+      if (orden === "precio") return b.precioUsd - a.precioUsd;
+      if (orden === "dias") return diasEnStock(b) - diasEnStock(a);
+      return new Date(b.fechaIngreso).getTime() - new Date(a.fechaIngreso).getTime();
+    });
+  }, [items, filter, orden]);
+
+  const kpis = useMemo(() => {
+    const activos = items.filter((v) => v.estado !== "VENDIDO");
+    const total = activos.length || 1;
+    const disponibles = activos.filter((v) => v.estado === "DISPONIBLE").length;
+    const reservados = activos.filter((v) => v.estado === "RESERVADO").length;
+    const aRevisar = activos.filter((v) => docStatus(v).tier !== "ok").length;
+    const antiguedadProm = activos.length
+      ? Math.round(activos.reduce((sum, v) => sum + diasEnStock(v), 0) / activos.length)
+      : 0;
+    return {
+      disponibles,
+      reservados,
+      aRevisar,
+      antiguedadProm,
+      pctDisponibles: Math.round((disponibles / total) * 100),
+      pctReservados: Math.round((reservados / total) * 100),
+      pctARevisar: Math.round((aRevisar / total) * 100),
+      pctAntiguedad: Math.min(100, Math.round((antiguedadProm / 45) * 100)),
+    };
+  }, [items]);
 
   function showToast() {
     setToast(true);
@@ -347,6 +410,7 @@ export function StockView({
     setFotoError(null);
     setCropQueue([]);
     setCropTarget(null);
+    setStep("fotos");
     setShowModal(true);
   }
 
@@ -390,6 +454,7 @@ export function StockView({
     setFotoError(null);
     setCropQueue([]);
     setCropTarget(null);
+    setStep("fotos");
     setShowModal(true);
   }
 
@@ -617,9 +682,37 @@ export function StockView({
     <>
       <div className={styles.topActions}>
         <button className={styles.btnPrimary} onClick={openCreate}>
-          <span className={styles.dot} />
+          <Plus size={14} />
           Nuevo vehículo
         </button>
+      </div>
+
+      <div className={panelStyles.kpiRow} style={{ marginBottom: 18 }}>
+        <KpiBar
+          color="var(--success)"
+          label="Disponibles"
+          value={String(kpis.disponibles)}
+          percent={kpis.pctDisponibles}
+        />
+        <KpiBar
+          color="var(--warn)"
+          label="Reservados"
+          value={String(kpis.reservados)}
+          percent={kpis.pctReservados}
+        />
+        <KpiBar
+          color="var(--danger)"
+          label="Documentación a revisar"
+          value={String(kpis.aRevisar)}
+          percent={kpis.pctARevisar}
+        />
+        <KpiBar
+          color="var(--info)"
+          label="Antigüedad promedio en stock"
+          value={String(kpis.antiguedadProm)}
+          unit="días"
+          percent={kpis.pctAntiguedad}
+        />
       </div>
 
       <div className={styles.filterBar}>
@@ -634,10 +727,92 @@ export function StockView({
             </button>
           ))}
         </div>
+        <div className={styles.filterRight}>
+          <button type="button" className={styles.ordenBtn} onClick={cycleOrden}>
+            <ArrowUpDown size={13} />
+            {ordenLabel[orden]}
+          </button>
+          <div className={styles.viewToggle}>
+            <button
+              type="button"
+              className={vista === "grilla" ? styles.active : ""}
+              onClick={() => setVista("grilla")}
+              aria-label="Ver en grilla"
+              title="Grilla"
+            >
+              <LayoutGrid size={14} />
+            </button>
+            <button
+              type="button"
+              className={vista === "tabla" ? styles.active : ""}
+              onClick={() => setVista("tabla")}
+              aria-label="Ver en tabla"
+              title="Tabla"
+            >
+              <Table2 size={14} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {visible.length === 0 ? (
         <p className={styles.empty}>No hay vehículos en este filtro.</p>
+      ) : vista === "tabla" ? (
+        <div className={panelStyles.tableWrap}>
+          <table className={panelStyles.table}>
+            <thead>
+              <tr>
+                <th>Vehículo</th>
+                <th>Estado</th>
+                <th>Precio</th>
+                <th>Documentación</th>
+                <th>Días en stock</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((v) => {
+                const ds = docStatus(v);
+                return (
+                  <tr key={v.id} onClick={() => openEdit(v)} style={{ cursor: "pointer" }}>
+                    <td>
+                      {v.marca} {v.modelo}
+                      <div className={panelStyles.tableSub}>
+                        {v.anio} · {v.km.toLocaleString("es-AR")} km
+                      </div>
+                    </td>
+                    <td>
+                      <span className={styles.tableStateChip}>
+                        <span style={{ background: stateColor[v.estado] }} />
+                        {stateLabel[v.estado]}
+                      </span>
+                    </td>
+                    <td className="mono">USD {v.precioUsd.toLocaleString("es-AR")}</td>
+                    <td>
+                      <span className={`${styles.docs} ${styles[docTierClass[ds.tier]]}`}>
+                        {ds.label}
+                      </span>
+                    </td>
+                    <td className="mono">{diasEnStock(v)}</td>
+                    <td>
+                      {v.estado !== "VENDIDO" && (
+                        <button
+                          className={styles.btnGhost}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSaleModal(v);
+                          }}
+                        >
+                          Vender
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <div className={styles.grid}>
           {visible.map((v) => {
@@ -647,12 +822,18 @@ export function StockView({
               <div className={styles.card} key={v.id} onClick={() => openEdit(v)}>
                 <div className={styles.photo}>
                   <div className={styles.state}>
-                    <Pill
-                      color={stateColor[v.estado]}
-                      onClick={vendido ? undefined : () => toggleReserva(v)}
+                    <button
+                      type="button"
+                      className={styles.stateChip}
+                      disabled={vendido}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!vendido) toggleReserva(v);
+                      }}
                     >
+                      <span style={{ background: stateColor[v.estado], boxShadow: `0 0 6px ${stateColor[v.estado]}` }} />
                       {stateLabel[v.estado]}
-                    </Pill>
+                    </button>
                     {(leadsPorVehiculo.get(v.id)?.length ?? 0) > 0 && (
                       <span className={styles.interesados}>
                         {leadsPorVehiculo.get(v.id)!.length} interesado
@@ -670,7 +851,7 @@ export function StockView({
                           revertVenta(v);
                         }}
                       >
-                        ↺
+                        <RotateCcw size={12} />
                       </button>
                     )
                   ) : (
@@ -681,7 +862,7 @@ export function StockView({
                         handleDelete(v.id);
                       }}
                     >
-                      ✕
+                      <X size={12} />
                     </button>
                   )}
                   {v.fotos.length > 0 ? (
@@ -760,253 +941,311 @@ export function StockView({
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <h3 className="disp">{editingId ? "Editar vehículo" : "Nuevo vehículo"}</h3>
 
+          <div className={styles.stepper}>
+            {steps.map((s, i) => (
+              <button
+                type="button"
+                key={s.key}
+                className={`${styles.stepTab} ${step === s.key ? styles.active : ""}`}
+                onClick={() => setStep(s.key)}
+              >
+                <span className={styles.stepNum}>{i + 1}</span>
+                {s.label}
+              </button>
+            ))}
+          </div>
+
           {error && <div className={styles.errorBox} style={{ marginTop: 14 }}>{error}</div>}
 
-          {sucursales.length > 1 && (
+          {step === "fotos" && (
             <div className={styles.field} style={{ marginTop: 16 }}>
-              <label>Sucursal</label>
-              <select
-                value={form.sucursalId}
-                onChange={(e) => setForm({ ...form, sucursalId: e.target.value })}
-              >
-                {sucursales.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className={styles.fieldRow} style={{ marginTop: sucursales.length > 1 ? 0 : 16 }}>
-            <div className={styles.field}>
-              <label>Marca</label>
-              <input
-                value={form.marca}
-                onChange={(e) => setForm({ ...form, marca: e.target.value })}
-                placeholder="Toyota"
-              />
-            </div>
-            <div className={styles.field}>
-              <label>Modelo</label>
-              <input
-                value={form.modelo}
-                onChange={(e) => setForm({ ...form, modelo: e.target.value })}
-                placeholder="Corolla XEI"
-              />
-            </div>
-          </div>
-          <div className={styles.fieldRow}>
-            <div className={styles.field}>
-              <label>Año</label>
-              <input
-                type="number"
-                value={form.anio}
-                onChange={(e) => setForm({ ...form, anio: e.target.value })}
-                placeholder="2024"
-              />
-            </div>
-            <div className={styles.field}>
-              <label>Km</label>
-              <input
-                type="number"
-                value={form.km}
-                onChange={(e) => setForm({ ...form, km: e.target.value })}
-                placeholder="12000"
-              />
-            </div>
-          </div>
-          <div className={styles.field}>
-            <label>Categoría</label>
-            <select
-              value={form.categoria}
-              onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-            >
-              <option value="Compacto">Compacto</option>
-              <option value="Sedán">Sedán</option>
-              <option value="SUV">SUV</option>
-              <option value="Pickup">Pickup</option>
-            </select>
-          </div>
-
-          <div className={styles.fieldRow}>
-            <div className={styles.field}>
-              <label>Transmisión</label>
-              <input
-                value={form.transmision}
-                onChange={(e) => setForm({ ...form, transmision: e.target.value })}
-                placeholder="Automática, Manual, CVT…"
-              />
-            </div>
-            <div className={styles.field}>
-              <label>Motor</label>
-              <input
-                value={form.motor}
-                onChange={(e) => setForm({ ...form, motor: e.target.value })}
-                placeholder="1.8L 16v, 3.0 V6 TDI…"
-              />
-            </div>
-          </div>
-
-          <div className={styles.field}>
-            <label>Fotos (hasta {FOTOS_MAX_COUNT})</label>
-            <p className={styles.fotoTip}>
-              Recomendamos fotos horizontales para mejor visualización.
-            </p>
-            <div className={styles.fotosGrid}>
-              {existingFotos.map((url) => (
-                <div className={styles.fotoThumb} key={url}>
-                  <img src={url} alt="" />
-                  <button
-                    type="button"
-                    className={styles.fotoRemove}
-                    onClick={() => removeExistingFoto(url)}
-                    aria-label="Sacar foto"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              {fotoFiles.map((file, i) => (
-                <div className={styles.fotoThumb} key={`${file.name}-${i}`}>
-                  <img src={fotoPreviews[i]} alt="" />
-                  <button
-                    type="button"
-                    className={styles.fotoRemove}
-                    onClick={() => removeNewFoto(i)}
-                    aria-label="Sacar foto"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-              {existingFotos.length + fotoFiles.length < FOTOS_MAX_COUNT && (
-                <label className={styles.fotoAddTile}>
-                  +
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    multiple
-                    onChange={handleFotosSelected}
-                    hidden
-                  />
-                </label>
-              )}
-            </div>
-            {fotoError && <p className={styles.fotoHint}>{fotoError}</p>}
-          </div>
-
-          {!editingId && (
-            <div className={styles.iaBox}>
-              <div className={styles.iaBoxHead}>
-                <span>✦ Tasación con IA</span>
-                <button type="button" className={styles.iaSuggestBtn} onClick={suggestPrice}>
-                  Sugerir precio
-                </button>
-              </div>
-              <div className={styles.iaResult}>
-                {iaResult !== null ? `USD ${iaResult.toLocaleString("es-AR")}` : "—"}
-              </div>
-              <div className={styles.iaNote}>
-                {iaResult !== null ? (
-                  <>
-                    Estimación simulada según categoría, año y kilometraje.{" "}
-                    <b>Es una demo, no son datos reales de mercado</b> — en producción esto se
-                    conectaría a una fuente real (API de mercado o modelo entrenado con datos
-                    propios).
-                    <br />
-                    <button type="button" className={styles.iaUseBtn} onClick={useIaPrice}>
-                      Usar este precio →
+              <label>Fotos (hasta {FOTOS_MAX_COUNT})</label>
+              <p className={styles.fotoTip}>
+                Recomendamos fotos horizontales para mejor visualización.
+              </p>
+              <div className={styles.fotosGrid}>
+                {existingFotos.map((url) => (
+                  <div className={styles.fotoThumb} key={url}>
+                    <img src={url} alt="" />
+                    <button
+                      type="button"
+                      className={styles.fotoRemove}
+                      onClick={() => removeExistingFoto(url)}
+                      aria-label="Sacar foto"
+                    >
+                      <X size={11} />
                     </button>
-                  </>
-                ) : (
-                  'Completá año, km y categoría, y tocá "Sugerir precio" para ver una estimación demo.'
+                  </div>
+                ))}
+                {fotoFiles.map((file, i) => (
+                  <div className={styles.fotoThumb} key={`${file.name}-${i}`}>
+                    <img src={fotoPreviews[i]} alt="" />
+                    <button
+                      type="button"
+                      className={styles.fotoRemove}
+                      onClick={() => removeNewFoto(i)}
+                      aria-label="Sacar foto"
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
+                ))}
+                {existingFotos.length + fotoFiles.length < FOTOS_MAX_COUNT && (
+                  <label className={styles.fotoAddTile}>
+                    <Plus size={18} />
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      onChange={handleFotosSelected}
+                      hidden
+                    />
+                  </label>
                 )}
               </div>
+              <p className={styles.fotoTip} style={{ marginTop: 8, marginBottom: 0 }}>
+                {existingFotos.length + fotoFiles.length} de {FOTOS_MAX_COUNT}
+              </p>
+              {fotoError && <p className={styles.fotoHint}>{fotoError}</p>}
             </div>
           )}
 
-          <div className={styles.field}>
-            <label>Precio (USD)</label>
-            <input
-              type="number"
-              value={form.precioUsd}
-              onChange={(e) => setForm({ ...form, precioUsd: e.target.value })}
-              placeholder="24500"
-            />
-          </div>
+          {step === "datos" && (
+            <>
+              {sucursales.length > 1 && (
+                <div className={styles.field} style={{ marginTop: 16 }}>
+                  <label>Sucursal</label>
+                  <select
+                    value={form.sucursalId}
+                    onChange={(e) => setForm({ ...form, sucursalId: e.target.value })}
+                  >
+                    {sucursales.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-          <div className={styles.sectionLabel}>Documentación</div>
-          <div className={styles.docGrid}>
-            <label className={styles.docCheck}>
-              <input
-                type="checkbox"
-                checked={form.docTitulo}
-                onChange={(e) => setForm({ ...form, docTitulo: e.target.checked })}
-              />
-              Título
-            </label>
-            <label className={styles.docCheck}>
-              <input
-                type="checkbox"
-                checked={form.docCedula}
-                onChange={(e) => setForm({ ...form, docCedula: e.target.checked })}
-              />
-              Cédula
-            </label>
-            <label className={styles.docCheck}>
-              <input
-                type="checkbox"
-                checked={form.docDominio}
-                onChange={(e) => setForm({ ...form, docDominio: e.target.checked })}
-              />
-              Informe de dominio
-            </label>
-            <label className={styles.docCheck}>
-              <input
-                type="checkbox"
-                checked={form.docLibreDeuda}
-                onChange={(e) => setForm({ ...form, docLibreDeuda: e.target.checked })}
-              />
-              Libre de deuda
-            </label>
-          </div>
-          <div className={styles.field} style={{ marginTop: 12 }}>
-            <label>Vencimiento VTV</label>
-            <input
-              type="date"
-              value={form.vtvVencimiento}
-              onChange={(e) => setForm({ ...form, vtvVencimiento: e.target.value })}
-            />
-            {form.vtvVencimiento &&
-              (() => {
-                const dias = diasHastaVtv(form.vtvVencimiento);
-                if (dias === null) return null;
-                if (dias < 0) {
-                  return (
-                    <p style={{ fontSize: 11.5, color: "var(--red)", marginTop: 6 }}>
-                      ⚠ Vencida hace {Math.abs(dias)} día{Math.abs(dias) === 1 ? "" : "s"}
-                    </p>
-                  );
-                }
-                if (dias <= 30) {
-                  return (
-                    <p style={{ fontSize: 11.5, color: "#9A6F00", marginTop: 6 }}>
-                      Vence en {dias} día{dias === 1 ? "" : "s"}
-                    </p>
-                  );
-                }
-                return null;
-              })()}
-          </div>
+              <div className={styles.fieldRow} style={{ marginTop: sucursales.length > 1 ? 0 : 16 }}>
+                <div className={styles.field}>
+                  <label>Marca</label>
+                  <input
+                    value={form.marca}
+                    onChange={(e) => setForm({ ...form, marca: e.target.value })}
+                    placeholder="Toyota"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label>Modelo</label>
+                  <input
+                    value={form.modelo}
+                    onChange={(e) => setForm({ ...form, modelo: e.target.value })}
+                    placeholder="Corolla XEI"
+                  />
+                </div>
+              </div>
+              <div className={styles.fieldRow}>
+                <div className={styles.field}>
+                  <label>Año</label>
+                  <input
+                    type="number"
+                    value={form.anio}
+                    onChange={(e) => setForm({ ...form, anio: e.target.value })}
+                    placeholder="2024"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label>Km</label>
+                  <input
+                    type="number"
+                    value={form.km}
+                    onChange={(e) => setForm({ ...form, km: e.target.value })}
+                    placeholder="12000"
+                  />
+                </div>
+              </div>
+              <div className={styles.field}>
+                <label>Categoría</label>
+                <select
+                  value={form.categoria}
+                  onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+                >
+                  <option value="Compacto">Compacto</option>
+                  <option value="Sedán">Sedán</option>
+                  <option value="SUV">SUV</option>
+                  <option value="Pickup">Pickup</option>
+                </select>
+              </div>
+
+              <div className={styles.fieldRow}>
+                <div className={styles.field}>
+                  <label>Transmisión</label>
+                  <input
+                    value={form.transmision}
+                    onChange={(e) => setForm({ ...form, transmision: e.target.value })}
+                    placeholder="Automática, Manual, CVT…"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label>Motor</label>
+                  <input
+                    value={form.motor}
+                    onChange={(e) => setForm({ ...form, motor: e.target.value })}
+                    placeholder="1.8L 16v, 3.0 V6 TDI…"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === "precio" && (
+            <>
+              {!editingId && (
+                <div className={styles.iaBox} style={{ marginTop: 16 }}>
+                  <div className={styles.iaBoxHead}>
+                    <span>
+                      <Sparkles size={11} style={{ verticalAlign: -1, marginRight: 4 }} />
+                      Tasación con IA
+                    </span>
+                    <button type="button" className={styles.iaSuggestBtn} onClick={suggestPrice}>
+                      Sugerir precio
+                    </button>
+                  </div>
+                  <div className={styles.iaResult}>
+                    {iaResult !== null ? `USD ${iaResult.toLocaleString("es-AR")}` : "—"}
+                  </div>
+                  <div className={styles.iaNote}>
+                    {iaResult !== null ? (
+                      <>
+                        Estimación simulada según categoría, año y kilometraje.{" "}
+                        <b>Es una demo, no son datos reales de mercado</b> — en producción esto se
+                        conectaría a una fuente real (API de mercado o modelo entrenado con datos
+                        propios).
+                        <br />
+                        <button type="button" className={styles.iaUseBtn} onClick={useIaPrice}>
+                          Usar este precio →
+                        </button>
+                      </>
+                    ) : (
+                      'Completá año, km y categoría, y tocá "Sugerir precio" para ver una estimación demo.'
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.field} style={{ marginTop: editingId ? 16 : 0 }}>
+                <label>Precio (USD)</label>
+                <input
+                  type="number"
+                  value={form.precioUsd}
+                  onChange={(e) => setForm({ ...form, precioUsd: e.target.value })}
+                  placeholder="24500"
+                />
+              </div>
+            </>
+          )}
+
+          {step === "docs" && (
+            <>
+              <div className={styles.sectionLabel} style={{ marginTop: 16, paddingTop: 0, borderTop: "none" }}>
+                Documentación
+              </div>
+              <div className={styles.docGrid}>
+                <label className={styles.docCheck}>
+                  <input
+                    type="checkbox"
+                    checked={form.docTitulo}
+                    onChange={(e) => setForm({ ...form, docTitulo: e.target.checked })}
+                  />
+                  Título
+                </label>
+                <label className={styles.docCheck}>
+                  <input
+                    type="checkbox"
+                    checked={form.docCedula}
+                    onChange={(e) => setForm({ ...form, docCedula: e.target.checked })}
+                  />
+                  Cédula
+                </label>
+                <label className={styles.docCheck}>
+                  <input
+                    type="checkbox"
+                    checked={form.docDominio}
+                    onChange={(e) => setForm({ ...form, docDominio: e.target.checked })}
+                  />
+                  Informe de dominio
+                </label>
+                <label className={styles.docCheck}>
+                  <input
+                    type="checkbox"
+                    checked={form.docLibreDeuda}
+                    onChange={(e) => setForm({ ...form, docLibreDeuda: e.target.checked })}
+                  />
+                  Libre de deuda
+                </label>
+              </div>
+              <div className={styles.field} style={{ marginTop: 12 }}>
+                <label>Vencimiento VTV</label>
+                <input
+                  type="date"
+                  value={form.vtvVencimiento}
+                  onChange={(e) => setForm({ ...form, vtvVencimiento: e.target.value })}
+                />
+                {form.vtvVencimiento &&
+                  (() => {
+                    const dias = diasHastaVtv(form.vtvVencimiento);
+                    if (dias === null) return null;
+                    if (dias < 0) {
+                      return (
+                        <p style={{ fontSize: 11.5, color: "var(--danger-text)", marginTop: 6 }}>
+                          ⚠ Vencida hace {Math.abs(dias)} día{Math.abs(dias) === 1 ? "" : "s"}
+                        </p>
+                      );
+                    }
+                    if (dias <= 30) {
+                      return (
+                        <p style={{ fontSize: 11.5, color: "var(--warn-text)", marginTop: 6 }}>
+                          Vence en {dias} día{dias === 1 ? "" : "s"}
+                        </p>
+                      );
+                    }
+                    return null;
+                  })()}
+              </div>
+            </>
+          )}
 
           <div className={styles.modalActions}>
-            <button className={styles.btnGhost} onClick={() => setShowModal(false)}>
-              Cancelar
-            </button>
-            <button className={styles.btnPrimary} onClick={handleSave} disabled={saving}>
-              {saving ? "Guardando…" : "Guardar vehículo"}
-            </button>
+            {step === "fotos" ? (
+              <button className={styles.btnGhost} onClick={() => setShowModal(false)}>
+                Cancelar
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.btnGhost}
+                onClick={() => setStep(steps[steps.findIndex((s) => s.key === step) - 1].key)}
+              >
+                <ChevronLeft size={14} />
+                Atrás
+              </button>
+            )}
+            {step === "docs" ? (
+              <button className={styles.btnPrimary} onClick={handleSave} disabled={saving}>
+                {saving ? "Guardando…" : "Guardar vehículo"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                onClick={() => setStep(steps[steps.findIndex((s) => s.key === step) + 1].key)}
+              >
+                Siguiente
+                <ChevronRight size={14} />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1148,7 +1387,8 @@ export function StockView({
 
                   {l.reassignTo ? (
                     <div className={styles.warnReassignedTag}>
-                      ✓ Reasignado a {l.reassignTo.marca} {l.reassignTo.modelo}
+                      <Check size={11} style={{ verticalAlign: -1, marginRight: 3 }} />
+                      Reasignado a {l.reassignTo.marca} {l.reassignTo.modelo}
                     </div>
                   ) : reassigningLeadId === l.id ? (
                     <div className={styles.warnReassignRow}>
@@ -1173,7 +1413,7 @@ export function StockView({
                         onClick={() => setReassigningLeadId(null)}
                         aria-label="Cancelar reasignación"
                       >
-                        ✕
+                        <X size={12} />
                       </button>
                     </div>
                   ) : (
