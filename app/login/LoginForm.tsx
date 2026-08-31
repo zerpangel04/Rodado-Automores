@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import styles from "../auth.module.css";
+import { useEffect, useRef, useState } from "react";
+import authStyles from "../auth.module.css";
+import styles from "./login.module.css";
 
 function formatMMSS(totalSeconds: number) {
   const s = Math.max(0, Math.ceil(totalSeconds));
@@ -26,6 +27,14 @@ export function LoginForm({
   const [secondsLeft, setSecondsLeft] = useState(
     errorTipo === "bloqueado" ? esperaSegundosInicial : 0
   );
+  const [showPass, setShowPass] = useState(false);
+  // "Mantener la sesión abierta" no cambia todavía la duración real de la
+  // sesión (NextAuth usa un maxAge fijo) — queda como preferencia visual
+  // hasta que se implemente maxAge dinámico por login.
+  const [remember, setRemember] = useState(true);
+  const [clientError, setClientError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -41,28 +50,58 @@ export function LoginForm({
 
   const bloqueado = secondsLeft > 0;
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const form = formRef.current;
+    if (!form) return;
+    const email = (form.elements.namedItem("email") as HTMLInputElement)?.value ?? "";
+    const password = (form.elements.namedItem("password") as HTMLInputElement)?.value ?? "";
+
+    if (!email || !/.+@.+\..+/.test(email)) {
+      e.preventDefault();
+      setClientError("Revisá el email: no parece una dirección válida.");
+      return;
+    }
+    if (password.length < 6) {
+      e.preventDefault();
+      setClientError("La contraseña tiene que tener al menos 6 caracteres.");
+      return;
+    }
+    setClientError("");
+    setSubmitting(true);
+  }
+
   return (
     <>
       {bloqueado && (
-        <div className={styles.errorBox}>
+        <div className={authStyles.errorBox}>
+          <span>⚠</span>
           Demasiados intentos. Podés volver a intentar en{" "}
-          <span className={styles.countdown}>{formatMMSS(secondsLeft)}</span>.
+          <span className={authStyles.countdown}>{formatMMSS(secondsLeft)}</span>.
         </div>
       )}
-      {!bloqueado && errorTipo === "CredentialsSignin" && intentos && (
-        <div className={styles.errorBox}>
-          Email o contraseña incorrectos. Te queda{Number(intentos) === 1 ? "" : "n"}{" "}
-          {intentos} intento{Number(intentos) === 1 ? "" : "s"} antes de bloquear
-          temporalmente el acceso.
+      {!bloqueado && clientError && (
+        <div className={authStyles.errorBox}>
+          <span>⚠</span>
+          {clientError}
         </div>
       )}
-      {!bloqueado && errorTipo === "CredentialsSignin" && !intentos && (
-        <div className={styles.errorBox}>Email o contraseña incorrectos.</div>
+      {!bloqueado && !clientError && errorTipo === "CredentialsSignin" && intentos && (
+        <div className={authStyles.errorBox}>
+          <span>⚠</span>
+          Email o contraseña incorrectos. Te queda{Number(intentos) === 1 ? "" : "n"} {intentos}{" "}
+          intento{Number(intentos) === 1 ? "" : "s"} antes de bloquear temporalmente el acceso.
+        </div>
+      )}
+      {!bloqueado && !clientError && errorTipo === "CredentialsSignin" && !intentos && (
+        <div className={authStyles.errorBox}>
+          <span>⚠</span>
+          Email o contraseña incorrectos.
+        </div>
       )}
 
-      <form action={loginAction} className={styles.form}>
+      <form ref={formRef} action={loginAction} onSubmit={handleSubmit} className={authStyles.form}>
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
-        <div className={styles.field}>
+        <div className={authStyles.field}>
           <label htmlFor="email">Email</label>
           <input
             id="email"
@@ -70,22 +109,55 @@ export function LoginForm({
             type="email"
             required
             placeholder="vos@agencia.com"
+            autoComplete="username"
             disabled={bloqueado}
+            onChange={() => setClientError("")}
           />
         </div>
-        <div className={styles.field}>
+
+        <div className={styles.passField}>
           <label htmlFor="password">Contraseña</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            placeholder="••••••••"
-            disabled={bloqueado}
-          />
+          <div className={styles.passInputWrap}>
+            <input
+              id="password"
+              name="password"
+              type={showPass ? "text" : "password"}
+              required
+              placeholder="Tu contraseña"
+              autoComplete="current-password"
+              disabled={bloqueado}
+              onChange={() => setClientError("")}
+            />
+            <button
+              type="button"
+              className={styles.passToggle}
+              onClick={() => setShowPass((v) => !v)}
+              tabIndex={-1}
+            >
+              {showPass ? "Ocultar" : "Ver"}
+            </button>
+          </div>
         </div>
-        <button type="submit" className={styles.submit} disabled={bloqueado}>
-          {bloqueado ? `Bloqueado — ${formatMMSS(secondsLeft)}` : "Entrar"}
+
+        <div className={styles.optionsRow}>
+          <button
+            type="button"
+            className={styles.rememberBtn}
+            onClick={() => setRemember((v) => !v)}
+          >
+            <span className={`${styles.checkbox} ${remember ? styles.checkboxOn : ""}`}>
+              {remember && "✓"}
+            </span>
+            Mantener la sesión abierta
+          </button>
+          <a href="/forgot-password" className={styles.forgotLink}>
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+
+        <button type="submit" className={authStyles.submit} disabled={bloqueado || submitting}>
+          {submitting && !bloqueado && <span className={styles.spinner} />}
+          {bloqueado ? `Bloqueado — ${formatMMSS(secondsLeft)}` : submitting ? "Entrando…" : "Entrar al panel"}
         </button>
       </form>
     </>

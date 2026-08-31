@@ -4,13 +4,20 @@ import { AuthError } from "next-auth";
 import { signIn, LOGIN_MAX_INTENTOS, LOGIN_VENTANA_MS, loginRateLimitKey } from "@/lib/auth";
 import { getRateLimitStatus } from "@/lib/rateLimit";
 import { LoginForm } from "./LoginForm";
-import styles from "../auth.module.css";
+import styles from "./login.module.css";
+import authStyles from "../auth.module.css";
 
 // A partir de qué intento fallido mostramos el aviso de "te quedan N" en
 // vez del mensaje genérico — con MAX=5, mostrarlo desde que quedan 2
 // (o sea, ya van 3 fallidos) da margen para reaccionar sin alarmar en el
 // primer error de tipeo.
 const AVISO_DESDE_INTENTOS_RESTANTES = 2;
+
+const hitos = [
+  { title: "Stock y documentación", color: "var(--accent)" },
+  { title: "Catálogo y Mercado Libre", color: "var(--warn)" },
+  { title: "Leads y ventas", color: "var(--success)" },
+];
 
 export default async function LoginPage({
   searchParams,
@@ -53,37 +60,68 @@ export default async function LoginPage({
   }
 
   return (
-    <div className={styles.authScreen}>
-      <div className={styles.authCard}>
+    <div className={styles.wrap}>
+      <div className={styles.left}>
         <div className={styles.brand}>
           <div className={styles.logoMark}>
             <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
           </div>
-          <span className="disp">Rodado</span>
+          <span className={styles.brandName}>Rodado</span>
         </div>
-        <h1 className={`disp ${styles.title}`}>Iniciar sesión</h1>
-        <p className={styles.subtitle}>Entrá al panel de tu agencia</p>
 
-        {params.reset === "1" && (
-          <div className={styles.successBox}>
-            Contraseña actualizada. Ya podés iniciar sesión.
+        <div className={styles.formArea}>
+          <div className={styles.heading}>
+            <h1>Entrá al panel de tu agencia</h1>
+            <p>Tu stock, tus leads y tus ventas, donde los dejaste.</p>
           </div>
-        )}
 
-        <LoginForm
-          loginAction={loginAction}
-          callbackUrl={params.callbackUrl ?? ""}
-          errorTipo={params.error}
-          intentos={params.intentos}
-          esperaSegundosInicial={params.espera ? Number(params.espera) : 0}
-        />
+          {params.reset === "1" && (
+            <div className={authStyles.successBox}>Contraseña actualizada. Ya podés iniciar sesión.</div>
+          )}
 
-        <p className={styles.foot}>
-          <a href="/forgot-password">¿Olvidaste tu contraseña?</a>
-        </p>
-        <p className={styles.foot}>
-          ¿No tenés cuenta? <a href="/signup">Creá tu agencia</a>
-        </p>
+          <LoginForm
+            loginAction={loginAction}
+            callbackUrl={params.callbackUrl ?? ""}
+            errorTipo={params.error}
+            intentos={params.intentos}
+            esperaSegundosInicial={params.espera ? Number(params.espera) : 0}
+          />
+
+          <div className={styles.divider} />
+
+          <p className={authStyles.foot} style={{ margin: 0, textAlign: "left" }}>
+            ¿Todavía no tenés cuenta? <a href="/signup">Creá tu agencia →</a>
+          </p>
+        </div>
+
+        <div className={styles.trustRow}>
+          <span className={styles.trustDot} />
+          Conexión cifrada · Los datos de tu agencia están aislados del resto
+        </div>
+      </div>
+
+      <div className={styles.right}>
+        <div className={styles.rightBg} />
+        <div className={styles.rightGlow} />
+        <div className={styles.rightLane} />
+        <div className={styles.rightContent}>
+          <div className={styles.rightTitle}>
+            Tu playa,
+            <br />
+            ordenada de punta a punta.
+          </div>
+          <div className={styles.rightSubtitle}>
+            Stock, documentación y compradores viven en el mismo lugar. Entrás y seguís donde lo dejaste.
+          </div>
+          <div className={styles.hitos}>
+            {hitos.map((h) => (
+              <span key={h.title} className={styles.hito}>
+                <span className={styles.hitoDot} style={{ background: h.color }} />
+                {h.title}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
