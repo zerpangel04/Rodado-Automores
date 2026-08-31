@@ -125,14 +125,14 @@
 .headerWa {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--accent-ink);
+  justify-content: center;
+  color: #ffffff;
   background: linear-gradient(140deg, #86efac, #34d399);
-  padding: 9px 15px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   box-shadow: 0 10px 24px rgba(52, 211, 153, 0.18);
+  flex: none;
 }
 
 .headerWa:hover {

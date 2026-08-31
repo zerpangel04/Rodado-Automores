@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, MessageCircle, Phone, Mail } from "lucide-react";
+import { X, Phone, Mail } from "lucide-react";
 import styles from "./kanban.module.css";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import type { LeadDTO, Etapa } from "./KanbanView";
 import { ChannelBadge } from "./ChannelBadge";
+import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
 
 export type VehiculoOption = {
   id: string;
@@ -196,7 +197,7 @@ export function LeadDetailModal({
         <div className={styles.drawerActions}>
           {wa && (
             <a href={wa} target="_blank" rel="noreferrer" className={styles.drawerActionBtn}>
-              <MessageCircle size={15} />
+              <WhatsAppGlyph size={15} />
               WhatsApp
             </a>
           )}

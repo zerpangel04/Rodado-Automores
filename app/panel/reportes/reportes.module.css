@@ -443,6 +443,25 @@
   flex: none;
 }
 
+.canalLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: #ffffff;
+  flex: none;
+  overflow: hidden;
+}
+
+.canalLogo img {
+  height: 11px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
 .canalLabel {
   font-size: 12px;
   font-weight: 600;

@@ -37,7 +37,7 @@ export async function POST(
     );
   }
 
-  const { vendedorId, precioFinal, comision } = parsed.data;
+  const { vendedorId, compradorNombre, precioFinal, comision } = parsed.data;
 
   if (rol === "VENDEDOR" && vendedorId !== userId) {
     return NextResponse.json(
@@ -63,6 +63,7 @@ export async function POST(
         tenantId,
         vehiculoId: id,
         vendedorId,
+        compradorNombre: compradorNombre || null,
         precioFinal,
         comision,
       },

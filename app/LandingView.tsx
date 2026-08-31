@@ -145,7 +145,7 @@ const TABS = [
 ];
 
 const CANALES = [
-  { name: "Mercado Libre", note: "Conexión OAuth con tu propia cuenta", color: "#fbbf24" },
+  { name: "Mercado Libre", note: "Conexión OAuth con tu propia cuenta", logo: "/logos/mercadolibre.svg" },
   { name: "Tu catálogo público", note: "Formularios que entran como lead", color: "#60a5fa" },
   { name: "Email", note: "Notificaciones y recupero de cuenta", color: "#c084fc" },
   { name: "Asistente de IA", note: "Responde sobre tu stock real · en desarrollo", color: "#4ade80" },
@@ -687,7 +687,16 @@ export function LandingView() {
               <div className={styles.canalesGrid}>
                 {CANALES.map((c) => (
                   <div key={c.name} className={styles.canalCard}>
-                    <span className={styles.canalDot} style={{ background: c.color, boxShadow: `0 0 12px ${c.color}` }} />
+                    {c.logo ? (
+                      <span className={styles.canalLogo}>
+                        <Image src={c.logo} alt={c.name} width={44} height={16} />
+                      </span>
+                    ) : (
+                      <span
+                        className={styles.canalDot}
+                        style={{ background: c.color, boxShadow: `0 0 12px ${c.color}` }}
+                      />
+                    )}
                     <div>
                       <div className={styles.name}>{c.name}</div>
                       <div className={styles.note}>{c.note}</div>

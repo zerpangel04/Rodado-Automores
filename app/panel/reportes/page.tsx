@@ -147,6 +147,7 @@ export default async function ReportesPage({
     const cerrados = deEsteCanal.filter((l) => l.etapa === "CERRADO").length;
     return {
       canal: canalLabel[canal],
+      canalKey: canal,
       total: deEsteCanal.length,
       cerrados,
       pct: deEsteCanal.length > 0 ? Math.round((cerrados / deEsteCanal.length) * 100) : 0,

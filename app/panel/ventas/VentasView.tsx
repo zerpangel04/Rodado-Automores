@@ -11,6 +11,7 @@ export type VentaDTO = {
   fecha: string;
   vehiculo: { marca: string; modelo: string; sucursal: string };
   vendedor: { id: string; nombre: string };
+  compradorNombre: string | null;
   precioFinal: number;
   comision: number;
   estadoCobro: "PENDIENTE" | "COBRADO";
@@ -51,6 +52,20 @@ function haceLabel(iso: string) {
 
 function usd(n: number) {
   return `USD ${Math.round(n).toLocaleString("es-AR")}`;
+}
+
+function csvField(value: string) {
+  if (/[",\n]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+function fechaArchivo(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 export function VentasView({
@@ -207,6 +222,44 @@ export function VentasView({
 
   const vendedorSeleccionado = porVendedor.find((v) => v.id === vendedorId);
 
+  function handleExport() {
+    const encabezados = [
+      "Fecha",
+      "Vehículo",
+      "Cliente",
+      "Vendedor",
+      "Precio final (USD)",
+      "Comisión (USD)",
+      "Estado de cobro",
+    ];
+    const filas = lista.map((v) => [
+      new Date(v.fecha).toLocaleDateString("es-AR"),
+      `${v.vehiculo.marca} ${v.vehiculo.modelo}`,
+      // Ventas registradas antes de sumar este campo quedan sin comprador
+      // cargado — no hay forma real de recuperar ese dato, así que se
+      // exporta en blanco en vez de inventarlo.
+      v.compradorNombre ?? "",
+      v.vendedor.nombre,
+      String(Math.round(v.precioFinal)),
+      String(Math.round(v.comision)),
+      v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente",
+    ]);
+
+    const csv =
+      "﻿" +
+      [encabezados, ...filas].map((fila) => fila.map(csvField).join(",")).join("\r\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ventas-rodado-${fechaArchivo(new Date())}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   if (items.length === 0) {
     return (
       <p className={styles.empty}>
@@ -230,7 +283,7 @@ export function VentasView({
             </button>
           ))}
         </div>
-        <button type="button" className={styles.exportBtn}>
+        <button type="button" className={styles.exportBtn} onClick={handleExport}>
           Exportar
         </button>
       </div>
@@ -369,6 +422,7 @@ export function VentasView({
                 <tr>
                   <th>Fecha</th>
                   <th>Vehículo</th>
+                  <th>Cliente</th>
                   {verVendedor && <th>Vendedor</th>}
                   <th style={{ textAlign: "right" }}>Precio final</th>
                   <th style={{ textAlign: "right" }}>Comisión</th>
@@ -378,7 +432,7 @@ export function VentasView({
               <tbody>
                 {lista.length === 0 ? (
                   <tr>
-                    <td colSpan={verVendedor ? 6 : 5} className={styles.emptyRow}>
+                    <td colSpan={verVendedor ? 7 : 6} className={styles.emptyRow}>
                       Sin ventas con estos filtros
                     </td>
                   </tr>
@@ -396,6 +450,9 @@ export function VentasView({
                           {v.vehiculo.marca} {v.vehiculo.modelo}
                         </div>
                         <div className={styles.cellSub}>{v.vehiculo.sucursal}</div>
+                      </td>
+                      <td>
+                        <div className={styles.cellMain}>{v.compradorNombre || "—"}</div>
                       </td>
                       {verVendedor && (
                         <td>
@@ -427,7 +484,7 @@ export function VentasView({
               {lista.length > 0 && (
                 <tfoot>
                   <tr>
-                    <td colSpan={verVendedor ? 3 : 2} className={styles.totalLabel}>
+                    <td colSpan={verVendedor ? 4 : 3} className={styles.totalLabel}>
                       TOTAL {lista.length} {lista.length === 1 ? "OPERACIÓN" : "OPERACIONES"}
                     </td>
                     <td style={{ textAlign: "right" }} className={styles.totalValue}>

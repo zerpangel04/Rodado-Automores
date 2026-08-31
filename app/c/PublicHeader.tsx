@@ -1,5 +1,5 @@
-import { MessageCircle } from "lucide-react";
 import styles from "./public.module.css";
+import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
 
 function whatsappUrl(telefono: string) {
   const digits = telefono.replace(/[^\d]/g, "");
@@ -41,9 +41,15 @@ export function PublicHeader({
           <div className={styles.headerActions}>
             {telefono && <div className={styles.headerPhone}>{telefono}</div>}
             {wa && (
-              <a href={wa} target="_blank" rel="noreferrer" className={styles.headerWa}>
-                <MessageCircle size={14} />
-                WhatsApp
+              <a
+                href={wa}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.headerWa}
+                aria-label="Escribinos por WhatsApp"
+                title="WhatsApp"
+              >
+                <WhatsAppGlyph />
               </a>
             )}
           </div>

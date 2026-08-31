@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, MessageCircle } from "lucide-react";
+import { Search } from "lucide-react";
 import { CarSVG } from "../CarSVG";
+import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
 import styles from "../public.module.css";
 
 export type EstadoVehiculo = "DISPONIBLE" | "RESERVADO";
@@ -180,7 +181,7 @@ export function CatalogoView({
                   <div className={styles.cardSucursal}>{v.sucursal}</div>
                   <div className={styles.cardActions}>
                     <span className={styles.cardWa}>
-                      <MessageCircle size={14} />
+                      <WhatsAppGlyph size={14} />
                     </span>
                     <span className={styles.cardVerBtn}>Ver detalle</span>
                   </div>

@@ -1,14 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { TrendingUp, AlertTriangle, Clock } from "lucide-react";
 import styles from "./reportes.module.css";
 import { KpiSpark } from "../KpiSpark";
 
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
 
+type CanalKey = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
+
+const canalLogo: Partial<Record<CanalKey, string>> = {
+  WHATSAPP: "/logos/whatsapp.svg",
+  MERCADO_LIBRE: "/logos/mercadolibre.svg",
+  INSTAGRAM: "/logos/instagram.svg",
+};
+
 type VentaDia = { fecha: string; unidades: number; monto: number };
-type LeadCanal = { canal: string; total: number; cerrados: number; pct: number };
+type LeadCanal = { canal: string; canalKey: CanalKey; total: number; cerrados: number; pct: number };
 type RotacionItem = { vehiculo: string; dias: number };
 type VendedorPerf = { nombre: string; leads: number; ventas: number; facturado: number; comision: number };
 type EmbudoItem = { label: string; n: number };
@@ -345,10 +354,16 @@ export function ReportesView({
               {leadsPorCanal.map((c) => (
                 <div key={c.canal} className={styles.canalRow}>
                   <div className={styles.canalHead}>
-                    <span
-                      className={styles.canalDot}
-                      style={{ background: c.total === 0 ? "var(--ink-soft)" : "var(--accent)" }}
-                    />
+                    {canalLogo[c.canalKey] ? (
+                      <span className={styles.canalLogo}>
+                        <Image src={canalLogo[c.canalKey]!} alt={c.canal} width={44} height={16} />
+                      </span>
+                    ) : (
+                      <span
+                        className={styles.canalDot}
+                        style={{ background: c.total === 0 ? "var(--ink-soft)" : "var(--accent)" }}
+                      />
+                    )}
                     <span className={styles.canalLabel}>{c.canal}</span>
                     <span className={styles.canalDetalle}>
                       {c.total === 0 ? "sin consultas" : `${c.total} · ${c.cerrados}`}

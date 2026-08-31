@@ -217,17 +217,18 @@ model Lead {
 }
 
 model Venta {
-  id          String      @id @default(cuid())
-  tenantId    String
-  tenant      Tenant      @relation(fields: [tenantId], references: [id])
-  vehiculoId  String      @unique
-  vehiculo    Vehiculo    @relation(fields: [vehiculoId], references: [id])
-  vendedorId  String
-  vendedor    Usuario     @relation("VendedorVenta", fields: [vendedorId], references: [id])
-  precioFinal Decimal
-  comision    Decimal
-  estadoCobro EstadoCobro @default(PENDIENTE)
-  fecha       DateTime    @default(now())
+  id               String      @id @default(cuid())
+  tenantId         String
+  tenant           Tenant      @relation(fields: [tenantId], references: [id])
+  vehiculoId       String      @unique
+  vehiculo         Vehiculo    @relation(fields: [vehiculoId], references: [id])
+  vendedorId       String
+  vendedor         Usuario     @relation("VendedorVenta", fields: [vendedorId], references: [id])
+  compradorNombre  String?
+  precioFinal      Decimal
+  comision         Decimal
+  estadoCobro      EstadoCobro @default(PENDIENTE)
+  fecha            DateTime    @default(now())
 
   actividades ActividadLog[]
 

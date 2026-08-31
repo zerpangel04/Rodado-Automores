@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
 import {
   X,
@@ -110,6 +111,7 @@ const emptyForm: FormState = {
 
 type SaleForm = {
   vendedorId: string;
+  compradorNombre: string;
   precioFinal: string;
   comision: string;
 };
@@ -191,6 +193,7 @@ export function StockView({
   const [saleTarget, setSaleTarget] = useState<VehiculoDTO | null>(null);
   const [saleForm, setSaleForm] = useState<SaleForm>({
     vendedorId: userId,
+    compradorNombre: "",
     precioFinal: "",
     comision: "",
   });
@@ -604,6 +607,7 @@ export function StockView({
     setSaleTarget(v);
     setSaleForm({
       vendedorId: canRevertirVenta ? "" : userId,
+      compradorNombre: "",
       precioFinal: String(v.precioUsd),
       comision: "",
     });
@@ -624,6 +628,7 @@ export function StockView({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           vendedorId: saleForm.vendedorId,
+          compradorNombre: saleForm.compradorNombre.trim() || undefined,
           precioFinal: Number(saleForm.precioFinal) || 0,
           comision: Number(saleForm.comision) || 0,
         }),
@@ -907,9 +912,14 @@ export function StockView({
                         className={styles.mlLink}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {v.mlStatus === "payment_required"
-                          ? "Ver en Mercado Libre (pendiente de pago) ↗"
-                          : "Ver en Mercado Libre ↗"}
+                        <Image
+                          className={styles.mlWordmark}
+                          src="/logos/mercadolibre.svg"
+                          alt="Mercado Libre"
+                          width={70}
+                          height={12}
+                        />
+                        {v.mlStatus === "payment_required" ? "Ver (pendiente de pago) ↗" : "Ver ↗"}
                       </a>
                     ) : (
                       <button
@@ -920,7 +930,14 @@ export function StockView({
                           publishToMercadoLibre(v);
                         }}
                       >
-                        {publishingId === v.id ? "Publicando…" : "Publicar en Mercado Libre"}
+                        <Image
+                          className={styles.mlWordmark}
+                          src="/logos/mercadolibre.svg"
+                          alt="Mercado Libre"
+                          width={70}
+                          height={12}
+                        />
+                        {publishingId === v.id ? "Publicando…" : "Publicar"}
                       </button>
                     )}
                     {v.mlLastError && (
@@ -1314,7 +1331,17 @@ export function StockView({
             </div>
           )}
 
-          <div className={styles.fieldRow} style={canRevertirVenta ? undefined : { marginTop: 16 }}>
+          <div className={styles.field} style={canRevertirVenta ? undefined : { marginTop: 16 }}>
+            <label>Nombre del comprador (opcional)</label>
+            <input
+              type="text"
+              value={saleForm.compradorNombre}
+              onChange={(e) => setSaleForm({ ...saleForm, compradorNombre: e.target.value })}
+              placeholder="Juan Pérez"
+            />
+          </div>
+
+          <div className={styles.fieldRow}>
             <div className={styles.field}>
               <label>Precio final (USD)</label>
               <input

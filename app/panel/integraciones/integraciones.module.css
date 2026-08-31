@@ -102,18 +102,22 @@
 }
 
 .logo {
-  width: 46px;
+  width: 60px;
   height: 46px;
+  padding: 8px 9px;
   border-radius: 13px;
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--accent-ink);
-  background: linear-gradient(140deg, #fcd34d, var(--accent));
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .cardHeadInfo {
@@ -536,6 +540,13 @@
   align-items: center;
   justify-content: center;
   border: 1px solid;
+  overflow: hidden;
+}
+
+.proximaIconLogo img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .proximaInfo {

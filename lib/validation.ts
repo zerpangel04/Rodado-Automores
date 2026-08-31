@@ -88,6 +88,7 @@ export const leadUpdateSchema = z.object({
 
 export const ventaInputSchema = z.object({
   vendedorId: z.string().trim().min(1, "Elegí un vendedor"),
+  compradorNombre: z.string().trim().max(200).optional(),
   precioFinal: z.coerce.number().min(0),
   comision: z.coerce.number().min(0),
 });

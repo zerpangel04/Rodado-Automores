@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   ChevronDown,
-  MessageCircle,
   Table2,
   LayoutGrid,
   AlertTriangle,
@@ -15,6 +14,7 @@ import panelStyles from "../panel.module.css";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { LeadDetailModal } from "./LeadDetailModal";
 import { ChannelBadge } from "./ChannelBadge";
+import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
 
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
@@ -686,7 +686,7 @@ export function KanbanView({
                                   onClick={(e) => e.stopPropagation()}
                                   title="WhatsApp"
                                 >
-                                  <MessageCircle size={14} />
+                                  <WhatsAppGlyph size={14} />
                                 </a>
                               )}
                               {next && (

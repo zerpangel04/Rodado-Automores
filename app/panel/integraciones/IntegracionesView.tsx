@@ -2,12 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   RefreshCw,
   PauseCircle,
   AlertTriangle,
-  MessageCircle,
-  Camera,
   DollarSign,
   Calculator,
   Mail,
@@ -50,13 +49,23 @@ const actividadColorMl: Record<string, string> = {
   ML_ATENCION: "var(--warn)",
 };
 
-const proximas = [
+type ProximaItem = {
+  key: string;
+  nombre: string;
+  estado: string;
+  bg: string;
+  border: string;
+  estadoColor: string;
+  detalle: string;
+} & ({ kind: "logo"; logo: string } | { kind: "icon"; icon: typeof DollarSign; color: string });
+
+const proximas: ProximaItem[] = [
   {
     key: "wpp",
+    kind: "logo",
     nombre: "WhatsApp Business",
-    icon: MessageCircle,
+    logo: "/logos/whatsapp.svg",
     estado: "EN DESARROLLO",
-    color: "var(--success-text)",
     bg: "rgba(74,222,128,0.10)",
     border: "rgba(74,222,128,0.22)",
     estadoColor: "var(--success-text)",
@@ -64,10 +73,10 @@ const proximas = [
   },
   {
     key: "ig",
+    kind: "logo",
     nombre: "Instagram",
-    icon: Camera,
+    logo: "/logos/instagram.svg",
     estado: "PLANIFICADA",
-    color: "var(--secondary-text)",
     bg: "rgba(192,132,252,0.10)",
     border: "rgba(192,132,252,0.22)",
     estadoColor: "#8d949e",
@@ -75,6 +84,7 @@ const proximas = [
   },
   {
     key: "fin",
+    kind: "icon",
     nombre: "Financieras",
     icon: DollarSign,
     estado: "PLANIFICADA",
@@ -86,6 +96,7 @@ const proximas = [
   },
   {
     key: "cont",
+    kind: "icon",
     nombre: "Contabilidad",
     icon: Calculator,
     estado: "EN EVALUACIÓN",
@@ -209,7 +220,9 @@ export function IntegracionesView({
           <div className={styles.card}>
             <div className={styles.cardHairline} style={{ background: "linear-gradient(90deg, var(--warn), transparent 70%)" }} />
             <div className={styles.cardHead}>
-              <div className={styles.logo}>ML</div>
+              <div className={styles.logo}>
+                <Image src="/logos/mercadolibre.svg" alt="Mercado Libre" width={60} height={46} />
+              </div>
               <div className={styles.cardHeadInfo}>
                 <div className={styles.cardHeadTop}>
                   <div className={styles.nombre}>Mercado Libre</div>
@@ -234,7 +247,9 @@ export function IntegracionesView({
           <div className={styles.card}>
             <div className={styles.cardHairline} style={{ background: "linear-gradient(90deg, var(--warn), transparent 70%)" }} />
             <div className={styles.cardHead}>
-              <div className={styles.logo}>ML</div>
+              <div className={styles.logo}>
+                <Image src="/logos/mercadolibre.svg" alt="Mercado Libre" width={60} height={46} />
+              </div>
               <div className={styles.cardHeadInfo}>
                 <div className={styles.cardHeadTop}>
                   <div className={styles.nombre}>Mercado Libre</div>
@@ -409,12 +424,22 @@ export function IntegracionesView({
         <div className={styles.proximasGrid}>
           {proximas.map((p) => {
             const on = !!avisos[p.key];
-            const Icon = p.icon;
             return (
               <div key={p.key} className={styles.proximaCard}>
                 <div className={styles.proximaHead}>
-                  <div className={styles.proximaIcon} style={{ color: p.color, background: p.bg, borderColor: p.border }}>
-                    <Icon size={14} />
+                  <div
+                    className={`${styles.proximaIcon} ${p.kind === "logo" ? styles.proximaIconLogo : ""}`}
+                    style={
+                      p.kind === "icon"
+                        ? { color: p.color, background: p.bg, borderColor: p.border }
+                        : { background: "#ffffff", borderColor: p.border }
+                    }
+                  >
+                    {p.kind === "logo" ? (
+                      <Image src={p.logo} alt={p.nombre} width={16} height={16} />
+                    ) : (
+                      <p.icon size={14} />
+                    )}
                   </div>
                   <div className={styles.proximaInfo}>
                     <div className={styles.proximaNombre}>{p.nombre}</div>

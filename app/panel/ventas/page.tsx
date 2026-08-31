@@ -32,6 +32,7 @@ export default async function VentasPage() {
       sucursal: v.vehiculo.sucursal.nombre,
     },
     vendedor: v.vendedor,
+    compradorNombre: v.compradorNombre,
     precioFinal: Number(v.precioFinal),
     comision: Number(v.comision),
     estadoCobro: v.estadoCobro,

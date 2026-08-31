@@ -399,8 +399,10 @@
 
 .mlBtn {
   width: 100%;
-  text-align: center;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 7px;
   background: color-mix(in srgb, #ffe600 16%, transparent);
   color: #b8860b;
   border: 1px solid color-mix(in srgb, #ffe600 40%, var(--line));
@@ -416,15 +418,23 @@
 }
 
 .mlLink {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   width: 100%;
-  text-align: center;
   background: color-mix(in srgb, var(--success) 16%, transparent);
   color: var(--success);
   padding: 8px 12px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
+}
+
+.mlWordmark {
+  flex: none;
+  height: 12px;
+  width: auto;
 }
 
 .mlError {
