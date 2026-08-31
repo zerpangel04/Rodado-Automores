@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./LandingMobileMenu.module.css";
-import { ThemeToggle } from "./ThemeToggle";
 
 // Hamburguesa de la landing en mobile: agrupa los links de navegación
 // (que ya se ocultan en la barra a partir de 800px) y "Iniciar sesión"
@@ -57,8 +56,6 @@ export function LandingMobileMenu() {
             <a href="/login" className={styles.loginRow} onClick={close}>
               Iniciar sesión
             </a>
-            <div className={styles.divider} />
-            <ThemeToggle className={styles.themeToggle} />
           </nav>
         </>
       )}

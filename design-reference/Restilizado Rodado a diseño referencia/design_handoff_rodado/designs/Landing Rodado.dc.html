@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0d10; scroll-behavior: smooth; }
+  body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; color: #e9ecef; }
+  a { color: #f0a13c; text-decoration: none; }
+  a:hover { color: #f7c584; }
+  @keyframes rd-grid { from { transform: perspective(700px) rotateX(62deg) translateY(0); } to { transform: perspective(700px) rotateX(62deg) translateY(64px); } }
+  @keyframes rd-glow { 0%, 100% { transform: translate3d(-4%, -2%, 0) scale(1); opacity: .55; } 50% { transform: translate3d(6%, 4%, 0) scale(1.15); opacity: .85; } }
+  @keyframes rd-glow2 { 0%, 100% { transform: translate3d(3%, 5%, 0) scale(1.1); opacity: .4; } 50% { transform: translate3d(-5%, -3%, 0) scale(.95); opacity: .7; } }
+  @keyframes rd-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes rd-rowin { 0% { opacity: 0; transform: translateY(10px); } 8%, 88% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-10px); } }
+  @keyframes rd-pulse { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.35); } }
+  @keyframes rd-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes rd-sweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }
+  @keyframes rd-bar { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+  @keyframes rd-lane { from { background-position-x: 0; } to { background-position-x: -240px; } }
+  @keyframes rd-headlight { 0% { opacity: 0; transform: translateX(-30%) skewX(-18deg); } 45% { opacity: .5; } 100% { opacity: 0; transform: translateX(260%) skewX(-18deg); } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</helmet>
+<div style="position: relative; overflow-x: hidden; background: #0b0d10;">
+
+  <div style="position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;">
+    <div style="position: absolute; inset: -20% -20% 40%; background: radial-gradient(closest-side, rgba(240,161,60,0.22), transparent 70%); animation: rd-glow 18s ease-in-out infinite;"></div>
+    <div style="position: absolute; left: 40%; top: 20%; width: 70vw; height: 70vw; background: radial-gradient(closest-side, rgba(90,120,160,0.16), transparent 70%); animation: rd-glow2 24s ease-in-out infinite;"></div>
+    <div style="position: absolute; left: -25%; right: -25%; bottom: -10%; height: 70vh; background-image: linear-gradient(rgba(240,161,60,0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(240,161,60,0.10) 1px, transparent 1px); background-size: 64px 64px; transform-origin: 50% 100%; animation: rd-grid 4.5s linear infinite; mask-image: linear-gradient(to top, #000, transparent 78%); -webkit-mask-image: linear-gradient(to top, #000, transparent 78%);"></div>
+    <div style="position: absolute; left: 0; right: 0; bottom: 8vh; height: 3px; background-image: repeating-linear-gradient(90deg, rgba(240,161,60,0.5) 0 70px, transparent 70px 240px); animation: rd-lane 2.2s linear infinite; mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); opacity: .5;"></div>
+    <div style="position: absolute; left: 0; right: 0; bottom: 3vh; height: 2px; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.22) 0 44px, transparent 44px 200px); animation: rd-lane 3.6s linear infinite; mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); opacity: .35;"></div>
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,13,16,0.2), rgba(11,13,16,0.75) 60%, #0b0d10);"></div>
+  </div>
+
+  <div style="position: relative; z-index: 1;">
+
+    <header style="position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px); background: rgba(11,13,16,0.72); border-bottom: 1px solid rgba(255,255,255,0.06);">
+      <div style="max-width: 1180px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 28px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #17130c;">R</div>
+          <div style="font-size: 17px; font-weight: 700; letter-spacing: 0.02em;">Rodado</div>
+        </div>
+        <nav style="display: flex; align-items: center; gap: 22px; margin-left: 14px; flex-wrap: nowrap; white-space: nowrap;">
+          <a href="#plataforma" style="font-size: 13.5px; color: #a8b0b8;" style-hover="color: #eff2f4;">Plataforma</a>
+          <a href="#modulos" style="font-size: 13.5px; color: #a8b0b8;" style-hover="color: #eff2f4;">Módulos</a>
+          <a href="#movil" style="font-size: 13.5px; color: #a8b0b8;" style-hover="color: #eff2f4;">Celular</a>
+          <a href="#catalogo" style="font-size: 13.5px; color: #a8b0b8;" style-hover="color: #eff2f4;">Catálogo</a>
+          <a href="#precios" style="font-size: 13.5px; color: #a8b0b8;" style-hover="color: #eff2f4;">Precios</a>
+        </nav>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 14px; white-space: nowrap;">
+          <a href="#" style="font-size: 13.5px; color: #a8b0b8;" style-hover="color: #eff2f4;">Iniciar sesión</a>
+          <a href="#demo" style="font-size: 13.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 9px 16px; border-radius: 10px; box-shadow: 0 8px 22px rgba(224,140,44,0.28);" style-hover="color: #17130c; transform: translateY(-1px);">Pedí tu demo →</a>
+        </div>
+      </div>
+    </header>
+
+    <section style="max-width: 1180px; margin: 0 auto; padding: 84px 24px 40px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px;">
+      <div data-reveal="" style="display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; color: #d9cdb8; background: rgba(240,161,60,0.10); border: 1px solid rgba(240,161,60,0.24); padding: 7px 14px; border-radius: 30px;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #f0a13c; animation: rd-pulse 2.4s ease-in-out infinite;"></span>
+        Stock, leads y ventas en un solo sistema
+      </div>
+      <h1 data-reveal="" style="margin: 0; font-size: 62px; line-height: 1.03; font-weight: 800; letter-spacing: -0.035em; max-width: 900px; text-wrap: balance;">
+        Dejá el Excel.<br />Manejá tu concesionaria<br /><span style="background: linear-gradient(100deg, #f7c584, #f0a13c 40%, #c9762a); -webkit-background-clip: text; background-clip: text; color: transparent;">desde un solo panel.</span>
+      </h1>
+      <p data-reveal="" style="margin: 0; max-width: 620px; font-size: 17px; line-height: 1.6; color: #9aa3ac; text-wrap: pretty;">
+        Cargás el auto una vez y corre por todo el sistema: publicaciones, consultas de cada canal y el seguimiento de cada comprador hasta la venta.
+      </p>
+      <div data-reveal="" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; padding-top: 4px;">
+        <a href="#demo" style="font-size: 15px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 14px 26px; border-radius: 12px; box-shadow: 0 14px 34px rgba(224,140,44,0.3);" style-hover="color: #17130c; transform: translateY(-2px);">Pedí tu demo →</a>
+        <a href="#plataforma" style="font-size: 15px; font-weight: 600; color: #e9ecef; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); padding: 14px 24px; border-radius: 12px;" style-hover="color: #ffffff; background: rgba(255,255,255,0.09);">Ver la plataforma</a>
+      </div>
+      <div data-reveal="" style="display: flex; align-items: center; gap: 18px; font-size: 12px; color: #6f777f; flex-wrap: wrap; justify-content: center;">
+        <span>Sin instalación</span><span style="opacity: .4;">·</span><span>Migramos tu stock actual</span><span style="opacity: .4;">·</span><span>Hecho para agencias argentinas</span>
+      </div>
+    </section>
+
+    <section id="plataforma" style="position: relative; max-width: 1180px; margin: 0 auto; padding: 10px 24px 110px;">
+      <div data-reveal="" style="position: relative; border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; overflow: hidden; background: #12151a; box-shadow: 0 50px 120px rgba(0,0,0,0.65), 0 0 0 1px rgba(240,161,60,0.06); animation: rd-float 9s ease-in-out infinite;">
+        <div style="position: absolute; top: 0; left: 0; width: 22%; height: 2px; background: linear-gradient(90deg, transparent, #f0a13c, transparent); animation: rd-sweep 6s ease-in-out infinite; z-index: 3;"></div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 11px 14px; background: #0f1216; border-bottom: 1px solid rgba(255,255,255,0.07);">
+          <div style="display: flex; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #3a4048;"></span>
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #3a4048;"></span>
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #3a4048;"></span>
+          </div>
+          <div style="margin: 0 auto; font-size: 11px; color: #6f777f; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); padding: 4px 40px; border-radius: 8px;">rodado.app/panel</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 172px 1fr;">
+          <div style="background: #0f1216; border-right: 1px solid rgba(255,255,255,0.06); padding: 14px 10px; display: flex; flex-direction: column; gap: 6px; min-height: 430px;">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 4px 8px 12px;">
+              <div style="width: 20px; height: 20px; border-radius: 6px; background: linear-gradient(140deg, #f0a13c, #c9762a);"></div>
+              <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.12em;">RODADO</div>
+            </div>
+            <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: 9px; padding: 7px 9px; border-radius: 8px; font-size: 11.5px; color: #8d949e; background: {{ n.bg }};">
+                <span style="width: 13px; text-align: center; color: {{ n.iconColor }};">{{ n.icon }}</span>{{ n.label }}
+              </div>
+            </sc-for>
+            <div style="margin-top: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; padding: 8px 9px; background: rgba(255,255,255,0.025); display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 8px; letter-spacing: 0.14em; color: #6a7179; font-weight: 700;">DÓLAR</div>
+              <div style="display: flex; justify-content: space-between; font-size: 10.5px;"><span style="color: #8d949e;">Oficial</span><span style="font-weight: 700;">$1.535</span></div>
+              <div style="display: flex; justify-content: space-between; font-size: 10.5px;"><span style="color: #8d949e;">Blue</span><span style="font-weight: 700;">$1.555</span></div>
+            </div>
+          </div>
+
+          <div style="padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 14px; background: #11141a;">
+            <div style="display: flex; align-items: flex-end; gap: 12px;">
+              <div>
+                <div style="font-size: 10px; color: #7d848d;">Domingo, 30 de agosto</div>
+                <div style="font-size: 16px; font-weight: 700;">Buenos días, Alejandro</div>
+              </div>
+              <div style="margin-left: auto; display: flex; gap: 7px;">
+                <div style="font-size: 10px; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; padding: 5px 9px;">Hoy ▾</div>
+                <div style="font-size: 10px; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 7px; padding: 5px 9px;">Todas las sucursales ▾</div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+              <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+                <div style="background: {{ k.cardBg }}; border: 1px solid {{ k.cardBorder }}; border-radius: 11px; padding: 11px 12px; display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 38px; height: 38px; border-radius: 50%; background: {{ k.ring }}; display: flex; align-items: center; justify-content: center; flex: none;">
+                    <div style="width: 29px; height: 29px; border-radius: 50%; background: {{ k.holeBg }}; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: {{ k.pctColor }};">{{ k.pct }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 9.5px; color: {{ k.labelColor }};">{{ k.label }}</div>
+                    <div style="font-size: 16px; font-weight: 700; color: {{ k.valueColor }};">{{ k.value }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 11px; overflow: hidden;">
+              <div style="display: flex; align-items: center; gap: 8px; padding: 11px 14px;">
+                <div style="font-size: 12px; font-weight: 700;">Leads recientes</div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 700; color: #f3bd77; background: rgba(240,161,60,0.12); border: 1px solid rgba(240,161,60,0.22); padding: 2px 8px; border-radius: 20px;">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: #f0a13c; animation: rd-pulse 1.8s ease-in-out infinite;"></span>en vivo
+                </div>
+                <div style="margin-left: auto; font-size: 10px; color: #7d848d;">Ver todos →</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1.1fr 1fr 1.4fr 0.9fr 0.9fr; gap: 14px; padding: 8px 14px; font-size: 8.5px; letter-spacing: 0.1em; color: #6a7179; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div>NOMBRE</div><div>CONTACTO</div><div>VEHÍCULO</div><div>CANAL</div><div>ETAPA</div>
+              </div>
+              <sc-for list="{{ leads }}" as="l" hint-placeholder-count="5">
+                <div style="display: grid; grid-template-columns: 1.1fr 1fr 1.4fr 0.9fr 0.9fr; gap: 14px; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 11px; animation: rd-rowin 9s ease-in-out infinite; animation-delay: {{ l.delay }};">
+                  <div style="font-weight: 600;">{{ l.nombre }}</div>
+                  <div style="color: #949ba3;">{{ l.contacto }}</div>
+                  <div style="color: #c3c9cf;">{{ l.vehiculo }}</div>
+                  <div><span style="display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); color: #c3c9cf;"><span style="width: 4px; height: 4px; border-radius: 50%; background: {{ l.canalColor }};"></span>{{ l.canal }}</span></div>
+                  <div><span style="display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: {{ l.etapaBg }}; color: {{ l.etapaColor }};"><span style="width: 4px; height: 4px; border-radius: 50%; background: {{ l.etapaColor }};"></span>{{ l.etapa }}</span></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.015); overflow: hidden; padding: 16px 0;">
+      <div style="display: flex; width: max-content; gap: 46px; animation: rd-marquee 26s linear infinite; align-items: center;">
+        <sc-for list="{{ marquee }}" as="m" hint-placeholder-count="12">
+          <div style="display: flex; align-items: center; gap: 11px; font-size: 13px; color: #949ba3; white-space: nowrap;">
+            <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; color: #c3c9cf; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14); padding: 3px 7px; border-radius: 4px;">{{ m.plate }}</span>
+            {{ m.model }}
+            <span style="font-size: 11px; color: #6a7179;">{{ m.state }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section id="modulos" style="max-width: 1180px; margin: 0 auto; padding: 90px 24px;">
+      <div data-reveal="" style="max-width: 640px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 34px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">LOS MÓDULOS</div>
+        <h2 style="margin: 0; font-size: 38px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em;">Un núcleo. Sumás lo que tu agencia necesita.</h2>
+        <p style="margin: 0; font-size: 15.5px; line-height: 1.6; color: #9aa3ac;">Todo comparte el mismo dato: cargás el auto una vez y corre por todo el sistema.</p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+        <sc-for list="{{ modulos }}" as="m" hint-placeholder-count="6">
+          <div data-reveal="" style="position: relative; background: #171b21; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 10px; min-height: 168px; overflow: hidden; transition: transform .35s ease, border-color .35s ease, background .35s ease;" style-hover="transform: translateY(-4px); border-color: rgba(240,161,60,0.35); background: #1b2027;">
+            <div style="width: 34px; height: 34px; border-radius: 10px; background: rgba(240,161,60,0.12); border: 1px solid rgba(240,161,60,0.22); display: flex; align-items: center; justify-content: center; font-size: 15px; color: #f3bd77;">{{ m.icon }}</div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="font-size: 16px; font-weight: 700;">{{ m.title }}</div>
+              <sc-if value="{{ m.soon }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; color: #f3bd77; border: 1px solid rgba(240,161,60,0.3); padding: 2px 7px; border-radius: 20px;">PRÓXIMAMENTE</span>
+              </sc-if>
+            </div>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: #949ba3; text-wrap: pretty;">{{ m.desc }}</p>
+            <div style="margin-top: auto; font-size: 12px; color: #6f777f;">{{ m.meta }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section id="como" style="border-top: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.015);">
+      <div style="max-width: 1180px; margin: 0 auto; padding: 90px 24px;">
+        <div data-reveal="" style="max-width: 640px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px;">
+          <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">CÓMO FUNCIONA</div>
+          <h2 style="margin: 0; font-size: 38px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em;">Tres pasos, una sola carga.</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+          <sc-for list="{{ pasos }}" as="p" hint-placeholder-count="3">
+            <div data-reveal="" style="position: relative; padding: 26px 22px; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; background: #171b21; display: flex; flex-direction: column; gap: 12px;">
+              <div style="font-size: 40px; font-weight: 800; letter-spacing: -0.04em; color: rgba(240,161,60,0.28); line-height: 1;">{{ p.n }}</div>
+              <div style="font-size: 18px; font-weight: 700;">{{ p.title }}</div>
+              <p style="margin: 0; font-size: 13.5px; line-height: 1.6; color: #949ba3; text-wrap: pretty;">{{ p.desc }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section id="movil" style="position: relative; overflow: hidden; border-top: 1px solid rgba(255,255,255,0.06);">
+      <div style="position: absolute; inset: 0; pointer-events: none; background: radial-gradient(90% 70% at 85% 30%, rgba(240,161,60,0.10), transparent 65%);"></div>
+      <div style="position: relative; pointer-events: none; max-width: 1180px; margin: 0 auto; padding: 84px 24px; display: grid; grid-template-columns: 1fr 430px; gap: 40px; align-items: center;">
+        <div data-reveal="" style="display: flex; flex-direction: column; gap: 14px; max-width: 520px;">
+          <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">DESDE EL CELULAR</div>
+          <h2 style="margin: 0; font-size: 36px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em;">El panel entero, en tu bolsillo.</h2>
+          <p style="margin: 0; font-size: 15.5px; line-height: 1.65; color: #a8b0b8; text-wrap: pretty;">Rodado está adaptado a celular: entrás desde el teléfono y tenés exactamente lo mismo que en la computadora. Sin apps para instalar.</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 6px;">
+            <sc-for list="{{ movil }}" as="m" hint-placeholder-count="4">
+              <div style="display: flex; align-items: flex-start; gap: 11px; font-size: 14px; color: #c3c9cf;">
+                <span style="width: 18px; height: 18px; border-radius: 50%; background: rgba(240,161,60,0.16); border: 1px solid rgba(240,161,60,0.32); color: #f3bd77; font-size: 9px; display: flex; align-items: center; justify-content: center; flex: none; margin-top: 2px;">✓</span>{{ m }}
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 11px; padding-top: 10px;">
+            <sc-for list="{{ movilCards }}" as="c" hint-placeholder-count="4">
+              <div style="padding: 15px 16px; border-radius: 13px; background: rgba(255,255,255,0.028); border: 1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column; gap: 5px;">
+                <div style="display: flex; align-items: center; gap: 9px;">
+                  <span style="width: 26px; height: 26px; border-radius: 8px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #f3bd77; background: rgba(240,161,60,0.12); border: 1px solid rgba(240,161,60,0.24);">{{ c.icon }}</span>
+                  <div style="font-size: 13px; font-weight: 700; color: #eff2f4; line-height: 1.35;">{{ c.titulo }}</div>
+                </div>
+                <div style="font-size: 12px; line-height: 1.5; color: #949ba3; text-wrap: pretty;">{{ c.detalle }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 13px; padding-top: 8px; flex-wrap: wrap;">
+            <a href="#demo" style="pointer-events: auto; font-size: 14.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 13px 22px; border-radius: 11px; box-shadow: 0 12px 30px rgba(224,140,44,0.26);" style-hover="color: #17130c; transform: translateY(-1px);">Pedí tu demo →</a>
+            <div style="font-size: 12.5px; color: #7d848d;">Entrás desde el navegador del celular, sin instalar nada.</div>
+          </div>
+        </div>
+
+        <div data-reveal="" style="justify-self: center; width: 390px; height: 844px; box-sizing: border-box; border: 12px solid #1c2129; border-radius: 52px; background: #0f1216; box-shadow: 0 50px 110px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06); overflow: hidden; animation: rd-float 8s ease-in-out infinite;">
+         <div style="width: 100%; height: 100%; display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 26px 8px; font-size: 15px; font-weight: 600; color: #e9ecef;">
+            <span>9:41</span>
+            <span style="display: flex; gap: 7px; align-items: center; color: #949ba3; font-size: 13px;">▮▮▮ ⌁</span>
+          </div>
+          <div style="flex: 1; min-height: 0; padding: 12px 18px 0; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; color: #17130c;">R</div>
+              <div style="display: flex; flex-direction: column;">
+                <div style="font-size: 11px; color: #7d848d;">Agencia Demo</div>
+                <div style="font-size: 17px; font-weight: 700;">Panel general</div>
+              </div>
+              <div style="margin-left: auto; position: relative; font-size: 18px; color: #949ba3;">⌁<span style="position: absolute; top: 0; right: -2px; width: 8px; height: 8px; border-radius: 50%; background: #f0a13c;"></span></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 11px;">
+              <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 14px 15px;">
+                <div style="font-size: 12px; color: #7d848d;">Stock disponible</div>
+                <div style="font-size: 24px; font-weight: 700;">6 / 6</div>
+              </div>
+              <div style="background: linear-gradient(150deg, #e29a3a, #c9762a); border: 1px solid rgba(255,255,255,0.16); border-radius: 14px; padding: 14px 15px;">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.82);">En negociación</div>
+                <div style="font-size: 24px; font-weight: 700; color: #fff;">4 / 17</div>
+              </div>
+              <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 14px 15px;">
+                <div style="font-size: 12px; color: #7d848d;">Conversión</div>
+                <div style="font-size: 24px; font-weight: 700; color: #86efac;">37%</div>
+              </div>
+              <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 14px 15px;">
+                <div style="font-size: 12px; color: #7d848d;">VTV por vencer</div>
+                <div style="font-size: 24px; font-weight: 700; color: #fcd34d;">2</div>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="font-size: 12px; letter-spacing: 0.12em; color: #6a7179; font-weight: 700;">PENDIENTES DE HOY</div>
+                <div style="font-size: 11px; font-weight: 700; color: #f3bd77; background: rgba(240,161,60,0.14); padding: 2px 8px; border-radius: 20px;">10</div>
+              </div>
+              <sc-for list="{{ movilPendientes }}" as="p" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 13px; background: #171b21; border: 1px solid rgba(255,255,255,0.06);">
+                  <div style="width: 19px; height: 19px; border-radius: 6px; border: 1.5px solid rgba(255,255,255,0.2); flex: none;"></div>
+                  <div style="min-width: 0;">
+                    <div style="font-size: 14.5px; font-weight: 600;">{{ p.a }}</div>
+                    <div style="font-size: 12px; color: #7d848d;">{{ p.b }}</div>
+                  </div>
+                  <div style="margin-left: auto; font-size: 11.5px; font-weight: 700; color: #f3bd77; background: rgba(240,161,60,0.12); padding: 3px 9px; border-radius: 7px; flex: none;">{{ p.c }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <div style="font-size: 12px; letter-spacing: 0.12em; color: #6a7179; font-weight: 700;">ACTIVIDAD RECIENTE</div>
+              <sc-for list="{{ movilActividad }}" as="a" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ a.dot }}; flex: none;"></span>
+                  <div style="font-size: 13.5px; color: #c3c9cf;">{{ a.text }}</div>
+                  <div style="margin-left: auto; font-size: 11.5px; color: #6a7179; flex: none;">{{ a.time }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 13px; background: rgba(240,161,60,0.08); border: 1px solid rgba(240,161,60,0.22);">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: #f0a13c; animation: rd-pulse 2s ease-in-out infinite; flex: none;"></span>
+              <div style="font-size: 13.5px; color: #e0d6c7;">Nueva consulta · Toyota Hilux SRX</div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; padding: 14px 30px 6px; border-top: 1px solid rgba(255,255,255,0.07); font-size: 12.5px; color: #6a7179;">
+            <span style="color: #f3bd77; font-weight: 600;">Panel</span><span>Stock</span><span>Leads</span><span>Ventas</span>
+          </div>
+          <div style="width: 132px; height: 5px; border-radius: 5px; background: rgba(255,255,255,0.24); margin: 0 auto 10px;"></div>
+         </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="demo" style="max-width: 1180px; margin: 0 auto; padding: 90px 24px;">
+      <div data-reveal="" style="display: flex; align-items: flex-end; gap: 20px; margin-bottom: 26px; flex-wrap: wrap;">
+        <div style="max-width: 560px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">EL PANEL POR DENTRO</div>
+          <h2 style="margin: 0; font-size: 38px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em;">Mirá cómo se ve tu operación.</h2>
+        </div>
+        <div style="margin-left: auto; display: flex; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); padding: 5px; border-radius: 12px;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <div onClick="{{ t.onClick }}" style="cursor: pointer; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 9px; color: {{ t.color }}; background: {{ t.bg }}; transition: all .25s ease;">{{ t.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div data-reveal="" style="border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; background: #12151a; overflow: hidden; box-shadow: 0 40px 90px rgba(0,0,0,0.5);">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 11px 14px; background: #0f1216; border-bottom: 1px solid rgba(255,255,255,0.07);">
+          <div style="display: flex; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #3a4048;"></span>
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #3a4048;"></span>
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #3a4048;"></span>
+          </div>
+          <div style="margin: 0 auto; font-size: 11px; color: #6f777f;">{{ tabUrl }}</div>
+        </div>
+        <div style="padding: 26px; min-height: 340px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start;">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="font-size: 20px; font-weight: 700;">{{ tabTitle }}</div>
+            <p style="margin: 0; font-size: 14.5px; line-height: 1.65; color: #949ba3; text-wrap: pretty;">{{ tabDesc }}</p>
+            <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 4px;">
+              <sc-for list="{{ tabBullets }}" as="b" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #c3c9cf;">
+                  <span style="width: 16px; height: 16px; border-radius: 50%; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.3); color: #f3bd77; font-size: 9px; display: flex; align-items: center; justify-content: center; flex: none;">✓</span>{{ b }}
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 280px;">
+            <div style="font-size: 11px; letter-spacing: 0.12em; color: #6a7179; font-weight: 700;">{{ tabPanelLabel }}</div>
+            <sc-for list="{{ tabRows }}" as="r" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 9px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(240,161,60,0.10); border: 1px solid rgba(240,161,60,0.18); flex: none;"></div>
+                <div style="min-width: 0;">
+                  <div style="font-size: 12.5px; font-weight: 600;">{{ r.a }}</div>
+                  <div style="font-size: 10.5px; color: #7d848d;">{{ r.b }}</div>
+                </div>
+                <div style="margin-left: auto; font-size: 11px; font-weight: 700; color: #f3bd77;">{{ r.c }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="catalogo" style="max-width: 1180px; margin: 0 auto; padding: 20px 24px 90px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+      <div data-reveal="" style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">CATÁLOGO PÚBLICO</div>
+        <h2 style="margin: 0; font-size: 36px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em;">Tu vidriera online, conectada al CRM.</h2>
+        <p style="margin: 0; font-size: 15.5px; line-height: 1.65; color: #9aa3ac; text-wrap: pretty;">Cada agencia tiene su propia dirección con su stock real y su marca. El comprador filtra, entra a la ficha, deja su consulta — y eso aparece como lead en tu pipeline, con el auto y el mensaje ya cargados.</p>
+        <div style="display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: #d7dde3; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); padding: 9px 14px; border-radius: 9px;">
+          <span style="color: #6a7179;">rodado.app/c/</span>tu-agencia
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 4px;">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #c3c9cf;"><span style="width: 16px; height: 16px; border-radius: 50%; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.3); color: #f3bd77; font-size: 9px; display: flex; align-items: center; justify-content: center; flex: none;">✓</span>Filtros por marca, precio y estado</div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #c3c9cf;"><span style="width: 16px; height: 16px; border-radius: 50%; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.3); color: #f3bd77; font-size: 9px; display: flex; align-items: center; justify-content: center; flex: none;">✓</span>Galería, specs completos y sucursal en cada ficha</div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: #c3c9cf;"><span style="width: 16px; height: 16px; border-radius: 50%; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.3); color: #f3bd77; font-size: 9px; display: flex; align-items: center; justify-content: center; flex: none;">✓</span>Asistente de IA anclado a tu stock real <span style="font-size: 10px; color: #7d848d;">· en desarrollo</span></div>
+        </div>
+      </div>
+      <div data-reveal="" style="border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; overflow: hidden; background: #12151a; box-shadow: 0 34px 80px rgba(0,0,0,0.5);">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 10px 13px; background: #0f1216; border-bottom: 1px solid rgba(255,255,255,0.07);">
+          <div style="display: flex; gap: 6px;">
+            <span style="width: 9px; height: 9px; border-radius: 50%; background: #3a4048;"></span>
+            <span style="width: 9px; height: 9px; border-radius: 50%; background: #3a4048;"></span>
+            <span style="width: 9px; height: 9px; border-radius: 50%; background: #3a4048;"></span>
+          </div>
+          <div style="margin: 0 auto; font-size: 10.5px; color: #6f777f;">rodado.app/c/agencia-demo</div>
+        </div>
+        <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; gap: 7px; flex-wrap: wrap;">
+            <span style="font-size: 10.5px; font-weight: 700; color: #17130c; background: #f0a13c; padding: 5px 11px; border-radius: 20px;">Todos</span>
+            <span style="font-size: 10.5px; color: #a8b0b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 5px 11px; border-radius: 20px;">Toyota</span>
+            <span style="font-size: 10.5px; color: #a8b0b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 5px 11px; border-radius: 20px;">Ford</span>
+            <span style="font-size: 10.5px; color: #a8b0b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 5px 11px; border-radius: 20px;">Hasta $20M</span>
+            <span style="font-size: 10.5px; color: #a8b0b8; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 5px 11px; border-radius: 20px;">Disponibles</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div style="border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; overflow: hidden; background: #171b21;">
+              <div style="height: 96px;"><image-slot id="rodado-catalogo-1" shape="rect" placeholder="Foto de tu stock"></image-slot></div>
+              <div style="padding: 10px 11px; display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 12px; font-weight: 700;">Toyota Corolla XEI</div>
+                <div style="font-size: 10px; color: #7d848d;">2021 · 48.000 km · Automático</div>
+              </div>
+            </div>
+            <div style="border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; overflow: hidden; background: #171b21;">
+              <div style="height: 96px;"><image-slot id="rodado-catalogo-2" shape="rect" placeholder="Foto de tu stock"></image-slot></div>
+              <div style="padding: 10px 11px; display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 12px; font-weight: 700;">Ford Ranger XLT</div>
+                <div style="font-size: 10px; color: #7d848d;">2019 · 96.500 km · Diésel</div>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; padding: 11px 13px; border-radius: 10px; background: rgba(240,161,60,0.08); border: 1px solid rgba(240,161,60,0.22);">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #f0a13c; animation: rd-pulse 2s ease-in-out infinite; flex: none;"></span>
+            <div style="font-size: 11.5px; color: #e0d6c7;">Consulta enviada → entró como lead en tu CRM</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="border-top: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.015);">
+      <div style="max-width: 1180px; margin: 0 auto; padding: 74px 24px; display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 40px; align-items: center;">
+        <div data-reveal="" style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">INTEGRACIONES</div>
+          <h2 style="margin: 0; font-size: 34px; line-height: 1.12; font-weight: 800; letter-spacing: -0.03em;">Tus canales, una sola bandeja.</h2>
+          <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #9aa3ac; text-wrap: pretty;">Cada consulta entra al mismo lugar con el vehículo y el canal de origen ya cargados. Nada se pierde en un chat.</p>
+        </div>
+        <div data-reveal="" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+          <sc-for list="{{ canales }}" as="c" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 18px; border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; background: #171b21; transition: border-color .3s ease;" style-hover="border-color: rgba(240,161,60,0.35);">
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: {{ c.color }}; box-shadow: 0 0 12px {{ c.color }}; flex: none;"></div>
+              <div>
+                <div style="font-size: 14.5px; font-weight: 700;">{{ c.name }}</div>
+                <div style="font-size: 11.5px; color: #7d848d;">{{ c.note }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section id="precios" style="max-width: 1180px; margin: 0 auto; padding: 90px 24px;">
+      <div data-reveal="" style="max-width: 620px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 34px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">PLANES</div>
+        <h2 style="margin: 0; font-size: 38px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em;">Empezás por el núcleo y sumás módulos.</h2>
+        <p style="margin: 0; font-size: 15.5px; line-height: 1.6; color: #9aa3ac;">Precios de referencia por mes. El valor final depende de la cantidad de sucursales y módulos, y lo cerramos en la demo.</p>
+      </div>
+      <div data-reveal="" style="display: flex; align-items: center; gap: 22px; flex-wrap: wrap; padding: 20px 24px; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; background: #171b21;">
+        <div style="display: flex; flex-direction: column; gap: 4px; min-width: 210px;">
+          <div style="font-size: 11px; letter-spacing: 0.14em; color: #6a7179; font-weight: 700;">TU AGENCIA HOY</div>
+          <div style="font-size: 15px; font-weight: 600;">{{ autos }} autos en stock · {{ sucursales }}</div>
+        </div>
+        <input type="range" min="5" max="150" step="5" value="{{ autos }}" onChange="{{ onAutos }}" onInput="{{ onAutos }}" style="flex: 1; min-width: 240px; accent-color: #f0a13c; height: 4px; cursor: pointer;" />
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #949ba3;">
+          Te recomendamos
+          <span style="font-size: 13px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 6px 13px; border-radius: 8px;">{{ recomendado }}</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: stretch;">
+        <sc-for list="{{ planes }}" as="p" hint-placeholder-count="3">
+          <div data-reveal="" style="display: flex; flex-direction: column; gap: 16px; padding: 26px 24px; border: 1px solid {{ p.border }}; border-radius: 16px; background: {{ p.bg }}; box-shadow: {{ p.shadow }};">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="font-size: 17px; font-weight: 700; color: {{ p.titleColor }};">{{ p.name }}</div>
+              <sc-if value="{{ p.featured }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 9px; font-weight: 800; letter-spacing: 0.1em; color: #17130c; background: #f0a13c; padding: 3px 8px; border-radius: 20px;">RECOMENDADO</span>
+              </sc-if>
+            </div>
+            <div style="font-size: 12px; color: #7d848d;">{{ p.nota }}</div>
+            <div style="display: flex; align-items: flex-end; gap: 8px;">
+              <div style="font-size: 34px; font-weight: 800; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; line-height: 1; color: {{ p.titleColor }};">{{ p.precio }}</div>
+              <div style="font-size: 12.5px; color: #7d848d; padding-bottom: 3px;">/ mes</div>
+            </div>
+            <div style="font-size: 11.5px; color: #6a7179;">pesos + IVA · sin costo de instalación</div>
+            <div style="font-size: 13.5px; line-height: 1.55; color: {{ p.descColor }};">{{ p.desc }}</div>
+            <div style="height: 1px; background: rgba(255,255,255,0.08);"></div>
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <sc-for list="{{ p.items }}" as="i" hint-placeholder-count="4">
+                <div style="display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: {{ p.itemColor }};">
+                  <span style="color: #f3bd77; font-size: 11px; line-height: 1.5;">✓</span>{{ i }}
+                </div>
+              </sc-for>
+            </div>
+            <a href="#cta" style="margin-top: auto; text-align: center; font-size: 14px; font-weight: 700; padding: 12px 18px; border-radius: 11px; color: {{ p.btnColor }}; background: {{ p.btnBg }}; border: 1px solid {{ p.btnBorder }};" style-hover="color: {{ p.btnColor }}; opacity: .88;">Pedí tu demo →</a>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="max-width: 1180px; margin: 0 auto; padding: 0 24px 30px;">
+      <div data-reveal="" style="border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; background: #14171c;">
+        <div style="display: grid; grid-template-columns: 1.6fr repeat(3, 0.8fr); gap: 0; padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 10.5px; letter-spacing: 0.12em; color: #6a7179; font-weight: 700;">
+          <div>QUÉ INCLUYE CADA PLAN</div>
+          <div style="text-align: center;">NÚCLEO</div>
+          <div style="text-align: center; color: #f3bd77;">AGENCIA</div>
+          <div style="text-align: center;">MULTISUCURSAL</div>
+        </div>
+        <sc-for list="{{ matriz }}" as="m" hint-placeholder-count="8">
+          <div style="display: grid; grid-template-columns: 1.6fr repeat(3, 0.8fr); align-items: center; padding: 13px 22px; border-bottom: 1px solid rgba(255,255,255,0.045); font-size: 13.5px;" style-hover="background: rgba(255,255,255,0.02);">
+            <div style="color: #c3c9cf;">{{ m.label }}</div>
+            <div style="text-align: center; font-size: 13px; color: {{ m.c1Color }};">{{ m.c1 }}</div>
+            <div style="text-align: center; font-size: 13px; font-weight: 600; color: {{ m.c2Color }};">{{ m.c2 }}</div>
+            <div style="text-align: center; font-size: 13px; color: {{ m.c3Color }};">{{ m.c3 }}</div>
+          </div>
+        </sc-for>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 16px 22px; font-size: 12.5px; color: #7d848d; flex-wrap: wrap;">
+          <span>Sin costo de instalación</span><span style="opacity: .4;">·</span>
+          <span>Migración de tu stock incluida</span><span style="opacity: .4;">·</span>
+          <span>Podés sumar módulos en cualquier momento</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="max-width: 1180px; margin: 0 auto; padding: 40px 24px 20px;">
+      <div data-reveal="" style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; color: #f0a13c; font-weight: 700;">SEGURIDAD</div>
+        <div style="font-size: 15px; color: #9aa3ac;">Los datos de tu agencia son solo tuyos.</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+        <sc-for list="{{ seguridad }}" as="s" hint-placeholder-count="4">
+          <div data-reveal="" style="padding: 18px; border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; background: #171b21; display: flex; flex-direction: column; gap: 7px;">
+            <div style="font-size: 13.5px; font-weight: 700;">{{ s.title }}</div>
+            <div style="font-size: 12.5px; line-height: 1.55; color: #949ba3; text-wrap: pretty;">{{ s.desc }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section id="cta" style="max-width: 1180px; margin: 0 auto; padding: 20px 24px 100px;">
+      <div data-reveal="" style="position: relative; overflow: hidden; border: 1px solid rgba(240,161,60,0.24); border-radius: 20px; background: linear-gradient(120deg, #1a1712, #14171c 60%); padding: 54px 46px; display: flex; align-items: center; gap: 32px; flex-wrap: wrap;">
+        <div style="position: absolute; inset: -40% -10% auto auto; width: 420px; height: 420px; background: radial-gradient(closest-side, rgba(240,161,60,0.22), transparent 70%); animation: rd-glow 14s ease-in-out infinite;"></div>
+        <div style="position: relative; max-width: 560px; display: flex; flex-direction: column; gap: 12px;">
+          <h2 style="margin: 0; font-size: 34px; line-height: 1.12; font-weight: 800; letter-spacing: -0.03em;">Te mostramos la plataforma con tu propio stock.</h2>
+          <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #a8b0b8;">Cargamos algunos de tus autos y lo ves funcionando con tu operación real, no con datos de ejemplo.</p>
+        </div>
+        <div style="position: relative; margin-left: auto; display: flex; flex-direction: column; gap: 10px;">
+          <a href="#" style="text-align: center; font-size: 15px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 15px 30px; border-radius: 12px; box-shadow: 0 16px 40px rgba(224,140,44,0.32);" style-hover="color: #17130c; transform: translateY(-2px);">Pedí tu demo →</a>
+          <div style="text-align: center; font-size: 11.5px; color: #7d848d;">Respondemos el mismo día hábil</div>
+        </div>
+      </div>
+    </section>
+
+    <footer style="border-top: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.015);">
+      <div style="max-width: 1180px; margin: 0 auto; padding: 34px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #17130c; font-size: 13px;">R</div>
+          <div style="font-size: 15px; font-weight: 700;">Rodado</div>
+        </div>
+        <div style="font-size: 13px; color: #767d86;">La plataforma comercial para concesionarias argentinas</div>
+        <div style="margin-left: auto; display: flex; gap: 20px; font-size: 13px;">
+          <a href="#plataforma" style="color: #767d86;" style-hover="color: #e9ecef;">Plataforma</a>
+          <a href="#precios" style="color: #767d86;" style-hover="color: #e9ecef;">Precios</a>
+          <a href="#cta" style="color: #767d86;" style-hover="color: #e9ecef;">Contacto</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { t: 0, tab: 0, autos: 40 };
+
+  componentDidMount() {
+    const start = performance.now();
+    const dur = 1700;
+    const tick = (now) => {
+      const p = Math.min(1, (now - start) / dur);
+      this.setState({ t: 1 - Math.pow(1 - p, 3) });
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = "1";
+          e.target.style.transform = "none";
+          this._io.unobserve(e.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+
+    requestAnimationFrame(() => {
+      document.querySelectorAll("[data-reveal]").forEach((el, i) => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(22px)";
+        el.style.transition = "opacity .7s cubic-bezier(.2,.7,.3,1) " + (i % 3) * 0.07 + "s, transform .7s cubic-bezier(.2,.7,.3,1) " + (i % 3) * 0.07 + "s";
+        this._io.observe(el);
+      });
+    });
+  }
+
+  componentWillUnmount() { if (this._io) this._io.disconnect(); }
+
+  renderVals() {
+    const t = this.state.t;
+    const n = (v) => Math.round(v * t);
+    const accent = "#f0a13c";
+    const tabsData = [
+      {
+        label: "Stock", url: "rodado.app/stock", title: "Cada auto, con su carpeta al día.",
+        desc: "Fotos reales con recorte al subirlas, precio, y toda la documentación del vehículo en la misma ficha. La VTV avisa sola cuando está por vencer.",
+        bullets: ["Título, cédula, informe de dominio y libre de deuda", "Alerta automática de vencimiento de VTV", "Badge de interesados por unidad"],
+        panelLabel: "STOCK ACTIVO",
+        rows: [
+          { a: "Toyota Corolla XEI", b: "2021 · 48.000 km", c: "4 interesados" },
+          { a: "Ford Ranger XLT", b: "VTV vence en 12 días", c: "Revisar" },
+          { a: "Fiat Cronos Precision", b: "2022 · 31.200 km", c: "Reservado" },
+          { a: "Peugeot 2008 Allure", b: "Documentación completa", c: "2 interesados" }
+        ]
+      },
+      {
+        label: "Leads", url: "rodado.app/leads", title: "Ningún interesado se enfría.",
+        desc: "Pipeline visual de Nuevo a Cerrado, o vista de tabla con filtros. Cada ficha guarda el mensaje completo que dejó el comprador.",
+        bullets: ["Kanban: Nuevo → Contactado → Test drive → Negociación → Cerrado", "Si vendés un auto con interesados abiertos, te avisa y los reasignás a otra unidad", "Alertas de leads sin contactar y sin vendedor"],
+        panelLabel: "PIPELINE DE HOY",
+        rows: [
+          { a: "Nuevo", b: "Entraron desde el catálogo", c: "6" },
+          { a: "Contactado", b: "Con vendedor asignado", c: "5" },
+          { a: "Test drive", b: "Agendados esta semana", c: "2" },
+          { a: "Negociación", b: "Con oferta sobre la mesa", c: "4" }
+        ]
+      },
+      {
+        label: "Reportes", url: "rodado.app/reportes", title: "Sabés qué canal te vende.",
+        desc: "Ventas en el tiempo, conversión por canal de origen, rotación de stock y ranking de vendedores — con los datos que ya cargás todos los días.",
+        bullets: ["Tasa de conversión por canal de origen", "Rotación: días promedio entre carga y venta", "Ranking de performance por vendedor"],
+        panelLabel: "LEADS POR CANAL",
+        rows: [
+          { a: "Mercado Libre", b: "Conversión a venta", c: "—" },
+          { a: "Catálogo propio", b: "Conversión a venta", c: "—" },
+          { a: "WhatsApp", b: "Conversión a venta", c: "—" },
+          { a: "Instagram", b: "Conversión a venta", c: "—" }
+        ]
+      },
+      {
+        label: "Catálogo", url: "rodado.app/c/tu-agencia", title: "Tu catálogo público, con tu marca.",
+        desc: "Cada agencia tiene su propia URL con su stock real, filtros y fichas con galería. Las consultas caen directo al CRM, no a un mail que nadie mira.",
+        bullets: ["Filtros por marca, precio y estado", "Ficha con galería, specs y sucursal", "El formulario genera un lead real en tu pipeline"],
+        panelLabel: "CONSULTAS DEL CATÁLOGO",
+        rows: [
+          { a: "\"¿Acepta permuta?\"", b: "Toyota Hilux SRX", c: "Nuevo" },
+          { a: "\"¿Está financiado?\"", b: "Fiat Cronos Precision", c: "Nuevo" },
+          { a: "\"Quiero verlo el sábado\"", b: "Ford Ranger XLT", c: "Test drive" },
+          { a: "\"¿Tiene service al día?\"", b: "Peugeot 2008 Allure", c: "Contactado" }
+        ]
+      }
+    ];
+    const tab = tabsData[this.state.tab];
+    const autos = this.state.autos;
+    const rec = autos <= 25 ? 0 : autos <= 80 ? 1 : 2;
+
+    return {
+      navItems: [
+        { label: "Panel general", icon: "▣", bg: "rgba(240,161,60,0.14)", iconColor: accent },
+        { label: "Stock", icon: "◫", bg: "transparent", iconColor: "#767d86" },
+        { label: "Leads", icon: "◍", bg: "transparent", iconColor: "#767d86" },
+        { label: "Ventas", icon: "◈", bg: "transparent", iconColor: "#767d86" },
+        { label: "Reportes", icon: "◔", bg: "transparent", iconColor: "#767d86" },
+        { label: "Equipo", icon: "◎", bg: "transparent", iconColor: "#767d86" }
+      ],
+      kpis: [
+        { label: "Stock disponible", value: n(6) + " / 6", pct: n(100) + "%", ring: "conic-gradient(" + accent + " 0% " + (t * 100) + "%, rgba(255,255,255,0.08) 0)", cardBg: "#171b21", cardBorder: "rgba(255,255,255,0.06)", holeBg: "#171b21", pctColor: "#f3bd77", labelColor: "#8d949e", valueColor: "#e9ecef" },
+        { label: "Leads en negociación", value: n(4) + " / 17", pct: n(24) + "%", ring: "conic-gradient(#ffffff 0% " + (t * 24) + "%, rgba(255,255,255,0.24) 0)", cardBg: "linear-gradient(150deg, #e29a3a, #c9762a)", cardBorder: "rgba(255,255,255,0.16)", holeBg: "#d5842f", pctColor: "#fff", labelColor: "rgba(255,255,255,0.8)", valueColor: "#fff" },
+        { label: "Conversión lead→venta", value: n(10) + " / 27", pct: n(37) + "%", ring: "conic-gradient(#4ade80 0% " + (t * 37) + "%, rgba(255,255,255,0.08) 0)", cardBg: "#171b21", cardBorder: "rgba(255,255,255,0.06)", holeBg: "#171b21", pctColor: "#86efac", labelColor: "#8d949e", valueColor: "#e9ecef" },
+        { label: "Publicaciones activas", value: n(24), pct: n(92) + "%", ring: "conic-gradient(#60a5fa 0% " + (t * 92) + "%, rgba(255,255,255,0.08) 0)", cardBg: "#171b21", cardBorder: "rgba(255,255,255,0.06)", holeBg: "#171b21", pctColor: "#93c5fd", labelColor: "#8d949e", valueColor: "#e9ecef" }
+      ],
+      leads: [
+        { nombre: "Bruno Castro", contacto: "11-4411-2290", vehiculo: "Toyota Corolla XEI", canal: "WhatsApp", canalColor: "#4ade80", etapa: "Contactado", etapaBg: "rgba(96,165,250,0.14)", etapaColor: "#93c5fd", delay: "0s" },
+        { nombre: "Valentina Torres", contacto: "11-5544-1122", vehiculo: "Toyota Hilux SRX", canal: "WhatsApp", canalColor: "#4ade80", etapa: "Negociación", etapaBg: "rgba(240,161,60,0.16)", etapaColor: "#f3bd77", delay: "0.5s" },
+        { nombre: "Diego Martinez", contacto: "11-3321-9087", vehiculo: "Fiat Cronos Precision", canal: "Instagram", canalColor: "#c084fc", etapa: "Cerrado", etapaBg: "rgba(74,222,128,0.14)", etapaColor: "#86efac", delay: "1s" },
+        { nombre: "Sofía Ramirez", contacto: "11-6789-2345", vehiculo: "Ford Ranger XLT", canal: "Mercado Libre", canalColor: "#fbbf24", etapa: "Test drive", etapaBg: "rgba(192,132,252,0.14)", etapaColor: "#d8b4fe", delay: "1.5s" },
+        { nombre: "Lucia Fernandez", contacto: "11-4444-5555", vehiculo: "Peugeot 2008 Allure", canal: "Web", canalColor: "#60a5fa", etapa: "Nuevo", etapaBg: "rgba(255,255,255,0.07)", etapaColor: "#b0b7be", delay: "2s" }
+      ],
+      marquee: (() => {
+        const base = [
+          { plate: "AF 482 KQ", model: "Toyota Hilux SRX", state: "publicado en 3 canales" },
+          { plate: "AC 917 TL", model: "Ford Ranger XLT", state: "2 consultas hoy" },
+          { plate: "AE 205 BR", model: "Fiat Cronos Precision", state: "reservado" },
+          { plate: "AD 771 MZ", model: "Toyota Corolla XEI", state: "en negociación" },
+          { plate: "AG 034 PS", model: "Peugeot 2008 Allure", state: "publicado en 4 canales" },
+          { plate: "AB 566 HN", model: "Chevrolet Onix Turbo LTZ", state: "test drive agendado" }
+        ];
+        return base.concat(base);
+      })(),
+      modulos: [
+        { icon: "◫", title: "e-Stock", desc: "Alta con fotos reales y recorte manual, más la carpeta completa del auto: título, cédula, informe de dominio, libre de deuda y VTV con alerta de vencimiento.", meta: "Núcleo", soon: false },
+        { icon: "◍", title: "e-CRM", desc: "Pipeline kanban de Nuevo a Cerrado o vista de tabla con filtros, con el mensaje completo de cada comprador en su ficha.", meta: "Núcleo", soon: false },
+        { icon: "◈", title: "Ventas y comisiones", desc: "Registrás la venta con vendedor y la comisión se calcula sola. Si algo se cae, revertís la operación.", meta: "Núcleo", soon: false },
+        { icon: "◔", title: "Reportes", desc: "Ventas en el tiempo, conversión por canal, rotación promedio de stock y ranking por vendedor.", meta: "Núcleo", soon: false },
+        { icon: "⬡", title: "Multisucursal", desc: "Una cuenta, varias sucursales: mirás todo consolidado o filtrás por ubicación.", meta: "Módulo", soon: false },
+        { icon: "◎", title: "Equipo y roles", desc: "El dueño ve toda la operación; cada vendedor ve solo lo suyo.", meta: "Módulo", soon: false },
+        { icon: "$", title: "Cotización del dólar", desc: "Oficial y blue actualizados en vivo dentro del panel, para cotizar sin salir del sistema.", meta: "Incluido", soon: false },
+        { icon: "◇", title: "Tasación con IA", desc: "Precio de referencia sugerido según categoría, año y kilometraje. Es una estimación para orientarte, no un dato de mercado en vivo.", meta: "Módulo", soon: false },
+        { icon: "⇱", title: "Catálogo público", desc: "Tu propia URL con tu stock, tus filtros y tus fotos. Cada consulta entra como lead al CRM.", meta: "Incluido", soon: false }
+      ],
+      pasos: [
+        { n: "01", title: "Cargás el auto una vez", desc: "Fotos, precio y datos en una ficha. Se acabó repetir el mismo auto en cada plataforma." },
+        { n: "02", title: "Se publica solo", desc: "La misma ficha alimenta tu catálogo público y tu cuenta de Mercado Libre. Cambiás el precio en un lugar y cambia en los dos." },
+        { n: "03", title: "Seguís cada consulta", desc: "Todo lo que entra cae en el pipeline con vendedor, etapa y próxima acción. Nada se pierde en un chat." }
+      ],
+      tabs: tabsData.map((td, i) => ({
+        label: td.label,
+        color: this.state.tab === i ? "#17130c" : "#a8b0b8",
+        bg: this.state.tab === i ? "linear-gradient(140deg, #f5b45c, #e08c2c)" : "transparent",
+        onClick: () => this.setState({ tab: i })
+      })),
+      tabUrl: tab.url, tabTitle: tab.title, tabDesc: tab.desc, tabBullets: tab.bullets,
+      tabPanelLabel: tab.panelLabel, tabRows: tab.rows,
+      canales: [
+        { name: "Mercado Libre", note: "Conexión OAuth con tu propia cuenta", color: "#fbbf24" },
+        { name: "Tu catálogo público", note: "Formularios que entran como lead", color: "#60a5fa" },
+        { name: "Email", note: "Notificaciones y recupero de cuenta", color: "#c084fc" },
+        { name: "Asistente de IA", note: "Responde sobre tu stock real · en desarrollo", color: "#4ade80" }
+      ],
+      movil: [
+        "Subís las fotos del auto desde la cámara y las recortás ahí mismo",
+        "Contestás una consulta sin volver al escritorio",
+        "Movés el lead de etapa o cerrás la venta en el momento",
+        "Chequeás precio y documentación con el cliente adelante"
+      ],
+      movilCards: [
+        { icon: "⌗", titulo: "iPhone y Android", detalle: "Funciona en el navegador de cualquier teléfono, sin descargar una app." },
+        { icon: "◎", titulo: "Los mismos permisos", detalle: "Cada vendedor ve solo lo suyo, igual que en la computadora." },
+        { icon: "⇱", titulo: "Fotos desde la cámara", detalle: "Sacás la foto del auto y la subís a la ficha en el momento." },
+        { icon: "⌁", titulo: "Avisos al instante", detalle: "Te llega la notificación cuando entra una consulta nueva." }
+      ],
+      movilPendientes: [
+        { a: "Contactar a Franco Molina", b: "Lead sin contactar", c: "40 d" },
+        { a: "Asignar vendedor", b: "Milagros Vega", c: "hoy" },
+        { a: "Revisar VTV", b: "Ford Ranger XLT", c: "12 d" },
+        { a: "Llamar a Bruno Castro", b: "Negociación abierta", c: "hoy" }
+      ],
+      movilActividad: [
+        { text: "Sofía Ramírez pasó a Test drive", time: "12 min", dot: "#d8b4fe" },
+        { text: "Se publicó Peugeot 2008 Allure", time: "1 h", dot: "#fbbf24" },
+        { text: "Venta registrada · Corolla XEI", time: "3 h", dot: "#4ade80" }
+      ],
+      seguridad: [
+        { title: "Datos aislados por agencia", desc: "Ninguna concesionaria ve el stock ni los leads de otra." },
+        { title: "Protección contra fuerza bruta", desc: "Los intentos de acceso se limitan automáticamente." },
+        { title: "Contraseñas hasheadas", desc: "Nunca se guardan en texto plano, ni las vemos nosotros." },
+        { title: "Formularios a prueba de bots", desc: "El catálogo público filtra spam antes de que llegue a tu CRM." }
+      ],
+      autos: autos,
+      sucursales: autos <= 25 ? "1 sucursal" : autos <= 80 ? "1 a 3 sucursales" : "varias sucursales",
+      recomendado: ["Núcleo", "Agencia", "Multisucursal"][rec],
+      onAutos: (e) => this.setState({ autos: Number(e.target.value) }),
+      planes: [
+        {
+          name: "Núcleo", desc: "Para la agencia que hoy vive en Excel y quiere ordenar stock y clientes.",
+          items: ["e-Stock con documentación y alertas de VTV", "e-CRM: pipeline kanban y vista de tabla", "Catálogo público con tu marca", "Ventas con comisión automática", "Cotización del dólar en vivo", "1 sucursal · 2 vendedores"],
+          nota: "Ideal hasta 25 autos en stock", precio: "$60.000"
+        },
+        {
+          name: "Agencia", desc: "Para la que publica en varios canales y no quiere cargar el mismo auto tres veces.",
+          items: ["Todo lo del Núcleo", "Publicación en Mercado Libre (OAuth)", "Tasación con IA", "Reportes y analítica completos", "Hasta 3 sucursales", "Vendedores ilimitados"],
+          nota: "Ideal de 25 a 80 autos en stock", precio: "$85.000"
+        },
+        {
+          name: "Multisucursal", desc: "Para grupos con varios locales y equipos de venta separados.",
+          items: ["Todo lo del plan Agencia", "Sucursales ilimitadas", "Permisos por equipo y rol", "Reportes consolidados por sucursal", "Soporte dedicado"],
+          nota: "Para más de 80 autos en stock", precio: "$120.000"
+        }
+      ].map((p, i) => Object.assign({}, p, {
+        featured: i === rec,
+        bg: i === rec ? "linear-gradient(160deg, #241d13, #191d23)" : "#171b21",
+        border: i === rec ? "rgba(240,161,60,0.38)" : "rgba(255,255,255,0.07)",
+        shadow: i === rec ? "0 24px 60px rgba(224,140,44,0.16)" : "none",
+        titleColor: i === rec ? "#f7d3a1" : "#e9ecef",
+        descColor: i === rec ? "#b6a891" : "#949ba3",
+        itemColor: i === rec ? "#e0d6c7" : "#c3c9cf",
+        btnBg: i === rec ? "linear-gradient(140deg, #f5b45c, #e08c2c)" : "rgba(255,255,255,0.05)",
+        btnColor: i === rec ? "#17130c" : "#e9ecef",
+        btnBorder: i === rec ? "transparent" : "rgba(255,255,255,0.12)"
+      })),
+      matriz: [
+        ["e-Stock con documentación y alertas de VTV", "✓", "✓", "✓"],
+        ["e-CRM: pipeline kanban y vista de tabla", "✓", "✓", "✓"],
+        ["Catálogo público con tu marca", "✓", "✓", "✓"],
+        ["Ventas con comisión automática", "✓", "✓", "✓"],
+        ["Cotización del dólar en vivo", "✓", "✓", "✓"],
+        ["Publicación en Mercado Libre", "—", "✓", "✓"],
+        ["Tasación con IA", "—", "✓", "✓"],
+        ["Reportes y analítica", "Básico", "Completo", "Consolidado"],
+        ["Sucursales", "1", "Hasta 3", "Ilimitadas"],
+        ["Vendedores con rol propio", "2", "Ilimitados", "Ilimitados"],
+        ["Soporte", "Por mail", "Prioritario", "Dedicado"]
+      ].map(([label, c1, c2, c3]) => ({
+        label, c1, c2, c3,
+        c1Color: c1 === "—" ? "#4d545b" : c1 === "✓" ? "#86efac" : "#a8b0b8",
+        c2Color: c2 === "—" ? "#4d545b" : c2 === "✓" ? "#86efac" : "#f3bd77",
+        c3Color: c3 === "—" ? "#4d545b" : c3 === "✓" ? "#86efac" : "#a8b0b8"
+      }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

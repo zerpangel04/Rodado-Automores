@@ -3,9 +3,24 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  Package,
+  Users,
+  HandCoins,
+  BarChart3,
+  Building2,
+  UserCog,
+  Plug,
+  ChevronDown,
+  Check,
+  Power,
+  Menu,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import styles from "./panel.module.css";
 import { FxBox } from "./FxBox";
-import { ThemeToggle } from "../ThemeToggle";
 import { NotificationBell } from "./NotificationBell";
 
 const initials = (name: string) =>
@@ -80,7 +95,7 @@ export function Sidebar({
 
   const navItem = (
     href: string,
-    icon: string,
+    Icon: LucideIcon,
     label: string,
     badge?: number
   ) => {
@@ -90,7 +105,9 @@ export function Sidebar({
         href={href}
         className={`${styles.navItem} ${active ? styles.active : ""}`}
       >
-        <span className={styles.navIcon}>{icon}</span>
+        <span className={styles.navIcon}>
+          <Icon size={14} />
+        </span>
         {label}
         {typeof badge === "number" && (
           <span className={styles.navBadge}>{badge}</span>
@@ -109,7 +126,7 @@ export function Sidebar({
           aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
           aria-expanded={mobileOpen}
         >
-          {mobileOpen ? "✕" : "☰"}
+          {mobileOpen ? <X size={16} /> : <Menu size={16} />}
         </button>
         <div>
           <div className={styles.mobileTopbarName}>{tenantNombre}</div>
@@ -139,7 +156,9 @@ export function Sidebar({
             <div className={styles.workspaceName}>{tenantNombre}</div>
             <div className={styles.workspacePlan}>{subtitle}</div>
           </div>
-          <div className={`${styles.workspaceChevron} ${open ? styles.open : ""}`}>▾</div>
+          <div className={`${styles.workspaceChevron} ${open ? styles.open : ""}`}>
+            <ChevronDown size={13} />
+          </div>
         </button>
 
         {open && (
@@ -152,7 +171,11 @@ export function Sidebar({
               onClick={() => choose("")}
             >
               Todas las sucursales
-              {!selectedSucursalId && <span className={styles.workspaceCheck}>✓</span>}
+              {!selectedSucursalId && (
+                <span className={styles.workspaceCheck}>
+                  <Check size={12} />
+                </span>
+              )}
             </button>
             {sucursales.map((s) => (
               <button
@@ -166,34 +189,34 @@ export function Sidebar({
                 onClick={() => choose(s.id)}
               >
                 {s.nombre}
-                {selectedSucursalId === s.id && <span className={styles.workspaceCheck}>✓</span>}
+                {selectedSucursalId === s.id && (
+                  <span className={styles.workspaceCheck}>
+                    <Check size={12} />
+                  </span>
+                )}
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <div className={styles.themeRow}>
-        <ThemeToggle />
-      </div>
-
       <FxBox />
 
       <div className={styles.navGroup}>
         <span className={styles.navLabel}>Operación</span>
-        {navItem("/panel", "P", "Panel general")}
-        {navItem("/panel/stock", "S", "Stock", stockCount)}
-        {navItem("/panel/leads", "L", "Leads", leadsCount)}
-        {navItem("/panel/ventas", "V", "Ventas")}
-        {navItem("/panel/reportes", "R", "Reportes")}
+        {navItem("/panel", LayoutDashboard, "Panel general")}
+        {navItem("/panel/stock", Package, "Stock", stockCount)}
+        {navItem("/panel/leads", Users, "Leads", leadsCount)}
+        {navItem("/panel/ventas", HandCoins, "Ventas")}
+        {navItem("/panel/reportes", BarChart3, "Reportes")}
       </div>
 
       {rol === "DUENIO" && (
         <div className={styles.navGroup}>
           <span className={styles.navLabel}>Agencia</span>
-          {navItem("/panel/sucursales", "B", "Sucursales")}
-          {navItem("/panel/equipo", "E", "Equipo")}
-          {navItem("/panel/integraciones", "I", "Integraciones")}
+          {navItem("/panel/sucursales", Building2, "Sucursales")}
+          {navItem("/panel/equipo", UserCog, "Equipo")}
+          {navItem("/panel/integraciones", Plug, "Integraciones")}
         </div>
       )}
 
@@ -205,7 +228,7 @@ export function Sidebar({
         </div>
         <form action={onLogout}>
           <button type="submit" className={styles.logoutBtn} title="Cerrar sesión">
-            ⏻
+            <Power size={14} />
           </button>
         </form>
       </div>

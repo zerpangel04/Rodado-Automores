@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Bell } from "lucide-react";
 import styles from "./panel.module.css";
 import { actividadIcon, actividadColor, formatRelativo } from "./actividadDisplay";
 
@@ -78,10 +79,7 @@ export function NotificationBell() {
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
+        <Bell size={17} />
         {count > 0 && <span className={styles.bellBadge}>{count > 9 ? "9+" : count}</span>}
       </button>
 
@@ -106,18 +104,21 @@ export function NotificationBell() {
             ) : items.length === 0 ? (
               <p className={styles.bellEmpty}>No hay notificaciones nuevas.</p>
             ) : (
-              items.map((a) => (
-                <div key={a.id} className={styles.activityRow}>
-                  <span
-                    className={styles.activityIcon}
-                    style={{ background: actividadColor[a.tipo] ?? "var(--ink-soft)" }}
-                  >
-                    {actividadIcon[a.tipo] ?? "•"}
-                  </span>
-                  <span className={styles.activityText}>{a.descripcion}</span>
-                  <span className={styles.activityTime}>{formatRelativo(a.createdAt)}</span>
-                </div>
-              ))
+              items.map((a) => {
+                const Icon = actividadIcon[a.tipo];
+                return (
+                  <div key={a.id} className={styles.activityRow}>
+                    <span
+                      className={styles.activityIcon}
+                      style={{ background: actividadColor[a.tipo] ?? "var(--ink-soft)" }}
+                    >
+                      {Icon ? <Icon size={13} /> : "•"}
+                    </span>
+                    <span className={styles.activityText}>{a.descripcion}</span>
+                    <span className={styles.activityTime}>{formatRelativo(a.createdAt)}</span>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>

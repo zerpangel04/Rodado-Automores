@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0d10; }
+  body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #f0a13c; text-decoration: none; }
+  a:hover { color: #f7c584; }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  @keyframes st-pulse { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.35); } }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: radial-gradient(1200px 600px at 20% -10%, #1c2129 0%, #0e1116 55%, #0b0d10 100%); padding: 18px; box-sizing: border-box; color: #e9ecef;">
+  <div style="display: grid; grid-template-columns: 212px minmax(1000px, 1fr); gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow-x: auto; overflow-y: hidden; background: #12151a; box-shadow: 0 30px 80px rgba(0,0,0,0.55);">
+
+    <aside style="background: #0f1216; border-right: 1px solid rgba(255,255,255,0.06); padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; min-height: 900px;">
+      <div style="display: flex; align-items: center; gap: 9px; padding: 4px 8px 2px;">
+        <div style="width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #17130c;">R</div>
+        <div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; color: #f2f5f7;">RODADO</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 10px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);">
+        <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(240,161,60,0.18); color: #f3bd77; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">A</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4;">Agencia Demo</div>
+          <div style="font-size: 10px; color: #7d848d;">Todas las sucursales (2)</div>
+        </div>
+        <div style="margin-left: auto; color: #767d86; font-size: 9px;">▾</div>
+      </div>
+
+      <div style="border: 1px solid rgba(255,255,255,0.06); border-radius: 11px; padding: 10px 11px; background: rgba(255,255,255,0.025); display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="font-size: 9px; letter-spacing: 0.14em; color: #6a7179; font-weight: 600;">COTIZACIÓN DÓLAR</div>
+          <div style="margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Oficial</span><span style="color: #eff2f4; font-weight: 600;">$1.535</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Blue</span><span style="color: #eff2f4; font-weight: 600;">$1.555</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">OPERACIÓN</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">▣</span>Panel general
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.22); color: #f2f5f7; font-size: 12.5px; font-weight: 600;">
+          <span style="width: 15px; text-align: center; color: #f3bd77;">◫</span>Stock
+          <span style="margin-left: auto; font-size: 10px; color: #f7d3a1; background: rgba(240,161,60,0.18); padding: 1px 6px; border-radius: 20px;">6</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◍</span>Leads
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">17</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◈</span>Ventas
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◔</span>Reportes
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">AGENCIA</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⬡</span>Sucursales
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◎</span>Equipo
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⌗</span>Integraciones
+        </div>
+      </div>
+    </aside>
+
+    <main style="background: #11141a; display: flex; flex-direction: column;">
+      <header style="display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 7px 12px; width: 260px; color: #767d86; font-size: 12px;">
+          <span>⌕</span><span>Buscar por marca, modelo o patente…</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">✉</div>
+          <div style="position: relative; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">
+            ⌁<span style="position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: #f87171;"></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 5px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #17130c;">A</div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600; color: #eff2f4;">Alejandro</span>
+              <span style="font-size: 9.5px; color: #7d848d;">Administrador</span>
+            </div>
+            <span style="color: #767d86; font-size: 9px;">▾</span>
+          </div>
+        </div>
+      </header>
+
+      <div style="padding: 20px 22px 30px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: flex-end; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em;">Stock</div>
+            <div style="font-size: 12px; color: #7d848d; font-variant-numeric: tabular-nums;">6 vehículos · 2 sucursales · inventario USD 141.900 <span style="color: #5d656d;">≈ $217.816.500</span></div>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 11px;">Todas las sucursales ▾</div>
+            <div onClick="{{ abrirModal }}" style="cursor: pointer; display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); border-radius: 8px; padding: 8px 14px; box-shadow: 0 8px 20px rgba(224,140,44,0.25);" style-hover="transform: translateY(-1px);">+ Nuevo vehículo</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px;">
+          <sc-for list="{{ resumen }}" as="r" hint-placeholder-count="4">
+            <div style="position: relative; overflow: hidden; background: linear-gradient(165deg, #1a1f26, #15191f); border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; padding: 15px 16px 14px; display: flex; flex-direction: column; gap: 11px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
+              <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, {{ r.dot }}, transparent 65%); opacity: .5;"></div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ r.dot }}; box-shadow: 0 0 7px {{ r.dot }}; flex: none;"></span>
+                <div style="font-size: 12px; color: #949ba3;">{{ r.label }}</div>
+              </div>
+              <div style="display: flex; align-items: flex-end; gap: 9px;">
+                <div style="font-size: 27px; font-weight: 700; letter-spacing: -0.035em; line-height: .95; font-variant-numeric: tabular-nums; color: {{ r.color }};">{{ r.value }}</div>
+                <div style="font-size: 11.5px; color: #7d848d; padding-bottom: 3px;">{{ r.unit }}</div>
+                <div style="margin-left: auto; font-size: 11px; font-weight: 600; color: {{ r.trendColor }}; padding-bottom: 3px;">{{ r.trend }}</div>
+              </div>
+              <div style="height: 3px; border-radius: 3px; background: rgba(255,255,255,0.07); overflow: hidden;">
+                <div style="height: 100%; width: {{ r.pct }}; border-radius: 3px; background: linear-gradient(90deg, {{ r.dot }}, {{ r.dot2 }});"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 2px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; padding: 3px;">
+            <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="4">
+              <div onClick="{{ f.onClick }}" style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 9px; color: {{ f.color }}; background: {{ f.bg }}; box-shadow: {{ f.shadow }}; transition: all .22s ease;">
+                <sc-if value="{{ f.dot }}" hint-placeholder-val="{{ true }}">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ f.dot }};"></span>
+                </sc-if>
+                {{ f.label }}<span style="font-size: 11px; font-weight: 600; color: {{ f.countColor }}; font-variant-numeric: tabular-nums;">{{ f.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <div onClick="{{ toggleOrden }}" style="cursor: pointer; font-size: 11.5px; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 11px;">Orden: {{ ordenLabel }} ⇅</div>
+            <div style="display: flex; gap: 3px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 9px; padding: 3px;">
+              <sc-for list="{{ vistas }}" as="v" hint-placeholder-count="2">
+                <div onClick="{{ v.onClick }}" style="cursor: pointer; font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 7px; color: {{ v.color }}; background: {{ v.bg }}; transition: all .2s ease;">{{ v.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <sc-if value="{{ esGrilla }}" hint-placeholder-val="{{ true }}">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+            <sc-for list="{{ autos }}" as="a" hint-placeholder-count="6">
+              <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; transition: transform .3s ease, border-color .3s ease;" style-hover="transform: translateY(-3px); border-color: rgba(240,161,60,0.32);">
+                <div style="position: relative; height: 196px; background: #0f1216;">
+                  <image-slot id="{{ a.slotId }}" shape="rect" placeholder="Foto del vehículo"></image-slot>
+                  <div style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(11,13,16,0.55) 0%, transparent 38%, rgba(11,13,16,0.72) 100%);"></div>
+                  <div style="position: absolute; top: 12px; left: 12px; pointer-events: none; display: flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 600; color: #eff2f4; background: rgba(11,13,16,0.55); border: 1px solid rgba(255,255,255,0.13); padding: 5px 11px 5px 9px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ a.estadoColor }}; box-shadow: 0 0 7px {{ a.estadoColor }};"></span>{{ a.estado }}
+                  </div>
+                  <div style="position: absolute; top: 11px; right: 11px; pointer-events: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; color: #e9ecef; background: rgba(11,13,16,0.62); border: 1px solid rgba(255,255,255,0.2); padding: 3px 7px; border-radius: 4px; backdrop-filter: blur(6px);">{{ a.patente }}</div>
+                  <div style="position: absolute; bottom: 11px; left: 11px; right: 11px; pointer-events: none; display: flex; align-items: flex-end; gap: 8px;">
+                    <div style="min-width: 0;">
+                      <div style="font-size: 15px; font-weight: 700; color: #f7f9fa; letter-spacing: -0.01em;">{{ a.modelo }}</div>
+                      <div style="font-size: 11px; color: #c3c9cf;">{{ a.specs }}</div>
+                    </div>
+                    <sc-if value="{{ a.interesados }}" hint-placeholder-val="{{ true }}">
+                      <div style="margin-left: auto; flex: none; display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; color: #f7d3a1; background: rgba(11,13,16,0.66); border: 1px solid rgba(240,161,60,0.35); padding: 4px 9px; border-radius: 20px; backdrop-filter: blur(6px);">
+                        <span style="width: 5px; height: 5px; border-radius: 50%; background: #f0a13c; animation: st-pulse 2.2s ease-in-out infinite;"></span>{{ a.interesados }}
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+
+                <div style="padding: 16px 17px 17px; display: flex; flex-direction: column; gap: 14px; flex: 1;">
+                  <div style="display: flex; align-items: flex-start; gap: 12px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+                      <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 700;">PRECIO DE LISTA</div>
+                      <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1;">{{ a.precioUsd }}</div>
+                      <div style="font-size: 11.5px; color: #8d949e; font-variant-numeric: tabular-nums;">≈ {{ a.precioArs }} <span style="color: #5d656d;">· dólar oficial</span></div>
+                    </div>
+                    <div style="margin-left: auto; flex: none; text-align: right; display: flex; flex-direction: column; gap: 4px;">
+                      <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 700;">EN STOCK</div>
+                      <div style="font-size: 15px; font-weight: 600; color: #c3c9cf; font-variant-numeric: tabular-nums; line-height: 1;">{{ a.dias }}</div>
+                      <div style="font-size: 11px; color: #6a7179;">{{ a.sucursal }}</div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; align-items: center; gap: 9px; padding: 11px 0; border-top: 1px solid rgba(255,255,255,0.055); border-bottom: 1px solid rgba(255,255,255,0.055);">
+                    <span style="width: 20px; height: 20px; border-radius: 6px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 10px; color: {{ a.docColor }}; background: {{ a.docBg }};">{{ a.docIcon }}</span>
+                    <div style="font-size: 12px; font-weight: 600; color: {{ a.docColor }};">{{ a.doc }}</div>
+                    <div style="margin-left: auto; font-size: 11px; color: #6a7179;">{{ a.docMeta }}</div>
+                  </div>
+
+                  <div style="margin-top: auto; display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 7px; min-width: 0;">
+                      <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ a.mlColor }}; flex: none;"></span>
+                      <span style="font-size: 11.5px; color: {{ a.mlTextColor }};">{{ a.ml }}</span>
+                    </div>
+                    <div style="margin-left: auto; flex: none; display: flex; gap: 6px;">
+                      <div style="cursor: pointer; font-size: 11.5px; font-weight: 600; color: #b0b7be; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); padding: 6px 12px; border-radius: 8px;" style-hover="color: #eff2f4; background: rgba(255,255,255,0.09);">Editar</div>
+                      <div style="cursor: pointer; font-size: 11.5px; font-weight: 700; color: {{ a.ctaColor }}; background: {{ a.ctaBg }}; border: 1px solid {{ a.ctaBorder }}; padding: 6px 12px; border-radius: 8px;" style-hover="opacity: .85;">{{ a.cta }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ esTabla }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 1.6fr 0.9fr 1fr 1.1fr 0.8fr 1fr; gap: 16px; padding: 11px 18px; font-size: 9.5px; letter-spacing: 0.1em; color: #6a7179; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.015);">
+              <div>VEHÍCULO</div><div>PATENTE</div><div>PRECIO</div><div>DOCUMENTACIÓN</div><div>DÍAS</div><div>ESTADO</div>
+            </div>
+            <sc-for list="{{ autos }}" as="a" hint-placeholder-count="6">
+              <div style="display: grid; grid-template-columns: 1.6fr 0.9fr 1fr 1.1fr 0.8fr 1fr; gap: 16px; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12.5px;" style-hover="background: rgba(240,161,60,0.06);">
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                  <div style="font-weight: 600; color: #eff2f4;">{{ a.modelo }}</div>
+                  <div style="font-size: 11px; color: #7d848d;">{{ a.specs }}</div>
+                </div>
+                <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; color: #c3c9cf;">{{ a.patente }}</div>
+                <div style="font-weight: 700;">{{ a.precioUsd }}</div>
+                <div style="font-size: 11.5px; color: {{ a.docColor }};">{{ a.doc }}</div>
+                <div style="color: #949ba3;">{{ a.dias }}</div>
+                <div>
+                  <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; color: {{ a.estadoColor }}; background: {{ a.estadoBg }};">
+                    <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ a.estadoColor }};"></span>{{ a.estado }}
+                  </span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ modalAbierto }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; inset: 0; z-index: 60; background: rgba(6,8,10,0.72); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 32px;">
+      <div style="width: 100%; max-width: 900px; max-height: 88vh; overflow-y: auto; background: #12151a; border: 1px solid rgba(255,255,255,0.10); border-radius: 18px; box-shadow: 0 50px 120px rgba(0,0,0,0.7);">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 20px 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Nuevo vehículo</div>
+            <div style="font-size: 12px; color: #7d848d;">Cargalo una vez y queda listo para tu catálogo y Mercado Libre</div>
+          </div>
+          <div onClick="{{ cerrarModal }}" style="margin-left: auto; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 14px;" style-hover="color: #eff2f4; background: rgba(255,255,255,0.1);">✕</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0; padding: 14px 24px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <sc-for list="{{ pasosModal }}" as="p" hint-placeholder-count="4">
+            <div onClick="{{ p.onClick }}" style="cursor: pointer; display: flex; align-items: center; gap: 9px; padding-right: 18px;">
+              <span style="width: 22px; height: 22px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; color: {{ p.numColor }}; background: {{ p.numBg }}; border: 1px solid {{ p.numBorder }};">{{ p.num }}</span>
+              <span style="font-size: 12.5px; font-weight: 600; color: {{ p.color }}; white-space: nowrap;">{{ p.label }}</span>
+              <span style="width: 22px; height: 1px; background: rgba(255,255,255,0.10); margin-left: 9px;"></span>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ pasoFotos }}" hint-placeholder-val="{{ true }}">
+          <div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="font-size: 13px; font-weight: 700;">Fotos del vehículo</div>
+              <div style="font-size: 11.5px; color: #7d848d;">La primera es la principal · arrastrá para reordenar · recorte al subir</div>
+              <div style="margin-left: auto; font-size: 11px; font-weight: 600; color: #f3bd77; background: rgba(240,161,60,0.12); border: 1px solid rgba(240,161,60,0.22); padding: 3px 9px; border-radius: 20px;">6 de 20</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr; grid-template-rows: repeat(2, 118px); gap: 10px;">
+              <div style="position: relative; grid-row: span 2; border: 1px solid rgba(240,161,60,0.3); border-radius: 12px; overflow: hidden; background: #0f1216;">
+                <image-slot id="nuevo-veh-1" shape="rect" placeholder="Foto principal — arrastrá acá"></image-slot>
+                <div style="position: absolute; top: 10px; left: 10px; pointer-events: none; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: #17130c; background: #f0a13c; padding: 3px 8px; border-radius: 6px;">PRINCIPAL</div>
+                <div style="position: absolute; bottom: 10px; left: 10px; right: 10px; pointer-events: none; display: flex; gap: 6px;">
+                  <span style="font-size: 10.5px; font-weight: 600; color: #e9ecef; background: rgba(11,13,16,0.7); border: 1px solid rgba(255,255,255,0.16); padding: 4px 9px; border-radius: 7px; backdrop-filter: blur(6px);">⌗ Recortar</span>
+                  <span style="font-size: 10.5px; font-weight: 600; color: #e9ecef; background: rgba(11,13,16,0.7); border: 1px solid rgba(255,255,255,0.16); padding: 4px 9px; border-radius: 7px; backdrop-filter: blur(6px);">↻ Girar</span>
+                </div>
+              </div>
+              <sc-for list="{{ slotsFotos }}" as="s" hint-placeholder-count="4">
+                <div style="position: relative; border: 1px dashed rgba(255,255,255,0.14); border-radius: 12px; overflow: hidden; background: #0f1216;">
+                  <image-slot id="{{ s.id }}" shape="rect" placeholder="{{ s.hint }}"></image-slot>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 11px; padding: 13px 15px; border-radius: 11px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);">
+              <span style="width: 26px; height: 26px; border-radius: 8px; flex: none; display: flex; align-items: center; justify-content: center; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.24); color: #f3bd77; font-size: 12px;">⇱</span>
+              <div style="font-size: 12.5px; color: #c3c9cf;">Sacá las fotos con el celular y subilas directo desde ahí. Se recortan solas al formato del catálogo.</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pasoDatos }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 20px 24px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <sc-for list="{{ camposDatos }}" as="c" hint-placeholder-count="6">
+              <div style="display: flex; flex-direction: column; gap: 7px; grid-column: {{ c.span }};">
+                <div style="font-size: 11.5px; font-weight: 600; color: #a8b0b8;">{{ c.label }}</div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: {{ c.valueColor }}; background: #14171c; border: 1px solid rgba(255,255,255,0.10); border-radius: 10px; padding: 12px 13px;">
+                  {{ c.value }}<span style="margin-left: auto; color: #6a7179; font-size: 10px;">{{ c.suffix }}</span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pasoPrecio }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+              <div style="display: flex; flex-direction: column; gap: 7px;">
+                <div style="font-size: 11.5px; font-weight: 600; color: #a8b0b8;">Precio de lista (USD)</div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: #eff2f4; background: #14171c; border: 1px solid rgba(240,161,60,0.32); border-radius: 10px; padding: 12px 13px;">
+                  31.000<span style="margin-left: auto; font-size: 11px; font-weight: 600; color: #6a7179;">USD</span>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 7px;">
+                <div style="font-size: 11.5px; font-weight: 600; color: #a8b0b8;">Equivalente en pesos</div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: #8d949e; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 13px;">
+                  $47.585.000<span style="margin-left: auto; font-size: 10.5px; color: #6a7179;">dólar oficial $1.535</span>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 15px 16px; border-radius: 12px; background: linear-gradient(120deg, rgba(240,161,60,0.10), rgba(255,255,255,0.02)); border: 1px solid rgba(240,161,60,0.24);">
+              <span style="width: 30px; height: 30px; border-radius: 9px; flex: none; display: flex; align-items: center; justify-content: center; background: rgba(240,161,60,0.16); border: 1px solid rgba(240,161,60,0.3); color: #f3bd77; font-size: 13px;">◇</span>
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 12.5px; font-weight: 700; color: #f7d3a1;">Tasación sugerida: USD 29.500 – 32.800</div>
+                <div style="font-size: 11.5px; color: #a8b0b8;">Estimación según categoría, año y kilometraje. No es un dato de mercado en vivo.</div>
+              </div>
+              <div style="margin-left: auto; flex: none; cursor: pointer; font-size: 11.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 8px 13px; border-radius: 8px;">Usar sugerido</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pasoDocs }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 9px;">
+            <sc-for list="{{ docsModal }}" as="d" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 11px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);">
+                <span style="width: 22px; height: 22px; border-radius: 7px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 10px; color: {{ d.color }}; background: {{ d.bg }};">{{ d.icon }}</span>
+                <div style="display: flex; flex-direction: column; gap: 1px;">
+                  <div style="font-size: 13px; font-weight: 600; color: #eff2f4;">{{ d.label }}</div>
+                  <div style="font-size: 11.5px; color: #7d848d;">{{ d.meta }}</div>
+                </div>
+                <div style="margin-left: auto; flex: none; cursor: pointer; font-size: 11.5px; font-weight: 600; color: {{ d.btnColor }}; background: {{ d.btnBg }}; border: 1px solid {{ d.btnBorder }}; padding: 6px 12px; border-radius: 8px;">{{ d.btn }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <div style="display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.015);">
+          <div style="font-size: 11.5px; color: #7d848d;">{{ hintModal }}</div>
+          <div style="margin-left: auto; display: flex; gap: 8px;">
+            <div onClick="{{ cerrarModal }}" style="cursor: pointer; font-size: 12.5px; font-weight: 600; color: #b0b7be; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); padding: 10px 16px; border-radius: 9px;" style-hover="color: #eff2f4;">Cancelar</div>
+            <div onClick="{{ siguientePaso }}" style="cursor: pointer; font-size: 12.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 10px 18px; border-radius: 9px; box-shadow: 0 10px 24px rgba(224,140,44,0.24);" style-hover="transform: translateY(-1px);">{{ ctaModal }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1360,&quot;height&quot;:980}}">
+class Component extends DCLogic {
+  state = { filtro: "Todos", vista: "Grilla", orden: 0, modal: false, paso: 0 };
+
+  renderVals() {
+    const ordenes = ["más reciente", "precio", "días en stock"];
+    const dolar = 1535;
+    const fmtArs = (usd) => "$" + (usd * dolar).toLocaleString("es-AR");
+
+    const raw = [
+      { modelo: "Volkswagen Golf GTI", specs: "2018 · 58.000 km · Nafta", patente: "AC 917 TL", usd: 31000, estado: "Disponible", dias: "42 días", sucursal: "Centro", doc: "VTV vence en 16 días", docMeta: "resto al día", docTipo: "alerta", ml: "Publicación pendiente de pago", mlTipo: "alerta", interesados: "4 interesados" },
+      { modelo: "Renault Duster Iconic", specs: "2024 · 15.200 km · Nafta", patente: "AF 482 KQ", usd: 24500, estado: "Vendido", dias: "18 días", sucursal: "Centro", doc: "Documentación completa", docMeta: "5 de 5", docTipo: "ok", ml: "Publicación dada de baja", mlTipo: "off", interesados: "" },
+      { modelo: "Renault Sandero Intens", specs: "2025 · 5.600 km · Nafta", patente: "AG 433 ZH", usd: 17200, estado: "Disponible", dias: "9 días", sucursal: "Norte", doc: "Documentación completa", docMeta: "5 de 5", docTipo: "ok", ml: "Sin publicar", mlTipo: "off", interesados: "2 interesados" },
+      { modelo: "Toyota Hilux SRX", specs: "2021 · 74.300 km · Diésel 4x4", patente: "AD 771 MZ", usd: 38900, estado: "Reservado", dias: "27 días", sucursal: "Norte", doc: "Falta informe de dominio", docMeta: "4 de 5", docTipo: "falta", ml: "Publicado en Mercado Libre", mlTipo: "ok", interesados: "6 interesados" },
+      { modelo: "Fiat Cronos Precision", specs: "2022 · 31.200 km · Nafta", patente: "AE 205 BR", usd: 15300, estado: "Disponible", dias: "63 días", sucursal: "Centro", doc: "Documentación completa", docMeta: "5 de 5", docTipo: "ok", ml: "Publicado en Mercado Libre", mlTipo: "ok", interesados: "" },
+      { modelo: "Peugeot 2008 Allure", specs: "2020 · 62.400 km · Nafta", patente: "AB 566 HN", usd: 15000, estado: "Disponible", dias: "5 días", sucursal: "Norte", doc: "VTV vence en 40 días", docMeta: "resto al día", docTipo: "ok", ml: "Publicado en Mercado Libre", mlTipo: "ok", interesados: "3 interesados" }
+    ];
+
+    const estados = {
+      Disponible: ["#86efac", "rgba(74,222,128,0.14)", "rgba(74,222,128,0.3)"],
+      Reservado: ["#f3bd77", "rgba(240,161,60,0.16)", "rgba(240,161,60,0.32)"],
+      Vendido: ["#b0b7be", "rgba(255,255,255,0.08)", "rgba(255,255,255,0.16)"]
+    };
+    const docs = {
+      ok: ["#86efac", "rgba(74,222,128,0.09)", "rgba(74,222,128,0.2)", "✓"],
+      alerta: ["#fcd34d", "rgba(251,191,36,0.10)", "rgba(251,191,36,0.26)", "◷"],
+      falta: ["#fca5a5", "rgba(248,113,113,0.10)", "rgba(248,113,113,0.26)", "⚠"]
+    };
+    const mls = { ok: ["#4ade80", "#a8b0b8"], alerta: ["#fbbf24", "#fcd34d"], off: ["#4d545b", "#7d848d"] };
+
+    let lista = raw.filter((a) => this.state.filtro === "Todos" || a.estado === this.state.filtro);
+    if (this.state.orden === 1) lista = lista.slice().sort((a, b) => b.usd - a.usd);
+    if (this.state.orden === 2) lista = lista.slice().sort((a, b) => parseInt(b.dias) - parseInt(a.dias));
+
+    const cuenta = (e) => raw.filter((a) => e === "Todos" || a.estado === e).length;
+
+    const paso = this.state.paso;
+    const labelsPaso = ["Fotos", "Datos del vehículo", "Precio", "Documentación"];
+    const hints = [
+      "Podés subir hasta 20 fotos. El recorte se hace al subirlas.",
+      "Los datos se usan para el catálogo y para publicar en Mercado Libre.",
+      "El equivalente en pesos se recalcula con la cotización del día.",
+      "Cargá lo que tengas ahora; el resto lo completás después."
+    ];
+
+    return {
+      modalAbierto: this.state.modal,
+      abrirModal: () => this.setState({ modal: true, paso: 0 }),
+      cerrarModal: () => this.setState({ modal: false }),
+      siguientePaso: () => paso < 3 ? this.setState({ paso: paso + 1 }) : this.setState({ modal: false }),
+      ctaModal: paso < 3 ? "Continuar →" : "Guardar vehículo",
+      hintModal: hints[paso],
+      pasoFotos: paso === 0,
+      pasoDatos: paso === 1,
+      pasoPrecio: paso === 2,
+      pasoDocs: paso === 3,
+      pasosModal: labelsPaso.map((l, i) => ({
+        label: l, num: i < paso ? "✓" : String(i + 1),
+        color: i === paso ? "#eff2f4" : i < paso ? "#a8b0b8" : "#6a7179",
+        numColor: i <= paso ? "#17130c" : "#6a7179",
+        numBg: i <= paso ? "linear-gradient(140deg, #f5b45c, #e08c2c)" : "rgba(255,255,255,0.04)",
+        numBorder: i <= paso ? "transparent" : "rgba(255,255,255,0.10)",
+        onClick: () => this.setState({ paso: i })
+      })),
+      slotsFotos: [
+        { id: "nuevo-veh-2", hint: "Lateral" },
+        { id: "nuevo-veh-3", hint: "Interior" },
+        { id: "nuevo-veh-4", hint: "Tablero" },
+        { id: "nuevo-veh-5", hint: "Motor" }
+      ],
+      camposDatos: [
+        { label: "Marca", value: "Volkswagen", suffix: "▾", valueColor: "#eff2f4", span: "auto" },
+        { label: "Modelo", value: "Golf GTI", suffix: "", valueColor: "#eff2f4", span: "auto" },
+        { label: "Año", value: "2018", suffix: "▾", valueColor: "#eff2f4", span: "auto" },
+        { label: "Kilometraje", value: "58.000", suffix: "km", valueColor: "#eff2f4", span: "auto" },
+        { label: "Combustible", value: "Nafta", suffix: "▾", valueColor: "#eff2f4", span: "auto" },
+        { label: "Transmisión", value: "Manual", suffix: "▾", valueColor: "#eff2f4", span: "auto" },
+        { label: "Patente", value: "AC 917 TL", suffix: "", valueColor: "#eff2f4", span: "auto" },
+        { label: "Sucursal", value: "Centro", suffix: "▾", valueColor: "#eff2f4", span: "auto" },
+        { label: "Observaciones para el catálogo", value: "Único dueño, service oficial al día.", suffix: "", valueColor: "#c3c9cf", span: "span 2" }
+      ],
+      docsModal: [
+        { label: "Título del automotor", meta: "Cargado · 30/08/2026", icon: "✓", color: "#86efac", bg: "rgba(74,222,128,0.12)", btn: "Ver", btnColor: "#b0b7be", btnBg: "rgba(255,255,255,0.05)", btnBorder: "rgba(255,255,255,0.09)" },
+        { label: "Cédula verde", meta: "Cargada · 30/08/2026", icon: "✓", color: "#86efac", bg: "rgba(74,222,128,0.12)", btn: "Ver", btnColor: "#b0b7be", btnBg: "rgba(255,255,255,0.05)", btnBorder: "rgba(255,255,255,0.09)" },
+        { label: "Informe de dominio", meta: "Pendiente de carga", icon: "⚠", color: "#fca5a5", bg: "rgba(248,113,113,0.12)", btn: "Subir", btnColor: "#17130c", btnBg: "linear-gradient(140deg, #f5b45c, #e08c2c)", btnBorder: "transparent" },
+        { label: "Libre de deuda", meta: "Pendiente de carga", icon: "⚠", color: "#fca5a5", bg: "rgba(248,113,113,0.12)", btn: "Subir", btnColor: "#17130c", btnBg: "linear-gradient(140deg, #f5b45c, #e08c2c)", btnBorder: "transparent" },
+        { label: "VTV", meta: "Vence el 15/09/2026 · te avisamos 30 días antes", icon: "◷", color: "#fcd34d", bg: "rgba(251,191,36,0.12)", btn: "Editar", btnColor: "#b0b7be", btnBg: "rgba(255,255,255,0.05)", btnBorder: "rgba(255,255,255,0.09)" }
+      ],
+      esGrilla: this.state.vista === "Grilla",
+      esTabla: this.state.vista === "Tabla",
+      ordenLabel: ordenes[this.state.orden],
+      toggleOrden: () => this.setState({ orden: (this.state.orden + 1) % 3 }),
+      resumen: [
+        { label: "Disponibles", value: "4", unit: "de 6", pct: "67%", trend: "67% del stock", trendColor: "#6a7179", dot: "#4ade80", dot2: "#22c55e", color: "#f2f5f7" },
+        { label: "Reservados", value: "1", unit: "de 6", pct: "17%", trend: "17% del stock", trendColor: "#6a7179", dot: "#f0a13c", dot2: "#c9762a", color: "#f2f5f7" },
+        { label: "Documentación", value: "2", unit: "a revisar", pct: "33%", trend: "requiere acción", trendColor: "#fcd34d", dot: "#fbbf24", dot2: "#d97706", color: "#fcd34d" },
+        { label: "Rotación", value: "27", unit: "días", pct: "54%", trend: "−4 vs. mes previo", trendColor: "#86efac", dot: "#60a5fa", dot2: "#3b82f6", color: "#f2f5f7" }
+      ],
+      filtros: ["Todos", "Disponible", "Reservado", "Vendido"].map((f) => {
+        const on = this.state.filtro === f;
+        const dots = { Todos: "", Disponible: "#4ade80", Reservado: "#f0a13c", Vendido: "#767d86" };
+        return {
+          label: f, count: cuenta(f), dot: dots[f],
+          color: on ? "#f7f9fa" : "#8d949e",
+          bg: on ? "rgba(255,255,255,0.07)" : "transparent",
+          shadow: on ? "inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.3)" : "none",
+          countColor: on ? "#a8b0b8" : "#5d656d",
+          onClick: () => this.setState({ filtro: f })
+        };
+      }),
+      vistas: ["Grilla", "Tabla"].map((v) => {
+        const on = this.state.vista === v;
+        return {
+          label: v,
+          color: on ? "#17130c" : "#8d949e",
+          bg: on ? "linear-gradient(140deg, #f5b45c, #e08c2c)" : "transparent",
+          onClick: () => this.setState({ vista: v })
+        };
+      }),
+      autos: lista.map((a, i) => {
+        const e = estados[a.estado], d = docs[a.docTipo], m = mls[a.mlTipo];
+        const puedePublicar = a.mlTipo === "off" && a.estado !== "Vendido";
+        return {
+          slotId: "stock-" + a.patente.replace(/\s/g, "-").toLowerCase(),
+          modelo: a.modelo, specs: a.specs, patente: a.patente,
+          precioUsd: "USD " + a.usd.toLocaleString("es-AR"),
+          precioArs: fmtArs(a.usd),
+          dias: a.dias, estado: a.estado, sucursal: a.sucursal, docMeta: a.docMeta,
+          estadoColor: e[0], estadoBg: e[1], estadoBorder: e[2],
+          doc: a.doc, docColor: d[0], docBg: d[1], docBorder: d[2], docIcon: d[3],
+          ml: a.ml, mlColor: m[0], mlTextColor: m[1],
+          interesados: a.interesados,
+          cta: puedePublicar ? "Publicar" : a.mlTipo === "alerta" ? "Resolver" : "Ver ficha",
+          ctaColor: puedePublicar || a.mlTipo === "alerta" ? "#17130c" : "#b0b7be",
+          ctaBg: puedePublicar || a.mlTipo === "alerta" ? "linear-gradient(140deg, #f5b45c, #e08c2c)" : "rgba(255,255,255,0.05)",
+          ctaBorder: puedePublicar || a.mlTipo === "alerta" ? "transparent" : "rgba(255,255,255,0.09)"
+        };
+      })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0d10; }
+  body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #f0a13c; text-decoration: none; }
+  a:hover { color: #f7c584; }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  @keyframes ig-pulse { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.35); } }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: radial-gradient(1200px 600px at 20% -10%, #1c2129 0%, #0e1116 55%, #0b0d10 100%); padding: 18px; box-sizing: border-box; color: #e9ecef;">
+  <div style="display: grid; grid-template-columns: 212px minmax(1000px, 1fr); gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow-x: auto; overflow-y: hidden; background: #12151a; box-shadow: 0 30px 80px rgba(0,0,0,0.55);">
+
+    <aside style="background: #0f1216; border-right: 1px solid rgba(255,255,255,0.06); padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; min-height: 900px;">
+      <div style="display: flex; align-items: center; gap: 9px; padding: 4px 8px 2px;">
+        <div style="width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #17130c;">R</div>
+        <div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; color: #f2f5f7;">RODADO</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 10px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);">
+        <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(240,161,60,0.18); color: #f3bd77; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">A</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4;">Agencia Demo</div>
+          <div style="font-size: 10px; color: #7d848d;">Todas las sucursales (2)</div>
+        </div>
+        <div style="margin-left: auto; color: #767d86; font-size: 9px;">▾</div>
+      </div>
+
+      <div style="border: 1px solid rgba(255,255,255,0.06); border-radius: 11px; padding: 10px 11px; background: rgba(255,255,255,0.025); display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="font-size: 9px; letter-spacing: 0.14em; color: #6a7179; font-weight: 600;">COTIZACIÓN DÓLAR</div>
+          <div style="margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Oficial</span><span style="color: #eff2f4; font-weight: 600;">$1.535</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Blue</span><span style="color: #eff2f4; font-weight: 600;">$1.555</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">OPERACIÓN</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">▣</span>Panel general
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◫</span>Stock
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">6</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◍</span>Leads
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">17</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◈</span>Ventas
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◔</span>Reportes
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">AGENCIA</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⬡</span>Sucursales
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">2</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◎</span>Equipo
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">3</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.22); color: #f2f5f7; font-size: 12.5px; font-weight: 600;">
+          <span style="width: 15px; text-align: center; color: #f3bd77;">⌗</span>Integraciones
+        </div>
+      </div>
+
+      <div style="margin-top: auto; display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.025);">
+        <div style="width: 27px; height: 27px; border-radius: 50%; flex: none; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; color: #17130c;">AR</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4; line-height: 1.35;">Alejandro Rivas</div>
+          <div style="font-size: 10px; color: #7d848d; line-height: 1.35;">Dueño</div>
+        </div>
+        <div style="margin-left: auto; flex: none; color: #767d86; font-size: 12px;">⏻</div>
+      </div>
+    </aside>
+
+    <main style="background: #11141a; display: flex; flex-direction: column; min-width: 0;">
+      <header style="display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 7px 12px; width: 260px; color: #767d86; font-size: 12px;">
+          <span>⌕</span><span>Buscar integración…</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">✉</div>
+          <div style="position: relative; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">
+            ⌁<span style="position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: #f87171;"></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 5px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #17130c;">A</div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600; color: #eff2f4; line-height: 1.35;">Alejandro</span>
+              <span style="font-size: 9.5px; color: #7d848d; line-height: 1.35;">Dueño</span>
+            </div>
+            <span style="color: #767d86; font-size: 9px;">▾</span>
+          </div>
+        </div>
+      </header>
+
+      <div style="padding: 20px 22px 28px; display: flex; flex-direction: column; gap: 16px; min-width: 0;">
+        <div style="display: flex; align-items: flex-end; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em;">Integraciones</div>
+            <div style="font-size: 12px; color: #7d848d;">Conectá tu agencia con las plataformas donde publicás y vendés</div>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 9px;">
+            <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; color: #86efac; background: rgba(74,222,128,0.10); border: 1px solid rgba(74,222,128,0.26); padding: 8px 13px; border-radius: 20px;">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: ig-pulse 2.4s ease-in-out infinite;"></span>1 conexión activa
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="font-size: 10px; letter-spacing: 0.16em; color: #6a7179; font-weight: 700;">CONECTADAS</div>
+
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden;">
+            <div style="height: 2px; background: linear-gradient(90deg, #fbbf24, transparent 70%);"></div>
+            <div style="padding: 18px 20px 16px; display: flex; align-items: flex-start; gap: 14px; border-bottom: 1px solid rgba(255,255,255,0.055);">
+              <div style="width: 46px; height: 46px; border-radius: 13px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 800; letter-spacing: -0.02em; color: #17130c; background: linear-gradient(140deg, #fcd34d, #f0a13c);">ML</div>
+              <div style="display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+                <div style="display: flex; align-items: center; gap: 9px;">
+                  <div style="font-size: 16.5px; font-weight: 700; letter-spacing: -0.012em; line-height: 1.35;">Mercado Libre</div>
+                  <span style="display: inline-flex; align-items: center; gap: 7px; flex: none; font-size: 10.5px; font-weight: 700; color: #86efac; background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.26); padding: 3px 10px; border-radius: 20px;">
+                    <span style="width: 5px; height: 5px; border-radius: 50%; background: #4ade80;"></span>Conectada
+                  </span>
+                </div>
+                <div style="font-size: 12.5px; color: #949ba3; line-height: 1.5;">Publicás tu stock desde la misma ficha y los precios se sincronizan solos. Las consultas entran como leads a tu pipeline.</div>
+                <div style="display: flex; align-items: center; gap: 9px; padding-top: 2px; font-size: 11px; color: #6a7179; flex-wrap: wrap;">
+                  <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; color: #b0b7be; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); padding: 3px 8px; border-radius: 5px;">Cuenta #1658994008</span>
+                  <span>Vinculada por Alejandro Rivas el 12/07/2026</span>
+                </div>
+              </div>
+              <div style="margin-left: auto; flex: none; display: flex; align-items: center; gap: 7px;">
+                <div style="cursor: pointer; font-size: 11.5px; font-weight: 600; color: #b0b7be; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); padding: 8px 13px; border-radius: 8px; white-space: nowrap;" style-hover="color: #eff2f4; background: rgba(255,255,255,0.09);">Configurar</div>
+                <div onClick="{{ sincronizar }}" style="cursor: pointer; font-size: 11.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 8px 14px; border-radius: 8px; white-space: nowrap;" style-hover="opacity: .88;">{{ syncLabel }}</div>
+                <div style="cursor: pointer; flex: none; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #5d656d;" style-hover="color: #b0b7be; background: rgba(255,255,255,0.05);">···</div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid rgba(255,255,255,0.055);">
+              <sc-for list="{{ metricas }}" as="m" hint-placeholder-count="4">
+                <div style="padding: 15px 20px; border-left: 1px solid {{ m.divider }}; display: flex; flex-direction: column; gap: 5px;">
+                  <div style="font-size: 9.5px; letter-spacing: 0.12em; color: #6a7179; font-weight: 700;">{{ m.label }}</div>
+                  <div style="display: flex; align-items: baseline; gap: 7px;">
+                    <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.025em; font-variant-numeric: tabular-nums; color: {{ m.color }}; line-height: 1.1;">{{ m.value }}</div>
+                    <div style="font-size: 11px; color: #6a7179;">{{ m.unit }}</div>
+                  </div>
+                  <div style="font-size: 10.5px; color: #7d848d; line-height: 1.35;">{{ m.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0;">
+              <div style="padding: 16px 20px 18px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 9px;">
+                  <div style="font-size: 12.5px; font-weight: 700;">Actividad de sincronización</div>
+                  <div style="margin-left: auto; font-size: 10.5px; color: #6a7179;">últimas 24 h</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0; border-left: 1px solid rgba(255,255,255,0.10); margin-left: 4px;">
+                  <sc-for list="{{ actividad }}" as="a" hint-placeholder-count="4">
+                    <div style="position: relative; padding: 8px 0 8px 18px;">
+                      <span style="position: absolute; left: -4.5px; top: 13px; width: 8px; height: 8px; border-radius: 50%; background: {{ a.dot }}; box-shadow: 0 0 0 3px #171b21;"></span>
+                      <div style="display: flex; align-items: center; gap: 9px;">
+                        <div style="font-size: 12px; color: #dfe4e9; line-height: 1.4; min-width: 0;">{{ a.texto }}</div>
+                        <div style="margin-left: auto; flex: none; font-size: 10.5px; color: #6a7179; font-variant-numeric: tabular-nums;">{{ a.hora }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="padding: 16px 20px 18px; border-left: 1px solid rgba(255,255,255,0.055); display: flex; flex-direction: column; gap: 12px;">
+                <div style="font-size: 12.5px; font-weight: 700;">Qué se sincroniza</div>
+                <div style="display: flex; flex-direction: column; gap: 9px;">
+                  <sc-for list="{{ opciones }}" as="o" hint-placeholder-count="4">
+                    <div onClick="{{ o.onClick }}" style="cursor: pointer; display: flex; align-items: center; gap: 11px;">
+                      <span style="width: 34px; height: 19px; flex: none; border-radius: 20px; padding: 2px; box-sizing: border-box; background: {{ o.trackBg }}; border: 1px solid {{ o.trackBorder }}; display: flex; justify-content: {{ o.justify }}; transition: all .22s ease;">
+                        <span style="width: 13px; height: 13px; border-radius: 50%; background: {{ o.knob }};"></span>
+                      </span>
+                      <div style="min-width: 0; display: flex; flex-direction: column;">
+                        <div style="font-size: 12px; font-weight: 600; color: {{ o.color }}; line-height: 1.4;">{{ o.label }}</div>
+                        <div style="font-size: 10.5px; color: #6a7179; line-height: 1.4;">{{ o.nota }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 9px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 10px; letter-spacing: 0.16em; color: #6a7179; font-weight: 700;">EN CAMINO</div>
+            <div style="font-size: 11.5px; color: #6a7179;">Activá el aviso y te escribimos el día que se libere</div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 11px;">
+            <sc-for list="{{ proximas }}" as="p" hint-placeholder-count="4">
+              <div style="background: rgba(255,255,255,0.022); border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; padding: 16px 16px 15px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 32px; height: 32px; border-radius: 10px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 13px; color: {{ p.color }}; background: {{ p.bg }}; border: 1px solid {{ p.border }};">{{ p.icon }}</div>
+                  <div style="min-width: 0;">
+                    <div style="font-size: 13px; font-weight: 700; color: #dfe4e9; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.nombre }}</div>
+                    <div style="font-size: 10px; letter-spacing: 0.1em; font-weight: 700; color: {{ p.estadoColor }};">{{ p.estado }}</div>
+                  </div>
+                </div>
+                <div style="font-size: 11.5px; line-height: 1.5; color: #8d949e; text-wrap: pretty;">{{ p.detalle }}</div>
+                <div onClick="{{ p.onClick }}" style="margin-top: auto; cursor: pointer; text-align: center; font-size: 11.5px; font-weight: 600; color: {{ p.btnColor }}; background: {{ p.btnBg }}; border: 1px solid {{ p.btnBorder }}; padding: 8px; border-radius: 8px; transition: all .2s ease;">{{ p.btn }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 13px; background: linear-gradient(100deg, rgba(240,161,60,0.09), rgba(255,255,255,0.02)); border: 1px solid rgba(240,161,60,0.22);">
+          <span style="width: 32px; height: 32px; border-radius: 10px; flex: none; display: flex; align-items: center; justify-content: center; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.28); color: #f3bd77; font-size: 14px;">✉</span>
+          <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+            <div style="font-size: 13px; font-weight: 700; color: #f7d3a1;">¿Usás otra plataforma que no está en la lista?</div>
+            <div style="font-size: 11.5px; color: #a8b0b8;">Contanos cuál y con cuántas publicaciones trabajás. Priorizamos las que más nos piden.</div>
+          </div>
+          <div style="margin-left: auto; flex: none; cursor: pointer; font-size: 11.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 9px 15px; border-radius: 9px;" style-hover="transform: translateY(-1px);">Pedir integración</div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    sync: false,
+    opciones: { precios: true, fotos: true, consultas: true, pausar: false },
+    avisos: {}
+  };
+
+  renderVals() {
+    const s = this.state;
+    const op = (key, label, nota) => {
+      const on = s.opciones[key];
+      return {
+        label: label, nota: nota,
+        color: on ? "#eff2f4" : "#8d949e",
+        trackBg: on ? "linear-gradient(140deg, #f5b45c, #e08c2c)" : "rgba(255,255,255,0.06)",
+        trackBorder: on ? "transparent" : "rgba(255,255,255,0.12)",
+        knob: on ? "#17130c" : "#767d86",
+        justify: on ? "flex-end" : "flex-start",
+        onClick: () => {
+          const next = Object.assign({}, s.opciones);
+          next[key] = !next[key];
+          this.setState({ opciones: next });
+        }
+      };
+    };
+
+    const futuras = [
+      { key: "wpp", nombre: "WhatsApp Business", icon: "✆", estado: "EN DESARROLLO", color: "#86efac", bg: "rgba(74,222,128,0.10)", border: "rgba(74,222,128,0.22)", estadoColor: "#86efac", detalle: "Catálogo sincronizado y las consultas del chat entrando directo a tu pipeline." },
+      { key: "ig", nombre: "Instagram", icon: "◍", estado: "PLANIFICADA", color: "#d8b4fe", bg: "rgba(192,132,252,0.10)", border: "rgba(192,132,252,0.22)", estadoColor: "#8d949e", detalle: "Los mensajes de tus publicaciones se convierten en leads con el vehículo cargado." },
+      { key: "fin", nombre: "Financieras", icon: "$", estado: "PLANIFICADA", color: "#f3bd77", bg: "rgba(240,161,60,0.10)", border: "rgba(240,161,60,0.22)", estadoColor: "#8d949e", detalle: "Simulación de cuotas y envío de legajos sin salir de la ficha del vehículo." },
+      { key: "cont", nombre: "Contabilidad", icon: "◧", estado: "EN EVALUACIÓN", color: "#93c5fd", bg: "rgba(96,165,250,0.10)", border: "rgba(96,165,250,0.22)", estadoColor: "#8d949e", detalle: "Cada venta registrada viaja al sistema de tu contador, sin cargar dos veces." }
+    ];
+
+    return {
+      syncLabel: s.sync ? "Sincronizando…" : "Sincronizar ahora",
+      sincronizar: () => {
+        this.setState({ sync: true });
+        clearTimeout(this._t);
+        this._t = setTimeout(() => this.setState({ sync: false }), 1600);
+      },
+      metricas: [
+        { label: "PUBLICACIONES ACTIVAS", value: "4", unit: "de 6", note: "vehículos en Mercado Libre", color: "#f2f5f7", divider: "transparent" },
+        { label: "CONSULTAS IMPORTADAS", value: "2", unit: "este mes", note: "entraron como leads", color: "#f2f5f7", divider: "rgba(255,255,255,0.055)" },
+        { label: "ÚLTIMA SINCRONIZACIÓN", value: "12", unit: "min", note: "precios y estado al día", color: "#86efac", divider: "rgba(255,255,255,0.055)" },
+        { label: "REQUIEREN ATENCIÓN", value: "1", unit: "publicación", note: "Golf GTI: plan pendiente de pago", color: "#fcd34d", divider: "rgba(255,255,255,0.055)" }
+      ],
+      actividad: [
+        { texto: "Precio actualizado · Fiat Cronos Precision", hora: "12 min", dot: "#4ade80" },
+        { texto: "Consulta importada como lead · Ford Ranger XLT", hora: "3 h", dot: "#f0a13c" },
+        { texto: "Publicación pausada por venta · Renault Duster Iconic", hora: "8 h", dot: "#93c5fd" },
+        { texto: "Golf GTI: la publicación requiere pagar el plan", hora: "1 d", dot: "#fcd34d" }
+      ],
+      opciones: [
+        op("precios", "Precios y stock", "Lo que cambiás en Rodado se actualiza allá"),
+        op("fotos", "Fotos y descripción", "Toma las fotos de la ficha del vehículo"),
+        op("consultas", "Consultas como leads", "Cada pregunta entra a tu pipeline"),
+        op("pausar", "Pausar al vender", "Baja la publicación cuando marcás vendido")
+      ],
+      proximas: futuras.map((f) => {
+        const on = !!s.avisos[f.key];
+        return Object.assign({}, f, {
+          btn: on ? "✓ Te avisamos" : "Avisarme",
+          btnColor: on ? "#86efac" : "#b0b7be",
+          btnBg: on ? "rgba(74,222,128,0.10)" : "rgba(255,255,255,0.05)",
+          btnBorder: on ? "rgba(74,222,128,0.26)" : "rgba(255,255,255,0.09)",
+          onClick: () => {
+            const next = Object.assign({}, s.avisos);
+            next[f.key] = !next[f.key];
+            this.setState({ avisos: next });
+          }
+        });
+      })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

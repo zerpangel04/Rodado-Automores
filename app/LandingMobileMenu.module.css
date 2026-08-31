@@ -67,13 +67,3 @@
   font-weight: 600;
   color: var(--violet);
 }
-
-.themeToggle {
-  margin: 2px 4px 0;
-  justify-content: center;
-}
-
-.themeToggle button {
-  flex: 1;
-  text-align: center;
-}

@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
 import styles from "./landing.module.css";
-import { ThemeToggle } from "./ThemeToggle";
 import { Reveal } from "./Reveal";
 import { LandingMobileMenu } from "./LandingMobileMenu";
 
@@ -27,7 +26,6 @@ export default async function Home() {
             <a href="#precios">Precios</a>
           </div>
           <div className={styles.navRight}>
-            <ThemeToggle />
             <a className={styles.loginLink} href="/login">
               Iniciar sesión
             </a>

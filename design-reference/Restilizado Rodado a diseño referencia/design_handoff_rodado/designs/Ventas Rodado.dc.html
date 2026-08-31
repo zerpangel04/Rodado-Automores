@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0d10; }
+  body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #f0a13c; text-decoration: none; }
+  a:hover { color: #f7c584; }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: radial-gradient(1200px 600px at 20% -10%, #1c2129 0%, #0e1116 55%, #0b0d10 100%); padding: 18px; box-sizing: border-box; color: #e9ecef;">
+  <div style="display: grid; grid-template-columns: 212px minmax(1060px, 1fr); gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow-x: auto; overflow-y: hidden; background: #12151a; box-shadow: 0 30px 80px rgba(0,0,0,0.55);">
+
+    <aside style="background: #0f1216; border-right: 1px solid rgba(255,255,255,0.06); padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; min-height: 940px;">
+      <div style="display: flex; align-items: center; gap: 9px; padding: 4px 8px 2px;">
+        <div style="width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #17130c;">R</div>
+        <div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; color: #f2f5f7;">RODADO</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 10px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);">
+        <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(240,161,60,0.18); color: #f3bd77; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">A</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4;">Agencia Demo</div>
+          <div style="font-size: 10px; color: #7d848d;">Todas las sucursales (2)</div>
+        </div>
+        <div style="margin-left: auto; color: #767d86; font-size: 9px;">▾</div>
+      </div>
+
+      <div style="border: 1px solid rgba(255,255,255,0.06); border-radius: 11px; padding: 10px 11px; background: rgba(255,255,255,0.025); display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="font-size: 9px; letter-spacing: 0.14em; color: #6a7179; font-weight: 600;">COTIZACIÓN DÓLAR</div>
+          <div style="margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Oficial</span><span style="color: #eff2f4; font-weight: 600;">$1.535</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Blue</span><span style="color: #eff2f4; font-weight: 600;">$1.555</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">OPERACIÓN</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">▣</span>Panel general
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◫</span>Stock
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">6</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◍</span>Leads
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">17</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.22); color: #f2f5f7; font-size: 12.5px; font-weight: 600;">
+          <span style="width: 15px; text-align: center; color: #f3bd77;">◈</span>Ventas
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◔</span>Reportes
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">AGENCIA</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⬡</span>Sucursales
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◎</span>Equipo
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⌗</span>Integraciones
+        </div>
+      </div>
+
+      <div style="margin-top: auto; display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.025);">
+        <div style="width: 27px; height: 27px; border-radius: 50%; flex: none; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; color: #17130c;">AR</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4; line-height: 1.35;">Alejandro Rivas</div>
+          <div style="font-size: 10px; color: #7d848d; line-height: 1.35;">Dueño</div>
+        </div>
+        <div style="margin-left: auto; flex: none; color: #767d86; font-size: 12px;">⏻</div>
+      </div>
+    </aside>
+
+    <main style="background: #11141a; display: flex; flex-direction: column; min-width: 0;">
+      <header style="display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 7px 12px; width: 260px; color: #767d86; font-size: 12px;">
+          <span>⌕</span><span>Buscar venta por vehículo o vendedor…</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">✉</div>
+          <div style="position: relative; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">
+            ⌁<span style="position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: #f87171;"></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 5px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #17130c;">A</div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600; color: #eff2f4; line-height: 1.35;">Alejandro</span>
+              <span style="font-size: 9.5px; color: #7d848d; line-height: 1.35;">Dueño</span>
+            </div>
+            <span style="color: #767d86; font-size: 9px;">▾</span>
+          </div>
+        </div>
+      </header>
+
+      <div style="padding: 20px 22px 28px; display: flex; flex-direction: column; gap: 15px; min-width: 0;">
+        <div style="display: flex; align-items: flex-end; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em;">Ventas</div>
+            <div style="font-size: 12px; color: #7d848d;">Se completa automáticamente al marcar un vehículo como vendido en Stock</div>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; gap: 2px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; padding: 3px;">
+              <sc-for list="{{ periodos }}" as="p" hint-placeholder-count="3">
+                <div onClick="{{ p.onClick }}" style="cursor: pointer; font-size: 12px; font-weight: 600; padding: 7px 13px; border-radius: 9px; color: {{ p.color }}; background: {{ p.bg }}; box-shadow: {{ p.shadow }}; transition: all .22s ease;">{{ p.label }}</div>
+              </sc-for>
+            </div>
+            <div style="cursor: pointer; font-size: 11.5px; font-weight: 600; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 8px 13px;" style-hover="color: #eff2f4;">Exportar</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px;">
+          <sc-for list="{{ resumen }}" as="r" hint-placeholder-count="4">
+            <div style="position: relative; overflow: hidden; background: linear-gradient(165deg, #1a1f26, #15191f); border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; padding: 15px 16px 14px; display: flex; flex-direction: column; gap: 11px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
+              <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, {{ r.dot }}, transparent 65%); opacity: .5;"></div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ r.dot }}; box-shadow: 0 0 7px {{ r.dot }}; flex: none;"></span>
+                <div style="font-size: 12px; color: #949ba3;">{{ r.label }}</div>
+              </div>
+              <div style="display: flex; align-items: flex-end; gap: 9px;">
+                <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.035em; line-height: .95; font-variant-numeric: tabular-nums; color: {{ r.color }};">{{ r.value }}</div>
+                <div style="font-size: 11.5px; color: #7d848d; padding-bottom: 3px;">{{ r.unit }}</div>
+                <div style="margin-left: auto; font-size: 11px; font-weight: 600; color: {{ r.trendColor }}; padding-bottom: 3px;">{{ r.trend }}</div>
+              </div>
+              <div style="height: 3px; border-radius: 3px; background: rgba(255,255,255,0.07); overflow: hidden;">
+                <div style="height: 100%; width: {{ r.pct }}; border-radius: 3px; background: linear-gradient(90deg, {{ r.dot }}, {{ r.dot2 }});"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; gap: 2px; flex: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; padding: 3px;">
+            <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="3">
+              <div onClick="{{ f.onClick }}" style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 9px; color: {{ f.color }}; background: {{ f.bg }}; box-shadow: {{ f.shadow }}; transition: all .22s ease;">
+                <sc-if value="{{ f.dot }}" hint-placeholder-val="{{ true }}">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ f.dot }};"></span>
+                </sc-if>
+                {{ f.label }}<span style="font-size: 11px; font-weight: 600; color: {{ f.countColor }}; font-variant-numeric: tabular-nums;">{{ f.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="flex: 1; min-width: 140px; display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 8px 13px; color: #6a7179; font-size: 12px;" style-hover="border-color: rgba(255,255,255,0.14);">
+            <span style="flex: none;">⌕</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Buscar por vehículo, patente o comprador…</span>
+          </div>
+
+          <div style="position: relative; flex: none;">
+            <div onClick="{{ toggleVendedores }}" style="cursor: pointer; display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; color: {{ vendedorColor }}; background: {{ vendedorBg }}; border: 1px solid {{ vendedorBorder }}; border-radius: 9px; padding: 8px 13px; min-width: 178px;" style-hover="border-color: rgba(240,161,60,0.4);">
+              <span style="width: 5px; height: 5px; border-radius: 50%; background: #f0a13c; flex: none;"></span>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ vendedorLabel }}</span>
+              <span style="margin-left: auto; flex: none; font-size: 9px; color: #767d86;">▾</span>
+            </div>
+            <sc-if value="{{ listaAbierta }}" hint-placeholder-val="{{ false }}">
+              <div style="position: absolute; top: 42px; right: 0; z-index: 40; width: 262px; background: #171b21; border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; box-shadow: 0 30px 70px rgba(0,0,0,0.6); padding: 6px;">
+                <div style="padding: 9px 11px 7px; font-size: 9.5px; letter-spacing: 0.13em; color: #6a7179; font-weight: 700;">VENDEDORES CON VENTAS</div>
+                <sc-for list="{{ vendedores }}" as="v" hint-placeholder-count="4">
+                  <div onClick="{{ v.onClick }}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 9px; background: {{ v.bg }};" style-hover="background: rgba(255,255,255,0.05);">
+                    <span style="width: 22px; height: 22px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #17130c; background: {{ v.avatar }};">{{ v.ini }}</span>
+                    <div style="min-width: 0; display: flex; flex-direction: column; gap: 1px;">
+                      <div style="font-size: 12.5px; font-weight: 600; color: {{ v.color }}; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ v.label }}</div>
+                      <div style="font-size: 10.5px; color: #6a7179; line-height: 1.35; font-variant-numeric: tabular-nums;">{{ v.meta }}</div>
+                    </div>
+                    <div style="margin-left: auto; flex: none; font-size: 11px; font-weight: 700; color: #a8b0b8; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 20px; font-variant-numeric: tabular-nums;">{{ v.count }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 316px; gap: 12px; align-items: start;">
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 0.85fr 1.6fr 1.15fr 1fr 1fr 0.85fr; gap: 14px; padding: 12px 18px; font-size: 9.5px; letter-spacing: 0.1em; color: #6a7179; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.015);">
+              <div>FECHA</div><div>VEHÍCULO</div><div>VENDEDOR</div><div style="text-align: right;">PRECIO FINAL</div><div style="text-align: right;">COMISIÓN</div><div style="text-align: right;">COBRO</div>
+            </div>
+            <sc-for list="{{ ventas }}" as="v" hint-placeholder-count="10">
+              <div style="display: grid; grid-template-columns: 0.85fr 1.6fr 1.15fr 1fr 1fr 0.85fr; gap: 14px; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04);" style-hover="background: rgba(240,161,60,0.055);">
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <div style="font-size: 12.5px; font-weight: 600; color: #eff2f4; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ v.fecha }}</div>
+                  <div style="font-size: 10.5px; color: #6a7179; line-height: 1.35;">{{ v.hace }}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                  <div style="font-size: 13px; font-weight: 600; color: #f2f5f7; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ v.vehiculo }}</div>
+                  <div style="display: flex; align-items: center; gap: 7px;">
+                    <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; color: #b0b7be;">{{ v.patente }}</span>
+                    <span style="font-size: 10.5px; color: #6a7179;">· {{ v.sucursal }}</span>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 9px; min-width: 0;">
+                  <span style="width: 24px; height: 24px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 700; color: #17130c; background: {{ v.avatar }};">{{ v.ini }}</span>
+                  <span style="font-size: 12.5px; color: #dfe4e9; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ v.vendedor }}</span>
+                </div>
+                <div style="text-align: right; display: flex; flex-direction: column; gap: 2px;">
+                  <div style="font-size: 13.5px; font-weight: 700; color: #f2f5f7; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ v.precio }}</div>
+                  <div style="font-size: 10.5px; color: #6a7179; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ v.precioArs }}</div>
+                </div>
+                <div style="text-align: right; display: flex; flex-direction: column; gap: 2px;">
+                  <div style="font-size: 12.5px; font-weight: 600; color: #dfe4e9; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ v.comision }}</div>
+                  <div style="font-size: 10.5px; color: #6a7179; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ v.comisionPct }}</div>
+                </div>
+                <div style="display: flex; justify-content: flex-end;">
+                  <span style="display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 20px; color: {{ v.cobroColor }}; background: {{ v.cobroBg }}; border: 1px solid {{ v.cobroBorder }};">
+                    <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ v.cobroColor }};"></span>{{ v.cobro }}
+                  </span>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display: grid; grid-template-columns: 0.85fr 1.6fr 1.15fr 1fr 1fr 0.85fr; gap: 14px; align-items: center; padding: 14px 18px; background: rgba(255,255,255,0.022);">
+              <div style="grid-column: span 3; font-size: 11.5px; letter-spacing: 0.1em; color: #6a7179; font-weight: 700;">TOTAL {{ totalUnidades }}</div>
+              <div style="text-align: right; font-size: 14px; font-weight: 700; color: #f2f5f7; font-variant-numeric: tabular-nums;">{{ totalPrecio }}</div>
+              <div style="text-align: right; font-size: 13px; font-weight: 700; color: #f3bd77; font-variant-numeric: tabular-nums;">{{ totalComision }}</div>
+              <div></div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; overflow: hidden;">
+              <div style="display: flex; align-items: center; gap: 9px; padding: 14px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-size: 13px; font-weight: 700;">Por vendedor</div>
+                <div style="margin-left: auto; font-size: 10.5px; color: #6a7179;">{{ periodoLabel }}</div>
+              </div>
+              <div style="padding: 13px 16px 15px; display: flex; flex-direction: column; gap: 15px;">
+                <sc-for list="{{ ranking }}" as="r" hint-placeholder-count="3">
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 9px;">
+                      <span style="width: 25px; height: 25px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #17130c; background: {{ r.avatar }};">{{ r.ini }}</span>
+                      <div style="min-width: 0; display: flex; flex-direction: column; gap: 1px;">
+                        <div style="font-size: 12.5px; font-weight: 600; color: #eff2f4; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.nombre }}</div>
+                        <div style="font-size: 10.5px; color: #6a7179; line-height: 1.35; font-variant-numeric: tabular-nums;">{{ r.unidades }}</div>
+                      </div>
+                      <div style="margin-left: auto; flex: none; text-align: right;">
+                        <div style="font-size: 12.5px; font-weight: 700; color: #f2f5f7; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ r.facturado }}</div>
+                        <div style="font-size: 10.5px; color: #f3bd77; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ r.comision }} comisión</div>
+                      </div>
+                    </div>
+                    <div style="height: 4px; border-radius: 4px; background: rgba(255,255,255,0.07); overflow: hidden;">
+                      <div style="height: 100%; width: {{ r.pct }}; border-radius: 4px; background: linear-gradient(90deg, #f5b45c, #c9762a);"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; overflow: hidden;">
+              <div style="display: flex; align-items: center; gap: 9px; padding: 14px 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-size: 13px; font-weight: 700;">Comisiones a pagar</div>
+                <div style="margin-left: auto; font-size: 10.5px; font-weight: 700; color: #fcd34d; background: rgba(251,191,36,0.12); padding: 2px 8px; border-radius: 20px;">{{ pendientesCount }}</div>
+              </div>
+              <div style="padding: 13px 16px 15px; display: flex; flex-direction: column; gap: 11px;">
+                <sc-for list="{{ pendientes }}" as="p" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #fbbf24; flex: none;"></span>
+                    <div style="min-width: 0; display: flex; flex-direction: column; gap: 1px;">
+                      <div style="font-size: 12px; font-weight: 600; color: #dfe4e9; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.vendedor }}</div>
+                      <div style="font-size: 10.5px; color: #6a7179; line-height: 1.35;">{{ p.detalle }}</div>
+                    </div>
+                    <div style="margin-left: auto; flex: none; font-size: 12.5px; font-weight: 700; color: #f3bd77; font-variant-numeric: tabular-nums;">{{ p.monto }}</div>
+                  </div>
+                </sc-for>
+                <div style="display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06);">
+                  <div style="font-size: 11.5px; color: #949ba3;">Total pendiente</div>
+                  <div style="margin-left: auto; font-size: 15px; font-weight: 700; color: #f7d3a1; font-variant-numeric: tabular-nums;">{{ totalPendiente }}</div>
+                </div>
+                <div style="cursor: pointer; text-align: center; font-size: 12px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 10px; border-radius: 9px;" style-hover="transform: translateY(-1px);">Registrar pago de comisiones</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420,&quot;height&quot;:1000}}">
+class Component extends DCLogic {
+  state = { periodo: "Este mes", filtro: "Todas", vendedor: "Todos", listaAbierta: false };
+
+  datos() {
+    return [
+      { fecha: "29/8/2026", hace: "hace 1 día", vehiculo: "Renault Sandero Intens", patente: "AG 433 ZH", sucursal: "Norte", vendedor: "Gustavo Ledesma", usd: 17200, com: 300, cobro: "Pendiente", mes: 8 },
+      { fecha: "29/8/2026", hace: "hace 1 día", vehiculo: "Renault Duster Iconic", patente: "AF 482 KQ", sucursal: "Centro", vendedor: "Gustavo Ledesma", usd: 24500, com: 500, cobro: "Pendiente", mes: 8 },
+      { fecha: "22/8/2026", hace: "hace 8 días", vehiculo: "Volkswagen Golf GTI", patente: "AC 917 TL", sucursal: "Centro", vendedor: "Alejandro Rivas", usd: 31000, com: 500, cobro: "Pendiente", mes: 8 },
+      { fecha: "20/8/2026", hace: "hace 10 días", vehiculo: "Toyota Corolla XEI", patente: "AD 118 KS", sucursal: "Norte", vendedor: "Alejandro Rivas", usd: 24500, com: 800, cobro: "Pendiente", mes: 8 },
+      { fecha: "19/8/2026", hace: "hace 11 días", vehiculo: "Ford Ranger XLT", patente: "AE 660 TP", sucursal: "Centro", vendedor: "Alejandro Rivas", usd: 32500, com: 980, cobro: "Pendiente", mes: 8 },
+      { fecha: "12/8/2026", hace: "hace 18 días", vehiculo: "Fiat Toro Volcano", patente: "AB 902 LM", sucursal: "Norte", vendedor: "Gustavo Ledesma", usd: 29000, com: 870, cobro: "Pendiente", mes: 8 },
+      { fecha: "5/8/2026", hace: "hace 25 días", vehiculo: "Chevrolet Tracker Premier", patente: "AF 145 QR", sucursal: "Centro", vendedor: "Martín López", usd: 27200, com: 820, cobro: "Cobrado", mes: 8 },
+      { fecha: "30/7/2026", hace: "hace 1 mes", vehiculo: "Volkswagen Gol Trend", patente: "AA 331 BC", sucursal: "Norte", vendedor: "Gustavo Ledesma", usd: 10900, com: 330, cobro: "Cobrado", mes: 7 },
+      { fecha: "22/7/2026", hace: "hace 1 mes", vehiculo: "Toyota Hilux SRX", patente: "AD 771 MZ", sucursal: "Centro", vendedor: "Alejandro Rivas", usd: 51000, com: 1530, cobro: "Cobrado", mes: 7 },
+      { fecha: "14/7/2026", hace: "hace 1 mes", vehiculo: "Peugeot 208 Feline", patente: "AC 508 HJ", sucursal: "Norte", vendedor: "Martín López", usd: 14700, com: 440, cobro: "Cobrado", mes: 7 }
+    ];
+  }
+
+  renderVals() {
+    const dolar = 1535;
+    const usd = (n) => "USD " + n.toLocaleString("es-AR");
+    const ars = (n) => "≈ $" + (n * dolar).toLocaleString("es-AR");
+    const avatares = {
+      "Alejandro Rivas": "linear-gradient(140deg, #f5b45c, #e08c2c)",
+      "Gustavo Ledesma": "linear-gradient(140deg, #93c5fd, #3b82f6)",
+      "Martín López": "linear-gradient(140deg, #86efac, #22c55e)"
+    };
+    const ini = (n) => n.split(" ").map((p) => p[0]).slice(0, 2).join("");
+
+    const todas = this.datos();
+    const porPeriodo = this.state.periodo === "Este mes" ? todas.filter((v) => v.mes === 8)
+      : this.state.periodo === "Trimestre" ? todas.filter((v) => v.mes >= 6) : todas;
+
+    const pasa = (v, f) => f === "Todas" || v.cobro === f;
+    let lista = porPeriodo.filter((v) => pasa(v, this.state.filtro));
+    if (this.state.vendedor !== "Todos") lista = lista.filter((v) => v.vendedor === this.state.vendedor);
+
+    const sum = (arr, k) => arr.reduce((s, v) => s + v[k], 0);
+    const facturado = sum(porPeriodo, "usd");
+    const comisiones = sum(porPeriodo, "com");
+    const pend = porPeriodo.filter((v) => v.cobro === "Pendiente");
+    const ticket = porPeriodo.length ? Math.round(facturado / porPeriodo.length) : 0;
+
+    const cobros = {
+      Pendiente: ["#fcd34d", "rgba(251,191,36,0.12)", "rgba(251,191,36,0.28)"],
+      Cobrado: ["#86efac", "rgba(74,222,128,0.12)", "rgba(74,222,128,0.26)"]
+    };
+
+    const nombres = [];
+    porPeriodo.forEach((v) => { if (nombres.indexOf(v.vendedor) < 0) nombres.push(v.vendedor); });
+    const porVendedor = nombres.map((n) => {
+      const suyas = porPeriodo.filter((v) => v.vendedor === n);
+      return { nombre: n, u: suyas.length, fact: sum(suyas, "usd"), com: sum(suyas, "com") };
+    }).sort((a, b) => b.fact - a.fact);
+    const maxFact = porVendedor.length ? porVendedor[0].fact : 1;
+
+    const pendPorVendedor = nombres.map((n) => {
+      const suyas = pend.filter((v) => v.vendedor === n);
+      return { nombre: n, u: suyas.length, com: sum(suyas, "com") };
+    }).filter((p) => p.u > 0).sort((a, b) => b.com - a.com);
+
+    return {
+      periodoLabel: this.state.periodo.toLowerCase(),
+      periodos: ["Este mes", "Trimestre", "Todo"].map((p) => {
+        const on = this.state.periodo === p;
+        return {
+          label: p,
+          color: on ? "#f7f9fa" : "#8d949e",
+          bg: on ? "rgba(255,255,255,0.07)" : "transparent",
+          shadow: on ? "inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.3)" : "none",
+          onClick: () => this.setState({ periodo: p })
+        };
+      }),
+      resumen: [
+        { label: "Facturado", value: usd(facturado).replace("USD ", ""), unit: "USD", trend: ars(facturado).replace("≈ ", ""), trendColor: "#6a7179", pct: "100%", dot: "#4ade80", dot2: "#22c55e", color: "#f2f5f7" },
+        { label: "Unidades vendidas", value: String(porPeriodo.length), unit: "vehículos", trend: "en 2 sucursales", trendColor: "#6a7179", pct: "72%", dot: "#60a5fa", dot2: "#3b82f6", color: "#f2f5f7" },
+        { label: "Comisiones", value: comisiones.toLocaleString("es-AR"), unit: "USD", trend: pend.length ? sum(pend, "com").toLocaleString("es-AR") + " sin pagar" : "todo pagado", trendColor: pend.length ? "#fcd34d" : "#86efac", pct: "48%", dot: "#fbbf24", dot2: "#d97706", color: "#f2f5f7" },
+        { label: "Ticket promedio", value: ticket.toLocaleString("es-AR"), unit: "USD", trend: "por operación", trendColor: "#6a7179", pct: "63%", dot: "#f0a13c", dot2: "#c9762a", color: "#f2f5f7" }
+      ],
+      filtros: ["Todas", "Pendiente", "Cobrado"].map((f) => {
+        const on = this.state.filtro === f;
+        const dots = { Todas: "", Pendiente: "#fbbf24", Cobrado: "#4ade80" };
+        return {
+          label: f, count: porPeriodo.filter((v) => pasa(v, f)).length, dot: dots[f],
+          color: on ? "#f7f9fa" : "#8d949e",
+          bg: on ? "rgba(255,255,255,0.07)" : "transparent",
+          shadow: on ? "inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.3)" : "none",
+          countColor: on ? "#a8b0b8" : "#5d656d",
+          onClick: () => this.setState({ filtro: f })
+        };
+      }),
+      listaAbierta: this.state.listaAbierta,
+      toggleVendedores: () => this.setState({ listaAbierta: !this.state.listaAbierta }),
+      vendedorLabel: this.state.vendedor === "Todos" ? "Todos los vendedores" : this.state.vendedor,
+      vendedorColor: this.state.vendedor === "Todos" ? "#b0b7be" : "#f7d3a1",
+      vendedorBg: this.state.vendedor === "Todos" ? "rgba(255,255,255,0.04)" : "rgba(240,161,60,0.10)",
+      vendedorBorder: this.state.vendedor === "Todos" ? "rgba(255,255,255,0.07)" : "rgba(240,161,60,0.3)",
+      vendedores: ["Todos"].concat(porVendedor.map((v) => v.nombre)).map((n) => {
+        const on = this.state.vendedor === n;
+        const d = porVendedor.find((v) => v.nombre === n);
+        return {
+          label: n === "Todos" ? "Todos los vendedores" : n,
+          ini: n === "Todos" ? "★" : ini(n),
+          avatar: n === "Todos" ? "rgba(255,255,255,0.12)" : avatares[n],
+          count: n === "Todos" ? porPeriodo.length : d.u,
+          meta: n === "Todos" ? "sin filtrar" : usd(d.fact) + " facturado",
+          color: on ? "#f7d3a1" : "#dfe4e9",
+          bg: on ? "rgba(240,161,60,0.10)" : "transparent",
+          onClick: () => this.setState({ vendedor: n, listaAbierta: false })
+        };
+      }),
+      ventas: lista.map((v) => ({
+        fecha: v.fecha, hace: v.hace, vehiculo: v.vehiculo, patente: v.patente, sucursal: v.sucursal,
+        vendedor: v.vendedor, ini: ini(v.vendedor), avatar: avatares[v.vendedor],
+        precio: usd(v.usd), precioArs: ars(v.usd),
+        comision: usd(v.com), comisionPct: (v.com / v.usd * 100).toFixed(1).replace(".", ",") + "% del total",
+        cobro: v.cobro, cobroColor: cobros[v.cobro][0], cobroBg: cobros[v.cobro][1], cobroBorder: cobros[v.cobro][2]
+      })),
+      totalUnidades: lista.length + (lista.length === 1 ? " operación" : " operaciones"),
+      totalPrecio: usd(sum(lista, "usd")),
+      totalComision: usd(sum(lista, "com")),
+      ranking: porVendedor.map((v) => ({
+        nombre: v.nombre, ini: ini(v.nombre), avatar: avatares[v.nombre],
+        unidades: v.u + (v.u === 1 ? " unidad" : " unidades"),
+        facturado: usd(v.fact), comision: usd(v.com),
+        pct: Math.round(v.fact / maxFact * 100) + "%"
+      })),
+      pendientes: pendPorVendedor.map((p) => ({
+        vendedor: p.nombre, monto: usd(p.com),
+        detalle: p.u + (p.u === 1 ? " venta sin cobrar" : " ventas sin cobrar")
+      })),
+      pendientesCount: pend.length + " ventas",
+      totalPendiente: usd(sum(pend, "com"))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

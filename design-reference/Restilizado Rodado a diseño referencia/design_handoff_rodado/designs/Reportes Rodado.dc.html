@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0d10; }
+  body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #f0a13c; text-decoration: none; }
+  a:hover { color: #f7c584; }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: radial-gradient(1200px 600px at 20% -10%, #1c2129 0%, #0e1116 55%, #0b0d10 100%); padding: 18px; box-sizing: border-box; color: #e9ecef;">
+  <div style="display: grid; grid-template-columns: 212px minmax(1060px, 1fr); gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow-x: auto; overflow-y: hidden; background: #12151a; box-shadow: 0 30px 80px rgba(0,0,0,0.55);">
+
+    <aside style="background: #0f1216; border-right: 1px solid rgba(255,255,255,0.06); padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; min-height: 1080px;">
+      <div style="display: flex; align-items: center; gap: 9px; padding: 4px 8px 2px;">
+        <div style="width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #17130c;">R</div>
+        <div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; color: #f2f5f7;">RODADO</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 10px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);">
+        <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(240,161,60,0.18); color: #f3bd77; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">A</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4;">Agencia Demo</div>
+          <div style="font-size: 10px; color: #7d848d;">Todas las sucursales (2)</div>
+        </div>
+        <div style="margin-left: auto; color: #767d86; font-size: 9px;">▾</div>
+      </div>
+
+      <div style="border: 1px solid rgba(255,255,255,0.06); border-radius: 11px; padding: 10px 11px; background: rgba(255,255,255,0.025); display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="font-size: 9px; letter-spacing: 0.14em; color: #6a7179; font-weight: 600;">COTIZACIÓN DÓLAR</div>
+          <div style="margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Oficial</span><span style="color: #eff2f4; font-weight: 600;">$1.535</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Blue</span><span style="color: #eff2f4; font-weight: 600;">$1.555</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">OPERACIÓN</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">▣</span>Panel general
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◫</span>Stock
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">6</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◍</span>Leads
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">17</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◈</span>Ventas
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.22); color: #f2f5f7; font-size: 12.5px; font-weight: 600;">
+          <span style="width: 15px; text-align: center; color: #f3bd77;">◔</span>Reportes
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">AGENCIA</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⬡</span>Sucursales
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◎</span>Equipo
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⌗</span>Integraciones
+        </div>
+      </div>
+
+      <div style="margin-top: auto; display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.025);">
+        <div style="width: 27px; height: 27px; border-radius: 50%; flex: none; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; color: #17130c;">AR</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4; line-height: 1.35;">Alejandro Rivas</div>
+          <div style="font-size: 10px; color: #7d848d; line-height: 1.35;">Dueño</div>
+        </div>
+        <div style="margin-left: auto; flex: none; color: #767d86; font-size: 12px;">⏻</div>
+      </div>
+    </aside>
+
+    <main style="background: #11141a; display: flex; flex-direction: column; min-width: 0;">
+      <header style="display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 7px 12px; width: 260px; color: #767d86; font-size: 12px;">
+          <span>⌕</span><span>Buscar vehículo, vendedor o canal…</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">✉</div>
+          <div style="position: relative; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">
+            ⌁<span style="position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: #f87171;"></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 5px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #17130c;">A</div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600; color: #eff2f4; line-height: 1.35;">Alejandro</span>
+              <span style="font-size: 9.5px; color: #7d848d; line-height: 1.35;">Dueño</span>
+            </div>
+            <span style="color: #767d86; font-size: 9px;">▾</span>
+          </div>
+        </div>
+      </header>
+
+      <div style="padding: 20px 22px 28px; display: flex; flex-direction: column; gap: 14px; min-width: 0;">
+        <div style="display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em;">Reportes</div>
+            <div style="font-size: 12px; color: #7d848d;">{{ subtitulo }}</div>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; gap: 2px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; padding: 3px;">
+              <sc-for list="{{ periodos }}" as="p" hint-placeholder-count="3">
+                <div onClick="{{ p.onClick }}" style="cursor: pointer; font-size: 12px; font-weight: 600; padding: 7px 13px; border-radius: 9px; color: {{ p.color }}; background: {{ p.bg }}; box-shadow: {{ p.shadow }}; transition: all .22s ease;">{{ p.label }}</div>
+              </sc-for>
+            </div>
+            <div style="font-size: 11.5px; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 8px 12px;">Todas las sucursales ▾</div>
+            <div style="cursor: pointer; font-size: 11.5px; font-weight: 600; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 8px 13px;" style-hover="color: #eff2f4;">Exportar</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="position: relative; overflow: hidden; background: linear-gradient(165deg, #1a1f26, #15191f); border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; padding: 15px 16px 14px; display: flex; flex-direction: column; gap: 11px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);">
+              <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, {{ k.dot }}, transparent 65%); opacity: .5;"></div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ k.dot }}; box-shadow: 0 0 7px {{ k.dot }}; flex: none;"></span>
+                <div style="font-size: 12px; color: #949ba3;">{{ k.label }}</div>
+              </div>
+              <div style="display: flex; align-items: flex-end; gap: 9px;">
+                <div style="font-size: 24px; font-weight: 700; letter-spacing: -0.035em; line-height: .95; font-variant-numeric: tabular-nums; color: #f2f5f7;">{{ k.value }}</div>
+                <div style="font-size: 11.5px; color: #7d848d; padding-bottom: 3px;">{{ k.unit }}</div>
+                <div style="margin-left: auto; font-size: 11px; font-weight: 600; color: {{ k.trendColor }}; padding-bottom: 3px;">{{ k.trend }}</div>
+              </div>
+              <div style="display: flex; align-items: flex-end; gap: 3px; height: 26px;">
+                <sc-for list="{{ k.spark }}" as="s" hint-placeholder-count="8">
+                  <div style="flex: 1; height: {{ s.h }}; border-radius: 2px 2px 0 0; background: {{ s.color }};"></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 12px; align-items: stretch;">
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 14px; font-weight: 700;">Ventas en el tiempo</div>
+                <div style="font-size: 11.5px; color: #7d848d; font-variant-numeric: tabular-nums;">{{ ventasSub }}</div>
+              </div>
+              <div style="margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 10.5px; color: #8d949e;">
+                <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 9px; height: 9px; border-radius: 2px; background: linear-gradient(180deg, #f5b45c, #c9762a);"></span>unidades</span>
+                <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 2px; background: #86efac;"></span>monto USD</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; min-width: 0;">
+              <div style="display: flex; flex-direction: column; justify-content: space-between; font-size: 10px; color: #5d656d; font-variant-numeric: tabular-nums; height: 196px; text-align: right; flex: none; padding-bottom: 20px;">
+                <span>{{ escalaMax }}</span><span>{{ escalaMed }}</span><span>0</span>
+              </div>
+              <div style="flex: 1; min-width: 0; position: relative; height: 196px;">
+                <div style="position: absolute; left: 0; right: 0; top: 0; height: 176px;">
+                  <div style="position: absolute; left: 0; right: 0; top: 0; height: 1px; background: rgba(255,255,255,0.055);"></div>
+                  <div style="position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(255,255,255,0.055);"></div>
+                  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: rgba(255,255,255,0.09);"></div>
+                </div>
+                <div style="position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 10px;">
+                  <sc-for list="{{ serie }}" as="s" hint-placeholder-count="6">
+                    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 7px;">
+                      <div style="width: 100%; display: flex; justify-content: center; align-items: flex-end; height: 176px;">
+                        <div style="width: 60%; max-width: 46px; height: {{ s.h }}; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #f5b45c, #c9762a); position: relative;">
+                          <div style="position: absolute; top: -17px; left: 0; right: 0; text-align: center; font-size: 10.5px; font-weight: 700; color: #f7d3a1; font-variant-numeric: tabular-nums;">{{ s.u }}</div>
+                        </div>
+                      </div>
+                      <div style="font-size: 10.5px; color: #7d848d; font-variant-numeric: tabular-nums;">{{ s.dia }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <svg viewBox="0 0 100 176" preserveAspectRatio="none" style="position: absolute; left: 0; top: 0; width: 100%; height: 176px; overflow: visible; pointer-events: none;">
+                  <polyline points="{{ linea }}" fill="none" stroke="#86efac" stroke-width="0.7" vector-effect="non-scaling-stroke" stroke-linejoin="round"></polyline>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; padding: 16px 18px 16px; display: flex; flex-direction: column; gap: 13px;">
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 14px; font-weight: 700;">Embudo de conversión</div>
+              <div style="font-size: 11.5px; color: #7d848d;">Dónde se caen los compradores</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 9px;">
+              <sc-for list="{{ embudo }}" as="e" hint-placeholder-count="5">
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                  <div style="display: flex; align-items: center; gap: 9px;">
+                    <div style="font-size: 11.5px; color: #c3c9cf;">{{ e.label }}</div>
+                    <div style="margin-left: auto; font-size: 11.5px; font-weight: 700; color: #f2f5f7; font-variant-numeric: tabular-nums;">{{ e.n }}</div>
+                    <div style="width: 52px; text-align: right; font-size: 10.5px; color: {{ e.caidaColor }}; font-variant-numeric: tabular-nums;">{{ e.caida }}</div>
+                  </div>
+                  <div style="height: 9px; border-radius: 5px; background: rgba(255,255,255,0.05); overflow: hidden;">
+                    <div style="height: 100%; width: {{ e.pct }}; border-radius: 5px; background: linear-gradient(90deg, {{ e.c1 }}, {{ e.c2 }});"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 12px 13px; border-radius: 11px; background: rgba(240,161,60,0.08); border: 1px solid rgba(240,161,60,0.22);">
+              <div style="font-size: 11.5px; color: #e0d6c7;">{{ embudoInsight }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start;">
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; padding: 16px 18px 16px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 14px; font-weight: 700;">Leads por canal</div>
+                <div style="font-size: 11.5px; color: #7d848d;">{{ canalesSub }}</div>
+              </div>
+              <div style="margin-left: auto; font-size: 10.5px; color: #6a7179; text-align: right;">consultas · cerradas</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 13px;">
+              <sc-for list="{{ canales }}" as="c" hint-placeholder-count="5">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <div style="display: flex; align-items: center; gap: 9px;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ c.dot }}; flex: none;"></span>
+                    <div style="font-size: 12px; font-weight: 600; color: #dfe4e9;">{{ c.label }}</div>
+                    <div style="margin-left: auto; font-size: 11.5px; color: #949ba3; font-variant-numeric: tabular-nums;">{{ c.detalle }}</div>
+                    <div style="width: 62px; text-align: right; font-size: 11.5px; font-weight: 700; color: {{ c.convColor }}; font-variant-numeric: tabular-nums;">{{ c.conv }}</div>
+                  </div>
+                  <div style="position: relative; height: 9px; border-radius: 5px; background: rgba(255,255,255,0.05); overflow: hidden;">
+                    <div style="position: absolute; inset: 0 auto 0 0; width: {{ c.pctTotal }}; border-radius: 5px; background: rgba(240,161,60,0.34);"></div>
+                    <div style="position: absolute; inset: 0 auto 0 0; width: {{ c.pctCerrados }}; border-radius: 5px; background: linear-gradient(90deg, #86efac, #22c55e);"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; padding: 16px 18px 16px; display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="font-size: 14px; font-weight: 700;">Rotación de stock</div>
+                <div style="font-size: 11.5px; color: #7d848d;">Días entre que el auto entra y se vende</div>
+              </div>
+              <div style="margin-left: auto; text-align: right;">
+                <div style="font-size: 18px; font-weight: 700; color: #f2f5f7; font-variant-numeric: tabular-nums; line-height: 1.1;">{{ rotPromedio }}</div>
+                <div style="font-size: 10.5px; color: #6a7179;">promedio</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 11px;">
+              <sc-for list="{{ rotacion }}" as="r" hint-placeholder-count="7">
+                <div style="display: flex; align-items: center; gap: 11px;">
+                  <div style="width: 128px; flex: none; font-size: 11.5px; color: #c3c9cf; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ r.label }}</div>
+                  <div style="flex: 1; min-width: 0; height: 9px; border-radius: 5px; background: rgba(255,255,255,0.05); overflow: hidden;">
+                    <div style="height: 100%; width: {{ r.pct }}; border-radius: 5px; background: linear-gradient(90deg, {{ r.c1 }}, {{ r.c2 }});"></div>
+                  </div>
+                  <div style="width: 52px; flex: none; text-align: right; font-size: 11.5px; font-weight: 600; color: {{ r.color }}; font-variant-numeric: tabular-nums;">{{ r.dias }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.055); font-size: 11px; color: #6a7179;">
+              <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: #4ade80;"></span>rápida</span>
+              <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: #f0a13c;"></span>media</span>
+              <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 8px; height: 8px; border-radius: 2px; background: #f87171;"></span>lenta</span>
+              <span style="margin-left: auto;">{{ rotNota }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; overflow: hidden;">
+          <div style="display: flex; align-items: flex-start; gap: 10px; padding: 16px 18px 13px;">
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 14px; font-weight: 700;">Performance por vendedor</div>
+              <div style="font-size: 11.5px; color: #7d848d;">Cuántos leads tomó cada uno y cuántos terminó cerrando</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1.35fr 0.7fr 0.7fr 1.5fr 1fr 1fr; gap: 14px; padding: 11px 18px; font-size: 9.5px; letter-spacing: 0.1em; color: #6a7179; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.015);">
+            <div>VENDEDOR</div><div style="text-align: right;">LEADS</div><div style="text-align: right; padding-right: 18px;">VENTAS</div><div>CIERRE</div><div style="text-align: right;">FACTURADO</div><div style="text-align: right;">COMISIÓN</div>
+          </div>
+          <sc-for list="{{ vendedores }}" as="v" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 1.35fr 0.7fr 0.7fr 1.5fr 1fr 1fr; gap: 14px; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.04);" style-hover="background: rgba(240,161,60,0.055);">
+              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                <span style="width: 26px; height: 26px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #17130c; background: {{ v.avatar }};">{{ v.ini }}</span>
+                <span style="font-size: 13px; font-weight: 600; color: #f2f5f7; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ v.nombre }}</span>
+              </div>
+              <div style="text-align: right; font-size: 12.5px; color: #c3c9cf; font-variant-numeric: tabular-nums;">{{ v.leads }}</div>
+              <div style="text-align: right; padding-right: 18px; font-size: 12.5px; color: #c3c9cf; font-variant-numeric: tabular-nums;">{{ v.ventas }}</div>
+              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                <div style="flex: 1; min-width: 0; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.05); overflow: hidden;">
+                  <div style="height: 100%; width: {{ v.pct }}; border-radius: 4px; background: linear-gradient(90deg, {{ v.c1 }}, {{ v.c2 }});"></div>
+                </div>
+                <div style="flex: none; font-size: 11.5px; font-weight: 700; color: {{ v.convColor }}; font-variant-numeric: tabular-nums;">{{ v.conv }}</div>
+              </div>
+              <div style="text-align: right; font-size: 12.5px; font-weight: 600; color: #f2f5f7; font-variant-numeric: tabular-nums;">{{ v.facturado }}</div>
+              <div style="text-align: right; font-size: 12.5px; font-weight: 600; color: #f3bd77; font-variant-numeric: tabular-nums;">{{ v.comision }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px;">
+          <sc-for list="{{ lecturas }}" as="l" hint-placeholder-count="3">
+            <div style="display: flex; gap: 12px; padding: 15px 16px; border-radius: 13px; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);">
+              <span style="width: 28px; height: 28px; border-radius: 9px; flex: none; display: flex; align-items: center; justify-content: center; font-size: 12px; color: {{ l.color }}; background: {{ l.bg }}; border: 1px solid {{ l.border }};">{{ l.icon }}</span>
+              <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                <div style="font-size: 12.5px; font-weight: 700; color: #eff2f4;">{{ l.titulo }}</div>
+                <div style="font-size: 11.5px; line-height: 1.5; color: #949ba3; text-wrap: pretty;">{{ l.detalle }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420,&quot;height&quot;:1120}}">
+class Component extends DCLogic {
+  state = { periodo: "30 días" };
+
+  renderVals() {
+    const usd = (n) => "USD " + n.toLocaleString("es-AR");
+    const ini = (n) => n.split(" ").map((p) => p[0]).slice(0, 2).join("");
+    const avatares = {
+      "Alejandro Rivas": "linear-gradient(140deg, #f5b45c, #e08c2c)",
+      "Gustavo Ledesma": "linear-gradient(140deg, #93c5fd, #3b82f6)",
+      "Martín López": "linear-gradient(140deg, #86efac, #22c55e)"
+    };
+
+    const d30 = [
+      { dia: "05/08", u: 1, monto: 27200 },
+      { dia: "12/08", u: 1, monto: 29000 },
+      { dia: "19/08", u: 1, monto: 32500 },
+      { dia: "20/08", u: 1, monto: 24500 },
+      { dia: "22/08", u: 1, monto: 31000 },
+      { dia: "29/08", u: 2, monto: 41700 }
+    ];
+    const d90 = [
+      { dia: "14/07", u: 1, monto: 14700 },
+      { dia: "22/07", u: 1, monto: 51000 },
+      { dia: "30/07", u: 1, monto: 10900 },
+      { dia: "05/08", u: 1, monto: 27200 },
+      { dia: "12/08", u: 1, monto: 29000 },
+      { dia: "19/08", u: 1, monto: 32500 },
+      { dia: "20/08", u: 1, monto: 24500 },
+      { dia: "22/08", u: 1, monto: 31000 },
+      { dia: "29/08", u: 2, monto: 41700 }
+    ];
+    const largo = this.state.periodo !== "30 días";
+    const serieRaw = largo ? d90 : d30;
+
+    const totalU = serieRaw.reduce((s, x) => s + x.u, 0);
+    const totalMonto = serieRaw.reduce((s, x) => s + x.monto, 0);
+    const maxU = Math.max.apply(null, serieRaw.map((x) => x.u));
+    const maxMonto = Math.max.apply(null, serieRaw.map((x) => x.monto));
+
+    const linea = serieRaw.map((x, i) => {
+      const px = serieRaw.length === 1 ? 50 : (i + 0.5) / serieRaw.length * 100;
+      const py = 176 - (x.monto / (maxMonto * 1.12)) * 176;
+      return px.toFixed(2) + "," + py.toFixed(1);
+    }).join(" ");
+
+    const leads = largo ? 24 : 18;
+    const cerrados = largo ? 10 : 6;
+    const conv = Math.round(cerrados / leads * 100);
+    const rotProm = largo ? 19 : 17;
+
+    const canalesRaw = largo
+      ? [["WhatsApp", 9, 3, "#4ade80"], ["Catálogo propio", 6, 3, "#60a5fa"], ["Instagram", 5, 3, "#c084fc"], ["Mercado Libre", 4, 1, "#fbbf24"], ["Asistente IA", 0, 0, "#8d949e"]]
+      : [["WhatsApp", 7, 2, "#4ade80"], ["Catálogo propio", 5, 1, "#60a5fa"], ["Instagram", 4, 3, "#c084fc"], ["Mercado Libre", 2, 0, "#fbbf24"], ["Asistente IA", 0, 0, "#8d949e"]];
+    const maxCanal = Math.max.apply(null, canalesRaw.map((c) => c[1]));
+
+    const rotRaw = largo
+      ? [["Chevrolet Tracker Premier", 36], ["Fiat Toro Volcano", 30], ["Ford Ranger XLT", 22], ["Renault Duster Iconic", 16], ["Renault Sandero Intens", 13], ["Toyota Corolla XEI", 12], ["Volkswagen Golf GTI", 9], ["Toyota Hilux SRX", 8], ["Peugeot 208 Feline", 7], ["Volkswagen Gol Trend", 6]]
+      : [["Chevrolet Tracker Premier", 36], ["Fiat Toro Volcano", 30], ["Ford Ranger XLT", 22], ["Renault Duster Iconic", 16], ["Renault Sandero Intens", 13], ["Toyota Corolla XEI", 12], ["Volkswagen Golf GTI", 9]];
+    const maxRot = Math.max.apply(null, rotRaw.map((r) => r[1]));
+
+    const vendRaw = largo
+      ? [["Alejandro Rivas", 8, 4, 139000, 3810], ["Gustavo Ledesma", 9, 4, 81600, 2000], ["Martín López", 7, 2, 41900, 1260]]
+      : [["Alejandro Rivas", 6, 3, 88000, 2280], ["Gustavo Ledesma", 7, 3, 70700, 1670], ["Martín López", 5, 1, 27200, 820]];
+
+    const embudoRaw = largo
+      ? [["Consultas recibidas", 24], ["Contactados", 17], ["Test drive", 12], ["Negociación", 10], ["Cerrados", 10]]
+      : [["Consultas recibidas", 18], ["Contactados", 12], ["Test drive", 8], ["Negociación", 7], ["Cerrados", 6]];
+
+    const spark = (vals, color) => {
+      const m = Math.max.apply(null, vals);
+      return vals.map((v) => ({ h: Math.max(12, Math.round(v / m * 100)) + "%", color: color }));
+    };
+
+    return {
+      subtitulo: largo ? "Últimos 90 días · comparado con el trimestre anterior" : "Últimos 30 días · comparado con el mes anterior",
+      periodos: ["30 días", "90 días", "Rango"].map((p) => {
+        const on = this.state.periodo === p;
+        return {
+          label: p,
+          color: on ? "#f7f9fa" : "#8d949e",
+          bg: on ? "rgba(255,255,255,0.07)" : "transparent",
+          shadow: on ? "inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.3)" : "none",
+          onClick: () => this.setState({ periodo: p })
+        };
+      }),
+      kpis: [
+        { label: "Facturado", value: totalMonto.toLocaleString("es-AR"), unit: "USD", trend: "≈ $" + (totalMonto * 1535).toLocaleString("es-AR"), trendColor: "#6a7179", dot: "#4ade80", spark: spark(serieRaw.map((x) => x.monto), "rgba(74,222,128,0.5)") },
+        { label: "Unidades vendidas", value: String(totalU), unit: "vehículos", trend: "en 2 sucursales", trendColor: "#6a7179", dot: "#60a5fa", spark: spark(serieRaw.map((x) => x.u), "rgba(96,165,250,0.5)") },
+        { label: "Conversión lead→venta", value: conv + "%", unit: cerrados + " de " + leads, trend: largo ? "+5 pts" : "+3 pts", trendColor: "#86efac", dot: "#f0a13c", spark: spark(canalesRaw.map((c) => c[2] + 1), "rgba(240,161,60,0.5)") },
+        { label: "Rotación promedio", value: String(rotProm), unit: "días", trend: "−4 vs. período previo", trendColor: "#86efac", dot: "#c084fc", spark: spark(rotRaw.map((r) => r[1]).slice(0, 7).reverse(), "rgba(192,132,252,0.45)") }
+      ],
+      ventasSub: totalU + " vehículos · " + usd(totalMonto) + " en total",
+      escalaMax: String(maxU),
+      escalaMed: maxU % 2 === 0 ? String(maxU / 2) : (maxU / 2).toFixed(1).replace(".", ","),
+      serie: serieRaw.map((x) => ({ dia: x.dia, u: x.u, h: Math.round(x.u / (maxU * 1.12) * 176) + "px" })),
+      linea: linea,
+      embudo: embudoRaw.map((e, i) => {
+        const prev = i === 0 ? null : embudoRaw[i - 1][1];
+        const caida = prev ? Math.round((e[1] - prev) / prev * 100) : null;
+        const paleta = [["#93c5fd", "#3b82f6"], ["#f5b45c", "#e08c2c"], ["#d8b4fe", "#a855f7"], ["#fcd34d", "#d97706"], ["#86efac", "#22c55e"]];
+        return {
+          label: e[0], n: e[1], pct: Math.round(e[1] / embudoRaw[0][1] * 100) + "%",
+          caida: caida === null ? "base" : caida === 0 ? "sin caída" : caida + "%",
+          caidaColor: caida === null ? "#5d656d" : caida <= -30 ? "#fca5a5" : caida === 0 ? "#86efac" : "#8d949e",
+          c1: paleta[i][0], c2: paleta[i][1]
+        };
+      }),
+      embudoInsight: largo
+        ? "La caída más grande sigue estando en el primer contacto: 7 consultas nunca fueron respondidas."
+        : "La caída más grande está en el primer contacto: 6 de 18 consultas nunca fueron respondidas.",
+      canalesSub: leads + " consultas · " + cerrados + " cerradas · " + conv + "% de conversión",
+      canales: canalesRaw.map((c) => {
+        const cv = c[1] ? Math.round(c[2] / c[1] * 100) : 0;
+        return {
+          label: c[0], dot: c[3],
+          detalle: c[1] === 0 ? "sin consultas" : c[1] + " · " + c[2],
+          conv: c[1] === 0 ? "—" : cv + "%",
+          convColor: c[1] === 0 ? "#5d656d" : cv >= 50 ? "#86efac" : cv >= 20 ? "#f3bd77" : "#fca5a5",
+          pctTotal: Math.round(c[1] / maxCanal * 100) + "%",
+          pctCerrados: Math.round(c[2] / maxCanal * 100) + "%"
+        };
+      }),
+      rotPromedio: rotProm + " días",
+      rotNota: "solo vehículos ya vendidos",
+      rotacion: rotRaw.map((r) => {
+        const lento = r[1] >= 28, medio = r[1] >= 14;
+        return {
+          label: r[0], dias: r[1] + " d",
+          pct: Math.round(r[1] / maxRot * 100) + "%",
+          c1: lento ? "#fca5a5" : medio ? "#f5b45c" : "#86efac",
+          c2: lento ? "#ef4444" : medio ? "#c9762a" : "#22c55e",
+          color: lento ? "#fca5a5" : medio ? "#f3bd77" : "#86efac"
+        };
+      }),
+      vendedores: vendRaw.map((v) => {
+        const cv = Math.round(v[2] / v[1] * 100);
+        return {
+          nombre: v[0], ini: ini(v[0]), avatar: avatares[v[0]],
+          leads: v[1], ventas: v[2], conv: cv + "%",
+          pct: cv + "%",
+          c1: cv >= 45 ? "#86efac" : cv >= 25 ? "#f5b45c" : "#fca5a5",
+          c2: cv >= 45 ? "#22c55e" : cv >= 25 ? "#c9762a" : "#ef4444",
+          convColor: cv >= 45 ? "#86efac" : cv >= 25 ? "#f3bd77" : "#fca5a5",
+          facturado: usd(v[3]), comision: usd(v[4])
+        };
+      }),
+      lecturas: [
+        { icon: "◍", titulo: "Instagram es tu mejor canal", detalle: "Trae menos consultas que WhatsApp pero cierra el " + (largo ? "60" : "75") + "%. Vale la pena publicar más seguido ahí.", color: "#d8b4fe", bg: "rgba(192,132,252,0.12)", border: "rgba(192,132,252,0.26)" },
+        { icon: "◷", titulo: "Mercado Libre no está cerrando", detalle: largo ? "4 consultas y 1 venta. Revisá el precio de las publicaciones o el tiempo de respuesta." : "2 consultas y ninguna venta en el mes. Revisá precio y tiempo de respuesta.", color: "#fcd34d", bg: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.26)" },
+        { icon: "◫", titulo: "La Tracker tiene rotación lenta", detalle: "36 días en stock, más del doble del promedio. Considerá ajustar el precio o rotarla de sucursal.", color: "#fca5a5", bg: "rgba(248,113,113,0.12)", border: "rgba(248,113,113,0.26)" }
+      ]
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,61 +1,64 @@
 :root {
-  --bg: #0b0a14;
-  --ink: #f4f2fa;
-  --ink-soft: #9c97ac;
-  --surface: rgba(28, 23, 48, 0.55);
-  --surface-strong: rgba(28, 23, 48, 0.7);
-  --line: rgba(255, 255, 255, 0.08);
-  --input-bg: rgba(255, 255, 255, 0.04);
-  --modal-overlay: rgba(6, 5, 12, 0.6);
-  --tooltip-bg: #1c1730;
-  --select-option-bg: #1c1730;
-  --input-autofill-bg: #1c1730;
+  /* Superficies — identidad "grafito ámbar" (única, sin modo claro) */
+  --bg: #0b0d10;
+  --shell-bg: #12151a;
+  --sidebar-bg: #0f1216;
+  --content-bg: #11141a;
+  --ink: #f2f5f7;
+  --ink-soft: #8d949e;
+  --surface: #171b21;
+  --surface-strong: #14171c;
+  --line: rgba(255, 255, 255, 0.07);
+  --input-bg: #14171c;
+  --modal-overlay: rgba(0, 0, 0, 0.6);
+  --tooltip-bg: #171b21;
+  --select-option-bg: #171b21;
+  --input-autofill-bg: #14171c;
 
-  --violet: #8b5cf6;
-  --magenta: #e8319b;
-  --cyan: #22d3ee;
-  --success: #34d399;
-  --warn: #f5b400;
-  --danger: #e8319b;
+  /* Acento ámbar */
+  --accent: #f0a13c;
+  --accent-light: #f3bd77;
+  --accent-xlight: #f7d3a1;
+  --accent-grad: linear-gradient(140deg, #f5b45c, #e08c2c);
+  --accent-ink: #17130c;
+  --accent-mark-grad: linear-gradient(140deg, #f0a13c, #c9762a);
 
-  /* Alias legacy: mantiene compatibilidad con el resto del código que
-     ya referencia estos nombres, ahora resueltos contra la paleta neon. */
-  --accent: var(--violet);
-  --blue: var(--cyan);
+  /* Semánticos */
+  --success: #4ade80;
+  --success-text: #86efac;
+  --warn: #fbbf24;
+  --warn-text: #fcd34d;
+  --danger: #f87171;
+  --danger-text: #fca5a5;
+  --info: #60a5fa;
+  --info-text: #93c5fd;
+  --secondary: #c084fc;
+  --secondary-text: #d8b4fe;
+
+  /* Alias legacy: el resto del código todavía referencia estos nombres de
+     la paleta violeta anterior — resueltos contra la paleta ámbar nueva
+     para no tener que tocar cada archivo en esta misma pasada. */
+  --violet: var(--accent);
+  --magenta: var(--danger);
+  --cyan: var(--info);
+  --blue: var(--info);
   --green: var(--success);
   --red: var(--danger);
-  --purple: var(--violet);
+  --purple: var(--secondary);
   --gray: var(--ink-soft);
-  --sidebar: var(--surface-strong);
-  --sidebar-hover: color-mix(in srgb, var(--violet) 16%, transparent);
+  --sidebar: var(--sidebar-bg);
+  --sidebar-hover: rgba(255, 255, 255, 0.045);
 
-  --accent-grad: linear-gradient(135deg, #8b5cf6, #e8319b);
-  --blob-1: rgba(139, 92, 246, 0.45);
-  --blob-2: rgba(34, 211, 238, 0.35);
+  --blob-1: rgba(240, 161, 60, 0.16);
+  --blob-2: rgba(90, 120, 160, 0.12);
 
   --radius: 16px;
   --blur: 18px;
-}
 
-html[data-theme="light"] {
-  --bg: #f3f1fa;
-  --ink: #1b1730;
-  --ink-soft: #6b6478;
-  --surface: rgba(255, 255, 255, 0.6);
-  --surface-strong: rgba(255, 255, 255, 0.85);
-  --line: rgba(30, 20, 60, 0.09);
-  --input-bg: rgba(255, 255, 255, 0.75);
-  --modal-overlay: rgba(30, 20, 60, 0.35);
-  --tooltip-bg: #2a2140;
-  --select-option-bg: #ffffff;
-  --input-autofill-bg: #ffffff;
-
-  --success: #0e9668;
-  --warn: #9a6f00;
-  --danger: #c0197a;
-
-  --blob-1: rgba(139, 92, 246, 0.2);
-  --blob-2: rgba(34, 211, 238, 0.18);
+  /* Una sola familia (Plus Jakarta Sans) para todo — .disp existe en
+     el resto del código para los títulos, así que lo resolvemos contra
+     la misma variable en vez de cazar cada uso. */
+  --font-display: var(--font-body);
 }
 
 * {
@@ -72,11 +75,10 @@ body {
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: hidden;
-  transition: background 0.3s, color 0.3s;
 }
 
 body::before,
@@ -87,7 +89,6 @@ body::after {
   filter: blur(100px);
   z-index: 0;
   pointer-events: none;
-  transition: background 0.3s;
 }
 
 body::before {
@@ -120,11 +121,12 @@ button {
 }
 
 .disp {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display), system-ui, sans-serif;
 }
 
 .mono {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 input,
@@ -168,47 +170,21 @@ textarea:-webkit-autofill:focus {
   transition: background-color 9999s ease-in-out 0s, color 9999s ease-in-out 0s;
 }
 
-/* Glass — superficie translúcida compartida por cards, sidebar y modales
-   en las tres experiencias (panel, landing, catálogo). */
+/* Glass — superficie compartida por cards, sidebar y modales en las tres
+   experiencias (panel, landing, catálogo). La identidad "grafito ámbar"
+   usa tarjetas sólidas en vez de vidrio translúcido; blur/backdrop-filter
+   quedan declarados donde ya existían (son inertes sobre un fondo
+   opaco, no producen ningún efecto visible) en vez de tocar cada archivo
+   que los usa en esta misma pasada. */
 .glass {
   background: var(--surface);
-  backdrop-filter: blur(var(--blur)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(150%);
   border: 1px solid var(--line);
   border-radius: var(--radius);
 }
 
-/* Theme toggle — usado en el panel, la landing y el catálogo público.
-   Persiste vía lib/theme.ts (localStorage), este componente solo refleja
-   el atributo data-theme ya aplicado por el script de arranque. */
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 100px;
-  padding: 4px;
-  flex: none;
-}
-
-.theme-toggle button {
-  padding: 6px 11px;
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  line-height: 1;
-}
-
-.theme-toggle button.active {
-  background: var(--accent-grad);
-  color: #fff;
-}
-
 /* Pill — punto de color + texto, componente único de estado reutilizado
-   en Stock, Leads y Ventas. Fondo derivado por color-mix así se adapta
-   solo entre modo claro y oscuro sin duplicar valores. */
+   en Stock, Leads y Ventas. Valores tomados directo de la tabla de
+   colores semánticos del handoff (texto/fondo/borde por significado). */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -229,48 +205,52 @@ textarea:-webkit-autofill:focus {
 }
 
 .pill-green {
-  background: color-mix(in srgb, var(--success) 16%, transparent);
-  color: var(--success);
+  background: rgba(74, 222, 128, 0.12);
+  border: 1px solid rgba(74, 222, 128, 0.26);
+  color: var(--success-text);
 }
 .pill-green::before {
   background: var(--success);
 }
 
 .pill-amber {
-  background: color-mix(in srgb, var(--warn) 16%, transparent);
-  color: var(--warn);
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.26);
+  color: var(--warn-text);
 }
 .pill-amber::before {
   background: var(--warn);
 }
 
 .pill-red {
-  background: color-mix(in srgb, var(--danger) 16%, transparent);
-  color: var(--danger);
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.26);
+  color: var(--danger-text);
 }
 .pill-red::before {
   background: var(--danger);
 }
 
 .pill-blue {
-  background: color-mix(in srgb, var(--cyan) 16%, transparent);
-  color: var(--cyan);
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.24);
+  color: var(--info-text);
 }
 .pill-blue::before {
-  background: var(--cyan);
+  background: var(--info);
 }
 
 .pill-purple {
-  background: color-mix(in srgb, var(--violet) 16%, transparent);
-  color: var(--violet);
+  background: rgba(192, 132, 252, 0.14);
+  color: var(--secondary-text);
 }
 .pill-purple::before {
-  background: var(--violet);
+  background: var(--secondary);
 }
 
 .pill-gray {
-  background: color-mix(in srgb, var(--ink-soft) 14%, transparent);
-  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.06);
+  color: #a8b0b8;
 }
 .pill-gray::before {
   background: var(--ink-soft);

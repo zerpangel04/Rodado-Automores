@@ -234,6 +234,7 @@ export default async function PanelHome() {
             color="var(--cyan)"
             label="Leads en negociación"
             value={`${leadsNegociacion} / ${leadsAbiertos}`}
+            featured
           />
           <KpiRing
             percent={pctConversion}
@@ -311,18 +312,21 @@ export default async function PanelHome() {
               Sin actividad todavía.
             </p>
           ) : (
-            actividadReciente.map((a) => (
-              <div key={a.id} className={styles.activityRow}>
-                <span
-                  className={styles.activityIcon}
-                  style={{ background: actividadColor[a.tipo] ?? "var(--ink-soft)" }}
-                >
-                  {actividadIcon[a.tipo] ?? "•"}
-                </span>
-                <span className={styles.activityText}>{a.descripcion}</span>
-                <span className={styles.activityTime}>{formatRelativo(a.createdAt)}</span>
-              </div>
-            ))
+            actividadReciente.map((a) => {
+              const Icon = actividadIcon[a.tipo];
+              return (
+                <div key={a.id} className={styles.activityRow}>
+                  <span
+                    className={styles.activityIcon}
+                    style={{ background: actividadColor[a.tipo] ?? "var(--ink-soft)" }}
+                  >
+                    {Icon ? <Icon size={13} /> : "•"}
+                  </span>
+                  <span className={styles.activityText}>{a.descripcion}</span>
+                  <span className={styles.activityTime}>{formatRelativo(a.createdAt)}</span>
+                </div>
+              );
+            })
           )}
         </div>
       </div>

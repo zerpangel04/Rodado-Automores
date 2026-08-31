@@ -3,18 +3,20 @@
 import { useEffect, useRef } from "react";
 import styles from "./panel.module.css";
 
-const CIRCUMFERENCE = 170;
+const CIRCUMFERENCE = 126;
 
 export function KpiRing({
   percent,
   color,
   label,
   value,
+  featured,
 }: {
   percent: number;
   color: string;
   label: string;
   value: string;
+  featured?: boolean;
 }) {
   const circleRef = useRef<SVGCircleElement>(null);
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
@@ -31,16 +33,16 @@ export function KpiRing({
   }, [targetOffset]);
 
   return (
-    <div className={styles.kpi}>
+    <div className={`${styles.kpi} ${featured ? styles.kpiFeatured : ""}`}>
       <div className={styles.ring}>
-        <svg width="64" height="64" viewBox="0 0 64 64">
-          <circle className={styles.bg} cx="32" cy="32" r="27" />
+        <svg width="46" height="46" viewBox="0 0 46 46">
+          <circle className={styles.bg} cx="23" cy="23" r="20" />
           <circle
             ref={circleRef}
             className={styles.fg}
-            cx="32"
-            cy="32"
-            r="27"
+            cx="23"
+            cy="23"
+            r="20"
             stroke={color}
             strokeDasharray={CIRCUMFERENCE}
             strokeDashoffset={targetOffset}

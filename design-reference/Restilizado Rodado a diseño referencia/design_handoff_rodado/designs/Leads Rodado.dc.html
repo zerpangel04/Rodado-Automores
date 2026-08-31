@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0d10; }
+  body { font-family: "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #f0a13c; text-decoration: none; }
+  a:hover { color: #f7c584; }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  @keyframes ld-pulse { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.35); } }
+  @keyframes ld-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: radial-gradient(1200px 600px at 20% -10%, #1c2129 0%, #0e1116 55%, #0b0d10 100%); padding: 18px; box-sizing: border-box; color: #e9ecef;">
+  <div style="display: grid; grid-template-columns: 212px minmax(1080px, 1fr); gap: 0; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; overflow-x: auto; overflow-y: hidden; background: #12151a; box-shadow: 0 30px 80px rgba(0,0,0,0.55);">
+
+    <aside style="background: #0f1216; border-right: 1px solid rgba(255,255,255,0.06); padding: 16px 12px; display: flex; flex-direction: column; gap: 18px; min-height: 940px;">
+      <div style="display: flex; align-items: center; gap: 9px; padding: 4px 8px 2px;">
+        <div style="width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #17130c;">R</div>
+        <div style="font-size: 15px; font-weight: 700; letter-spacing: 0.14em; color: #f2f5f7;">RODADO</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 10px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06);">
+        <div style="width: 26px; height: 26px; border-radius: 8px; background: rgba(240,161,60,0.18); color: #f3bd77; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">A</div>
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; color: #eff2f4;">Agencia Demo</div>
+          <div style="font-size: 10px; color: #7d848d;">Todas las sucursales (2)</div>
+        </div>
+        <div style="margin-left: auto; color: #767d86; font-size: 9px;">▾</div>
+      </div>
+
+      <div style="border: 1px solid rgba(255,255,255,0.06); border-radius: 11px; padding: 10px 11px; background: rgba(255,255,255,0.025); display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="font-size: 9px; letter-spacing: 0.14em; color: #6a7179; font-weight: 600;">COTIZACIÓN DÓLAR</div>
+          <div style="margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px rgba(74,222,128,0.7);"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Oficial</span><span style="color: #eff2f4; font-weight: 600;">$1.535</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+          <span style="color: #8d949e;">Blue</span><span style="color: #eff2f4; font-weight: 600;">$1.555</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">OPERACIÓN</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">▣</span>Panel general
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◫</span>Stock
+          <span style="margin-left: auto; font-size: 10px; color: #7d848d; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 20px;">6</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; background: rgba(240,161,60,0.14); border: 1px solid rgba(240,161,60,0.22); color: #f2f5f7; font-size: 12.5px; font-weight: 600;">
+          <span style="width: 15px; text-align: center; color: #f3bd77;">◍</span>Leads
+          <span style="margin-left: auto; font-size: 10px; color: #f7d3a1; background: rgba(240,161,60,0.18); padding: 1px 6px; border-radius: 20px;">17</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◈</span>Ventas
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◔</span>Reportes
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 9px; letter-spacing: 0.16em; color: #6a7179; font-weight: 600; padding: 0 9px 6px;">AGENCIA</div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⬡</span>Sucursales
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">◎</span>Equipo
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 9px; color: #8d949e; font-size: 12.5px;" style-hover="background: rgba(255,255,255,0.04); color: #e9ecef;">
+          <span style="width: 15px; text-align: center; color: #767d86;">⌗</span>Integraciones
+        </div>
+      </div>
+    </aside>
+
+    <main style="background: #11141a; display: flex; flex-direction: column; min-width: 0;">
+      <header style="display: flex; align-items: center; gap: 12px; padding: 14px 22px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 7px 12px; width: 260px; color: #767d86; font-size: 12px;">
+          <span>⌕</span><span>Buscar por nombre o vehículo…</span>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+          <div style="width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">✉</div>
+          <div style="position: relative; width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;">
+            ⌁<span style="position: absolute; top: 4px; right: 5px; width: 6px; height: 6px; border-radius: 50%; background: #f87171;"></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 5px; border-radius: 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);">
+            <div style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(140deg, #f0a13c, #c9762a); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #17130c;">A</div>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-size: 11.5px; font-weight: 600; color: #eff2f4;">Alejandro</span>
+              <span style="font-size: 9.5px; color: #7d848d;">Administrador</span>
+            </div>
+            <span style="color: #767d86; font-size: 9px;">▾</span>
+          </div>
+        </div>
+      </header>
+
+      <div style="padding: 20px 22px 26px; display: flex; flex-direction: column; gap: 15px; min-width: 0;">
+        <div style="display: flex; align-items: flex-end; gap: 16px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <div style="font-size: 21px; font-weight: 700; letter-spacing: -0.01em;">Leads</div>
+            <div style="font-size: 12px; color: #7d848d; font-variant-numeric: tabular-nums;">17 activos · valor en juego USD 168.400 <span style="color: #5d656d;">≈ $258.494.000</span></div>
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 11.5px; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 11px;">Todos los canales ▾</div>
+            <div style="font-size: 11.5px; color: #b0b7be; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 7px 11px;">Todos los vendedores ▾</div>
+            <div style="cursor: pointer; font-size: 11.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); border-radius: 8px; padding: 8px 14px; box-shadow: 0 8px 20px rgba(224,140,44,0.25);" style-hover="transform: translateY(-1px);">+ Nuevo lead</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 13px; padding: 13px 16px; border-radius: 12px; background: linear-gradient(100deg, rgba(251,191,36,0.10), rgba(255,255,255,0.02)); border: 1px solid rgba(251,191,36,0.24);">
+          <span style="width: 28px; height: 28px; border-radius: 9px; flex: none; display: flex; align-items: center; justify-content: center; background: rgba(251,191,36,0.14); border: 1px solid rgba(251,191,36,0.3); color: #fcd34d; font-size: 13px;">◷</span>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <div style="font-size: 13px; font-weight: 700; color: #fcd34d;">5 leads sin contactar hace más de una semana</div>
+            <div style="font-size: 11.5px; color: #a8b0b8;">El más viejo entró hace 40 días. Cada día que pasa baja la chance de cierre.</div>
+          </div>
+          <div onClick="{{ verUrgentes }}" style="margin-left: auto; flex: none; cursor: pointer; font-size: 11.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #fbd38b, #f0a13c); padding: 8px 14px; border-radius: 8px;" style-hover="transform: translateY(-1px);">{{ urgentesLabel }}</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; gap: 2px; flex: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; padding: 3px;">
+            <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="3">
+              <div onClick="{{ f.onClick }}" style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; padding: 7px 14px; border-radius: 9px; color: {{ f.color }}; background: {{ f.bg }}; box-shadow: {{ f.shadow }}; transition: all .22s ease;">
+                <sc-if value="{{ f.dot }}" hint-placeholder-val="{{ true }}">
+                  <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ f.dot }};"></span>
+                </sc-if>
+                {{ f.label }}<span style="font-size: 11px; font-weight: 600; color: {{ f.countColor }}; font-variant-numeric: tabular-nums;">{{ f.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="flex: 1; min-width: 150px; display: flex; align-items: center; gap: 9px; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 8px 13px; color: #6a7179; font-size: 12px;" style-hover="border-color: rgba(255,255,255,0.14);">
+            <span style="flex: none;">⌕</span><span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Buscar lead por nombre, teléfono o vehículo…</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px; flex: none;">
+            <div style="position: relative;">
+              <div onClick="{{ toggleVehiculos }}" style="cursor: pointer; display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; color: {{ vehiculoColor }}; background: {{ vehiculoBg }}; border: 1px solid {{ vehiculoBorder }}; border-radius: 9px; padding: 8px 13px; min-width: 190px;" style-hover="border-color: rgba(240,161,60,0.4);">
+                <span style="width: 5px; height: 5px; border-radius: 50%; background: #f0a13c; flex: none;"></span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ vehiculoLabel }}</span>
+                <span style="margin-left: auto; flex: none; font-size: 9px; color: #767d86;">▾</span>
+              </div>
+              <sc-if value="{{ listaAbierta }}" hint-placeholder-val="{{ false }}">
+                <div style="position: absolute; top: 42px; right: 0; z-index: 40; width: 288px; max-height: 320px; overflow-y: auto; background: #171b21; border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; box-shadow: 0 30px 70px rgba(0,0,0,0.6); padding: 6px;">
+                  <div style="padding: 9px 11px 7px; font-size: 9.5px; letter-spacing: 0.13em; color: #6a7179; font-weight: 700;">VEHÍCULOS CON LEADS</div>
+                  <sc-for list="{{ vehiculos }}" as="v" hint-placeholder-count="7">
+                    <div onClick="{{ v.onClick }}" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 9px; background: {{ v.bg }};" style-hover="background: rgba(255,255,255,0.05);">
+                      <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ v.dot }}; flex: none;"></span>
+                      <div style="min-width: 0; display: flex; flex-direction: column; gap: 1px;">
+                        <div style="font-size: 12.5px; font-weight: 600; color: {{ v.color }}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ v.label }}</div>
+                        <div style="font-size: 10.5px; color: #6a7179; font-variant-numeric: tabular-nums;">{{ v.meta }}</div>
+                      </div>
+                      <div style="margin-left: auto; flex: none; font-size: 11px; font-weight: 700; color: #a8b0b8; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 20px; font-variant-numeric: tabular-nums;">{{ v.count }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <div style="display: flex; gap: 2px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 11px; padding: 3px;">
+              <sc-for list="{{ vistas }}" as="v" hint-placeholder-count="2">
+                <div onClick="{{ v.onClick }}" style="cursor: pointer; font-size: 12.5px; font-weight: 600; padding: 7px 15px; border-radius: 9px; color: {{ v.color }}; background: {{ v.bg }}; box-shadow: {{ v.shadow }}; transition: all .22s ease;">{{ v.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <sc-if value="{{ esKanban }}" hint-placeholder-val="{{ true }}">
+          <div style="display: grid; grid-template-columns: repeat(5, minmax(258px, 1fr)); gap: 12px; align-items: start;">
+            <sc-for list="{{ columnas }}" as="c" hint-placeholder-count="5">
+              <div style="background: #14181e; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; display: flex; flex-direction: column; overflow: hidden;">
+                <div style="height: 2px; background: linear-gradient(90deg, {{ c.color }}, transparent 80%);"></div>
+                <div style="padding: 15px 16px 13px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <div style="display: flex; align-items: center; gap: 9px;">
+                    <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ c.color }}; flex: none;"></span>
+                    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.05em; color: #eff2f4;">{{ c.label }}</div>
+                    <div style="margin-left: auto; font-size: 11.5px; font-weight: 700; color: #a8b0b8; background: rgba(255,255,255,0.06); padding: 2px 9px; border-radius: 20px; font-variant-numeric: tabular-nums;">{{ c.count }}</div>
+                  </div>
+                  <div style="font-size: 11px; color: #6a7179; font-variant-numeric: tabular-nums;">{{ c.valor }}</div>
+                </div>
+
+                <div style="padding: 11px; display: flex; flex-direction: column; gap: 11px; max-height: 640px; overflow-y: auto;">
+                  <sc-for list="{{ c.leads }}" as="l" hint-placeholder-count="3">
+                    <div onClick="{{ l.abrir }}" style="cursor: pointer; background: #191e25; border: 1px solid {{ l.borde }}; border-radius: 13px; padding: 15px 15px 13px; display: flex; flex-direction: column; gap: 13px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04); transition: transform .2s ease, border-color .2s ease;" style-hover="transform: translateY(-2px); border-color: rgba(240,161,60,0.34);">
+                      <div style="display: flex; align-items: center; gap: 11px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #17130c; background: {{ l.avatarBg }};">{{ l.iniciales }}</div>
+                        <div style="min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                          <div style="font-size: 14.5px; font-weight: 700; color: #f2f5f7; letter-spacing: -0.008em; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ l.nombre }}</div>
+                          <div style="font-size: 11.5px; color: #7d848d; font-variant-numeric: tabular-nums; line-height: 1.35;">{{ l.contacto }}</div>
+                        </div>
+                        <div style="margin-left: auto; flex: none; font-size: 13px; color: #5d656d;">···</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; gap: 4px; padding: 11px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.055);">
+                        <div style="font-size: 12.5px; font-weight: 600; color: #dfe4e9;">{{ l.vehiculo }}</div>
+                        <div style="font-size: 11.5px; color: #7d848d; font-variant-numeric: tabular-nums;">{{ l.precio }}</div>
+                      </div>
+
+                      <sc-if value="{{ l.mensaje }}" hint-placeholder-val="{{ true }}">
+                        <div style="font-size: 12px; line-height: 1.55; color: #949ba3; font-style: italic; text-wrap: pretty;">“{{ l.mensaje }}”</div>
+                      </sc-if>
+
+                      <div style="display: flex; align-items: center; gap: 7px; flex-wrap: wrap;">
+                        <span style="display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: #c3c9cf; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 20px;">
+                          <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ l.canalColor }};"></span>{{ l.canal }}
+                        </span>
+                        <span style="display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: {{ l.edadColor }}; background: {{ l.edadBg }}; padding: 4px 10px; border-radius: 20px;">
+                          <span style="width: 5px; height: 5px; border-radius: 50%; background: {{ l.edadColor }};"></span>{{ l.edad }}
+                        </span>
+                      </div>
+
+                      <div style="display: flex; align-items: center; gap: 9px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.055);">
+                        <div style="display: flex; align-items: center; gap: 7px; min-width: 0;">
+                          <span style="width: 20px; height: 20px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #c3c9cf; background: rgba(255,255,255,0.08);">{{ l.vendedorIni }}</span>
+                          <span style="font-size: 11.5px; color: #7d848d; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ l.vendedor }}</span>
+                        </div>
+                        <div style="margin-left: auto; flex: none; display: flex; gap: 6px;">
+                          <span style="width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #86efac; background: rgba(74,222,128,0.10); border: 1px solid rgba(74,222,128,0.22);" style-hover="background: rgba(74,222,128,0.2);">✆</span>
+                          <span onClick="{{ l.avanzar }}" style="display: flex; align-items: center; height: 30px; padding: 0 13px; border-radius: 9px; font-size: 11.5px; font-weight: 700; color: {{ l.avanzarColor }}; background: {{ l.avanzarBg }}; border: 1px solid {{ l.avanzarBorder }}; white-space: nowrap;" style-hover="opacity: .85;">{{ l.avanzarLabel }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+
+                  <sc-if value="{{ c.vacia }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding: 22px 12px; text-align: center; font-size: 11px; color: #5d656d; border: 1px dashed rgba(255,255,255,0.09); border-radius: 11px;">Sin leads en esta etapa</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ esTabla }}" hint-placeholder-val="{{ false }}">
+          <div style="background: #171b21; border: 1px solid rgba(255,255,255,0.06); border-radius: 13px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr 1.4fr 0.9fr 1fr 0.9fr; gap: 16px; padding: 11px 18px; font-size: 9.5px; letter-spacing: 0.1em; color: #6a7179; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.015);">
+              <div>NOMBRE</div><div>CONTACTO</div><div>VEHÍCULO</div><div>CANAL</div><div>VENDEDOR</div><div>ETAPA</div>
+            </div>
+            <sc-for list="{{ todos }}" as="l" hint-placeholder-count="8">
+              <div onClick="{{ l.abrir }}" style="cursor: pointer; display: grid; grid-template-columns: 1.2fr 1fr 1.4fr 0.9fr 1fr 0.9fr; gap: 16px; align-items: center; padding: 13px 18px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 12.5px;" style-hover="background: rgba(240,161,60,0.06);">
+                <div style="display: flex; align-items: center; gap: 9px; min-width: 0;">
+                  <span style="width: 24px; height: 24px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 700; color: #17130c; background: {{ l.avatarBg }};">{{ l.iniciales }}</span>
+                  <span style="font-weight: 600; color: #eff2f4;">{{ l.nombre }}</span>
+                </div>
+                <div style="color: #949ba3; font-variant-numeric: tabular-nums;">{{ l.contacto }}</div>
+                <div style="color: #c3c9cf;">{{ l.vehiculo }}</div>
+                <div>
+                  <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07); color: #c3c9cf;">
+                    <span style="width: 4px; height: 4px; border-radius: 50%; background: {{ l.canalColor }};"></span>{{ l.canal }}
+                  </span>
+                </div>
+                <div style="color: #949ba3;">{{ l.vendedor }}</div>
+                <div>
+                  <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: {{ l.etapaBg }}; color: {{ l.etapaColor }};">
+                    <span style="width: 4px; height: 4px; border-radius: 50%; background: {{ l.etapaColor }};"></span>{{ l.etapa }}
+                  </span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ fichaAbierta }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ cerrarFicha }}" style="position: fixed; inset: 0; z-index: 60; background: rgba(6,8,10,0.6); backdrop-filter: blur(4px); display: flex; justify-content: flex-end;">
+      <div style="width: 430px; height: 100%; box-sizing: border-box; overflow-y: auto; background: #12151a; border-left: 1px solid rgba(255,255,255,0.10); box-shadow: -40px 0 100px rgba(0,0,0,0.6); animation: ld-in .28s cubic-bezier(.2,.7,.3,1) both;">
+        <div style="padding: 20px 22px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: flex-start; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #17130c; background: {{ ficha.avatarBg }};">{{ ficha.iniciales }}</div>
+          <div style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+            <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.35;">{{ ficha.nombre }}</div>
+            <div style="font-size: 12px; color: #7d848d; font-variant-numeric: tabular-nums;">{{ ficha.contacto }} · entró {{ ficha.edad }}</div>
+          </div>
+          <div onClick="{{ cerrarFicha }}" style="margin-left: auto; flex: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); display: flex; align-items: center; justify-content: center; color: #949ba3; font-size: 13px;" style-hover="color: #eff2f4;">✕</div>
+        </div>
+
+        <div style="padding: 18px 22px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; gap: 8px;">
+            <div style="flex: 1; text-align: center; cursor: pointer; font-size: 12.5px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #86efac, #4ade80); padding: 11px 12px; border-radius: 10px;" style-hover="opacity: .9;">✆ WhatsApp</div>
+            <div style="flex: 1; text-align: center; cursor: pointer; font-size: 12.5px; font-weight: 600; color: #e9ecef; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); padding: 11px 12px; border-radius: 10px;" style-hover="background: rgba(255,255,255,0.09);">Llamar</div>
+            <div style="flex: 1; text-align: center; cursor: pointer; font-size: 12.5px; font-weight: 600; color: #e9ecef; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); padding: 11px 12px; border-radius: 10px;" style-hover="background: rgba(255,255,255,0.09);">Email</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 9.5px; letter-spacing: 0.14em; color: #6a7179; font-weight: 700;">MENSAJE DEL COMPRADOR</div>
+            <div style="padding: 14px 15px; border-radius: 11px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); font-size: 13px; line-height: 1.6; color: #dfe4e9;">{{ ficha.mensajeCompleto }}</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 9.5px; letter-spacing: 0.14em; color: #6a7179; font-weight: 700;">VEHÍCULO CONSULTADO</div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 11px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);">
+              <div style="min-width: 0;">
+                <div style="font-size: 13.5px; font-weight: 700; color: #f2f5f7;">{{ ficha.vehiculo }}</div>
+                <div style="font-size: 11.5px; color: #7d848d; font-variant-numeric: tabular-nums;">{{ ficha.precio }} · {{ ficha.precioArs }}</div>
+              </div>
+              <div style="margin-left: auto; flex: none; font-size: 11px; font-weight: 600; color: #f3bd77; background: rgba(240,161,60,0.12); border: 1px solid rgba(240,161,60,0.24); padding: 5px 10px; border-radius: 8px;">Ver ficha</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 9.5px; letter-spacing: 0.14em; color: #6a7179; font-weight: 700;">RECORRIDO</div>
+            <div style="display: flex; flex-direction: column; gap: 0; border-left: 1px solid rgba(255,255,255,0.10); margin-left: 4px;">
+              <sc-for list="{{ ficha.timeline }}" as="t" hint-placeholder-count="4">
+                <div style="position: relative; padding: 9px 0 9px 18px;">
+                  <span style="position: absolute; left: -4.5px; top: 15px; width: 8px; height: 8px; border-radius: 50%; background: {{ t.dot }}; box-shadow: 0 0 0 3px #12151a;"></span>
+                  <div style="font-size: 12.5px; font-weight: 600; color: {{ t.color }};">{{ t.label }}</div>
+                  <div style="font-size: 11px; color: #6a7179;">{{ t.meta }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 9px;">
+            <div style="font-size: 9.5px; letter-spacing: 0.14em; color: #6a7179; font-weight: 700;">VENDEDOR ASIGNADO</div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 11px 13px; border-radius: 11px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);">
+              <span style="width: 26px; height: 26px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #c3c9cf; background: rgba(255,255,255,0.08);">{{ ficha.vendedorIni }}</span>
+              <div style="font-size: 12.5px; color: #dfe4e9;">{{ ficha.vendedor }}</div>
+              <div style="margin-left: auto; cursor: pointer; font-size: 11.5px; color: #949ba3;" style-hover="color: #eff2f4;">Cambiar</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; padding-top: 4px;">
+            <div onClick="{{ ficha.avanzar }}" style="flex: 1; text-align: center; cursor: pointer; font-size: 13px; font-weight: 700; color: #17130c; background: linear-gradient(140deg, #f5b45c, #e08c2c); padding: 12px; border-radius: 10px; box-shadow: 0 10px 24px rgba(224,140,44,0.22);" style-hover="transform: translateY(-1px);">{{ ficha.avanzarLabel }}</div>
+            <div style="flex: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #fca5a5; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.24); padding: 12px 16px; border-radius: 10px;" style-hover="background: rgba(248,113,113,0.16);">Marcar perdido</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420,&quot;height&quot;:1000}}">
+class Component extends DCLogic {
+  state = { vista: "Kanban", abierto: null, soloUrgentes: false, movidos: {}, filtro: "Todos", vehiculo: "Todos", listaAbierta: false };
+
+  base() {
+    return [
+      { id: 1, nombre: "Franco Molina", contacto: "11-2244-8890", vehiculo: "Toyota Hilux SRX", usd: 38900, canal: "Mercado Libre", vendedor: "Sin asignar", etapa: "Nuevo", dias: 40, mensaje: "Hola, me interesa la Hilux. ¿Aceptan permuta por una Amarok 2018?", urgente: true },
+      { id: 2, nombre: "Milagros Vega", contacto: "11-6677-1122", vehiculo: "Peugeot 2008 Allure", usd: 15000, canal: "Catálogo", vendedor: "Sin asignar", etapa: "Nuevo", dias: 35, mensaje: "¿Sigue disponible? Quería saber si tiene service oficial al día.", urgente: true },
+      { id: 3, nombre: "Catalina Ferreyra", contacto: "11-3344-7788", vehiculo: "Fiat Cronos Precision", usd: 15300, canal: "Instagram", vendedor: "Sin asignar", etapa: "Nuevo", dias: 32, mensaje: "Me gustaría verlo el fin de semana si es posible.", urgente: true },
+      { id: 4, nombre: "Ignacio Campos", contacto: "11-9900-3344", vehiculo: "Fiat Cronos Precision", usd: 15300, canal: "Instagram", vendedor: "Martín López", etapa: "Nuevo", dias: 20, mensaje: "¿Tiene financiación? Puedo poner la mitad en efectivo.", urgente: true },
+      { id: 5, nombre: "Carlos Gomez", contacto: "11-5566-2211", vehiculo: "Chevrolet Onix Turbo LTZ", usd: 18200, canal: "WhatsApp", vendedor: "Martín López", etapa: "Nuevo", dias: 10, mensaje: "Buenas, ¿cuál es el precio final?", urgente: true },
+      { id: 6, nombre: "Bruno Castro", contacto: "11-4411-2290", vehiculo: "Toyota Corolla XEI", usd: 21500, canal: "WhatsApp", vendedor: "Martín López", etapa: "Contactado", dias: 6, mensaje: "Quedamos en que me manda las fotos del interior.", urgente: false },
+      { id: 7, nombre: "Lucia Fernandez", contacto: "11-4444-5555", vehiculo: "Fiat Cronos Precision", usd: 15300, canal: "Catálogo", vendedor: "Gustavo Ledesma", etapa: "Contactado", dias: 4, mensaje: "¿Acepta permuta? Tengo un Gol Trend 2016.", urgente: false },
+      { id: 8, nombre: "Tomas Herrera", contacto: "11-7788-9900", vehiculo: "Peugeot 2008 Allure", usd: 15000, canal: "WhatsApp", vendedor: "Gustavo Ledesma", etapa: "Contactado", dias: 3, mensaje: "Me interesa. ¿Puedo pasar mañana a la tarde?", urgente: false },
+      { id: 9, nombre: "Sofía Ramirez", contacto: "11-6789-2345", vehiculo: "Ford Ranger XLT", usd: 29800, canal: "Mercado Libre", vendedor: "Martín López", etapa: "Test drive", dias: 2, mensaje: "Confirmado para el sábado a las 11. Voy con mi señora.", urgente: false },
+      { id: 10, nombre: "Priscila Nuñez", contacto: "11-2233-4455", vehiculo: "Toyota Corolla XEI", usd: 21500, canal: "Mercado Libre", vendedor: "Gustavo Ledesma", etapa: "Test drive", dias: 1, mensaje: "Quiero probarlo antes de decidir. ¿Qué días tienen turno?", urgente: false },
+      { id: 11, nombre: "Valentina Torres", contacto: "11-5544-1122", vehiculo: "Toyota Hilux SRX", usd: 38900, canal: "WhatsApp", vendedor: "Martín López", etapa: "Negociación", dias: 5, mensaje: "Le ofrezco 37.500 y cierro hoy mismo.", urgente: false },
+      { id: 12, nombre: "Diego Martinez", contacto: "11-3321-9087", vehiculo: "Fiat Cronos Precision", usd: 15300, canal: "Instagram", vendedor: "Martín López", etapa: "Cerrado", dias: 8, mensaje: "Operación cerrada, entrega el viernes.", urgente: false },
+      { id: 13, nombre: "Maria Lopez", contacto: "11-8899-0011", vehiculo: "Renault Duster Iconic", usd: 24500, canal: "WhatsApp", vendedor: "Gustavo Ledesma", etapa: "Cerrado", dias: 12, mensaje: "Cerrado con financiación propia.", urgente: false }
+    ];
+  }
+
+  mover(id) {
+    const etapas = ["Nuevo", "Contactado", "Test drive", "Negociación", "Cerrado"];
+    const lead = this.base().find((l) => l.id === id);
+    const actual = this.state.movidos[id] || lead.etapa;
+    const i = etapas.indexOf(actual);
+    if (i < etapas.length - 1) {
+      const m = Object.assign({}, this.state.movidos);
+      m[id] = etapas[i + 1];
+      this.setState({ movidos: m });
+    }
+  }
+
+  renderVals() {
+    const etapas = ["Nuevo", "Contactado", "Test drive", "Negociación", "Cerrado"];
+    const colores = { Nuevo: "#60a5fa", Contactado: "#f0a13c", "Test drive": "#c084fc", "Negociación": "#fbbf24", Cerrado: "#4ade80" };
+    const etapaChip = {
+      Nuevo: ["rgba(96,165,250,0.14)", "#93c5fd"],
+      Contactado: ["rgba(240,161,60,0.14)", "#f3bd77"],
+      "Test drive": ["rgba(192,132,252,0.14)", "#d8b4fe"],
+      "Negociación": ["rgba(251,191,36,0.14)", "#fcd34d"],
+      Cerrado: ["rgba(74,222,128,0.14)", "#86efac"]
+    };
+    const canalColor = { Web: "#60a5fa", "Catálogo": "#60a5fa", WhatsApp: "#4ade80", Instagram: "#c084fc", "Mercado Libre": "#fbbf24" };
+    const avatares = ["linear-gradient(140deg, #f5b45c, #e08c2c)", "linear-gradient(140deg, #93c5fd, #3b82f6)", "linear-gradient(140deg, #86efac, #22c55e)", "linear-gradient(140deg, #d8b4fe, #a855f7)"];
+    const dolar = 1535;
+
+    const ini = (n) => n.split(" ").map((p) => p[0]).slice(0, 2).join("");
+    const edadTxt = (d) => d === 1 ? "hace 1 día" : "hace " + d + " días";
+
+    const decorar = (l, idx) => {
+      const etapa = this.state.movidos[l.id] || l.etapa;
+      const i = etapas.indexOf(etapa);
+      const urgente = etapa === "Nuevo" && l.dias >= 7;
+      const tibio = l.dias >= 15 && etapa !== "Cerrado";
+      return {
+        id: l.id, nombre: l.nombre, contacto: l.contacto, vehiculo: l.vehiculo, canal: l.canal,
+        precio: "USD " + l.usd.toLocaleString("es-AR"),
+        precioArs: "≈ $" + (l.usd * dolar).toLocaleString("es-AR"),
+        canalColor: canalColor[l.canal] || "#8d949e",
+        iniciales: ini(l.nombre), avatarBg: avatares[idx % avatares.length],
+        vendedor: l.vendedor, vendedorIni: l.vendedor === "Sin asignar" ? "?" : ini(l.vendedor),
+        mensaje: l.mensaje.length > 62 ? l.mensaje.slice(0, 62) + "…" : l.mensaje,
+        mensajeCompleto: l.mensaje,
+        edad: edadTxt(l.dias),
+        edadColor: urgente ? "#fca5a5" : tibio ? "#fcd34d" : "#8d949e",
+        edadBg: urgente ? "rgba(248,113,113,0.12)" : tibio ? "rgba(251,191,36,0.12)" : "rgba(255,255,255,0.05)",
+        borde: urgente ? "rgba(248,113,113,0.3)" : "rgba(255,255,255,0.07)",
+        etapa: etapa, etapaBg: etapaChip[etapa][0], etapaColor: etapaChip[etapa][1],
+        avanzarLabel: i < 4 ? etapas[i + 1] + " →" : "Ver venta",
+        avanzarColor: i < 4 ? "#17130c" : "#b0b7be",
+        avanzarBg: i < 4 ? "linear-gradient(140deg, #f5b45c, #e08c2c)" : "rgba(255,255,255,0.05)",
+        avanzarBorder: i < 4 ? "transparent" : "rgba(255,255,255,0.09)",
+        timeline: etapas.slice(0, i + 1).map((e, k) => ({
+          label: e, meta: k === i ? "etapa actual" : "completado",
+          dot: k === i ? colores[e] : "rgba(255,255,255,0.22)",
+          color: k === i ? "#f2f5f7" : "#8d949e"
+        })),
+        avanzar: (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); this.mover(l.id); },
+        abrir: () => this.setState({ abierto: l.id })
+      };
+    };
+
+    const completa = this.base().map(decorar);
+    const pasa = (l, f) => f === "Todos" ? true
+      : f === "Sin contactar" ? l.etapa === "Nuevo"
+      : f === "Sin vendedor" ? l.vendedor === "Sin asignar"
+      : true;
+
+    let lista = completa.filter((l) => pasa(l, this.state.filtro));
+    if (this.state.vehiculo !== "Todos") lista = lista.filter((l) => l.vehiculo === this.state.vehiculo);
+    if (this.state.soloUrgentes) lista = lista.filter((l) => l.edadColor === "#fca5a5");
+
+    const conteoVeh = {};
+    completa.forEach((l) => { conteoVeh[l.vehiculo] = (conteoVeh[l.vehiculo] || 0) + 1; });
+    const modelos = Object.keys(conteoVeh).sort((a, b) => conteoVeh[b] - conteoVeh[a]);
+    const vehSel = this.state.vehiculo;
+
+    const ficha = lista.find((l) => l.id === this.state.abierto) || this.base().map(decorar)[0];
+
+    return {
+      filtros: ["Todos", "Sin contactar", "Sin vendedor"].map((f) => {
+        const on = this.state.filtro === f;
+        const dots = { Todos: "", "Sin contactar": "#60a5fa", "Sin vendedor": "#c084fc" };
+        return {
+          label: f, count: completa.filter((l) => pasa(l, f)).length, dot: dots[f],
+          color: on ? "#f7f9fa" : "#8d949e",
+          bg: on ? "rgba(255,255,255,0.07)" : "transparent",
+          shadow: on ? "inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.3)" : "none",
+          countColor: on ? "#a8b0b8" : "#5d656d",
+          onClick: () => this.setState({ filtro: f, soloUrgentes: false })
+        };
+      }),
+      listaAbierta: this.state.listaAbierta,
+      toggleVehiculos: () => this.setState({ listaAbierta: !this.state.listaAbierta }),
+      vehiculoLabel: vehSel === "Todos" ? "Todos los vehículos" : vehSel,
+      vehiculoColor: vehSel === "Todos" ? "#b0b7be" : "#f7d3a1",
+      vehiculoBg: vehSel === "Todos" ? "rgba(255,255,255,0.04)" : "rgba(240,161,60,0.10)",
+      vehiculoBorder: vehSel === "Todos" ? "rgba(255,255,255,0.07)" : "rgba(240,161,60,0.3)",
+      vehiculos: ["Todos"].concat(modelos).map((m) => {
+        const on = vehSel === m;
+        const enNeg = completa.filter((l) => l.vehiculo === m && (l.etapa === "Negociación" || l.etapa === "Test drive")).length;
+        return {
+          label: m === "Todos" ? "Todos los vehículos" : m,
+          count: m === "Todos" ? completa.length : conteoVeh[m],
+          meta: m === "Todos" ? "sin filtrar" : enNeg ? enNeg + " avanzados" : "sin avances",
+          dot: on ? "#f0a13c" : "rgba(255,255,255,0.18)",
+          color: on ? "#f7d3a1" : "#dfe4e9",
+          bg: on ? "rgba(240,161,60,0.10)" : "transparent",
+          onClick: () => this.setState({ vehiculo: m, listaAbierta: false })
+        };
+      }),
+      esKanban: this.state.vista === "Kanban",
+      esTabla: this.state.vista === "Tabla",
+      vistas: ["Kanban", "Tabla"].map((v) => {
+        const on = this.state.vista === v;
+        return {
+          label: v,
+          color: on ? "#f7f9fa" : "#8d949e",
+          bg: on ? "rgba(255,255,255,0.07)" : "transparent",
+          shadow: on ? "inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.3)" : "none",
+          onClick: () => this.setState({ vista: v })
+        };
+      }),
+      urgentesLabel: this.state.soloUrgentes ? "Ver todos" : "Ver los 5",
+      verUrgentes: () => this.setState({ soloUrgentes: !this.state.soloUrgentes }),
+      columnas: etapas.map((e) => {
+        const leads = lista.filter((l) => l.etapa === e);
+        const total = leads.reduce((s, l) => s + Number(l.precio.replace(/[^0-9]/g, "")), 0);
+        return {
+          label: e.toUpperCase(), color: colores[e], count: leads.length, leads: leads,
+          vacia: leads.length === 0,
+          valor: leads.length ? "USD " + total.toLocaleString("es-AR") + " en juego" : "—"
+        };
+      }),
+      todos: lista,
+      fichaAbierta: this.state.abierto !== null,
+      cerrarFicha: () => this.setState({ abierto: null }),
+      ficha: ficha
+    };
+  }
+}
+
+</script>
+</body>
+</html>
