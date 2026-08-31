@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Search } from "lucide-react";
 import { CarSVG } from "../CarSVG";
 import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
@@ -132,7 +133,13 @@ export function CatalogoView({
             <Link href={`/c/${dominio}/${v.id}`} className={styles.card} key={v.id}>
               <div className={styles.cardPhoto}>
                 {v.fotos.length > 0 ? (
-                  <img className={styles.cardPhotoImg} src={v.fotos[0]} alt="" />
+                  <Image
+                    className={styles.cardPhotoImg}
+                    src={v.fotos[0]}
+                    alt=""
+                    fill
+                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                  />
                 ) : (
                   <div className={styles.cardPhotoPlaceholder}>
                     <CarSVG />

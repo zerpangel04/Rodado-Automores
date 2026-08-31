@@ -16,6 +16,109 @@
   z-index: 1;
 }
 
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.skeletonBlock {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.skeletonNavItem {
+  height: 32px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.045);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonBlock,
+  .skeletonNavItem {
+    animation: none;
+  }
+}
+
+.pageSkeleton {
+  display: flex;
+  flex-direction: column;
+}
+
+.pageSkeletonTopbar {
+  background: var(--surface-strong);
+  border-bottom: 1px solid var(--line);
+  padding: 14px 28px;
+}
+
+.pageSkeletonCards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 26px 28px 0;
+}
+
+@media (max-width: 900px) {
+  .pageSkeletonCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.pageSkeletonCard {
+  height: 92px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+}
+
+.pageSkeletonCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.04);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+.pageSkeletonRows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 28px 28px;
+}
+
+.pageSkeletonRow {
+  height: 52px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+}
+
+.pageSkeletonRow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.035);
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageSkeletonCard::after,
+  .pageSkeletonRow::after {
+    animation: none;
+  }
+}
+
 /* Mobile: la sidebar se convierte en un drawer que entra desde la
    izquierda (top bar con hamburguesa la abre) en vez de quedar fija
    angosta y comerse el ancho de pantalla. */

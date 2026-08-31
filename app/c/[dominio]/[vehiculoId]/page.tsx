@@ -29,16 +29,17 @@ export default async function VehiculoDetalle({
 }) {
   const { dominio, vehiculoId } = params;
 
-  const tenant = await prisma.tenant.findUnique({
-    where: { dominio },
-    include: { sucursales: { select: { id: true, nombre: true, direccion: true, telefono: true } } },
-  });
+  const [tenant, vehiculo] = await Promise.all([
+    prisma.tenant.findUnique({
+      where: { dominio },
+      include: { sucursales: { select: { id: true, nombre: true, direccion: true, telefono: true } } },
+    }),
+    prisma.vehiculo.findUnique({
+      where: { id: vehiculoId },
+      include: { sucursal: { select: { nombre: true, direccion: true } } },
+    }),
+  ]);
   if (!tenant) notFound();
-
-  const vehiculo = await prisma.vehiculo.findUnique({
-    where: { id: vehiculoId },
-    include: { sucursal: { select: { nombre: true, direccion: true } } },
-  });
   if (!vehiculo || vehiculo.tenantId !== tenant.id) notFound();
 
   const vendido = vehiculo.estado === "VENDIDO";

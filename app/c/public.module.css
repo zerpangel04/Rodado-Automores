@@ -11,6 +11,28 @@
   padding: 0 26px;
 }
 
+@keyframes skeletonPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.skeletonBlock {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonBlock {
+    animation: none;
+  }
+}
+
 @media (max-width: 640px) {
   .wrap {
     padding: 0 16px;

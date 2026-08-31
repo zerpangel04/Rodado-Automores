@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { CarSVG } from "./CarSVG";
 import styles from "./public.module.css";
 
@@ -18,7 +19,14 @@ export function PhotoGallery({ fotos }: { fotos: string[] }) {
   return (
     <>
       <div className={styles.galleryMain}>
-        <img className={styles.galleryImg} src={fotos[active]} alt="" />
+        <Image
+          className={styles.galleryImg}
+          src={fotos[active]}
+          alt=""
+          fill
+          sizes="(max-width: 860px) 100vw, 60vw"
+          priority
+        />
       </div>
       {fotos.length > 1 && (
         <div className={styles.galleryThumbs}>
@@ -29,7 +37,7 @@ export function PhotoGallery({ fotos }: { fotos: string[] }) {
               className={`${styles.galleryThumb} ${i === active ? styles.galleryThumbActive : ""}`}
               onClick={() => setActive(i)}
             >
-              <img src={url} alt="" />
+              <Image src={url} alt="" width={64} height={48} />
             </button>
           ))}
         </div>
