@@ -202,23 +202,25 @@ export function Sidebar({
 
       <FxBox />
 
-      <div className={styles.navGroup}>
-        <span className={styles.navLabel}>Operación</span>
-        {navItem("/panel", LayoutDashboard, "Panel general")}
-        {navItem("/panel/stock", Package, "Stock", stockCount)}
-        {navItem("/panel/leads", Users, "Leads", leadsCount)}
-        {navItem("/panel/ventas", HandCoins, "Ventas")}
-        {navItem("/panel/reportes", BarChart3, "Reportes")}
-      </div>
-
-      {rol === "DUENIO" && (
+      <div className={styles.sidebarNav}>
         <div className={styles.navGroup}>
-          <span className={styles.navLabel}>Agencia</span>
-          {navItem("/panel/sucursales", Building2, "Sucursales")}
-          {navItem("/panel/equipo", UserCog, "Equipo")}
-          {navItem("/panel/integraciones", Plug, "Integraciones")}
+          <span className={styles.navLabel}>Operación</span>
+          {navItem("/panel", LayoutDashboard, "Panel general")}
+          {navItem("/panel/stock", Package, "Stock", stockCount)}
+          {navItem("/panel/leads", Users, "Leads", leadsCount)}
+          {navItem("/panel/ventas", HandCoins, "Ventas")}
+          {navItem("/panel/reportes", BarChart3, "Reportes")}
         </div>
-      )}
+
+        {rol === "DUENIO" && (
+          <div className={styles.navGroup}>
+            <span className={styles.navLabel}>Agencia</span>
+            {navItem("/panel/sucursales", Building2, "Sucursales")}
+            {navItem("/panel/equipo", UserCog, "Equipo")}
+            {navItem("/panel/integraciones", Plug, "Integraciones")}
+          </div>
+        )}
+      </div>
 
       <div className={styles.sidebarFoot}>
         <div className={styles.avatar}>{initials(userName) || "?"}</div>

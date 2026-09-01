@@ -4,6 +4,7 @@
 }
 
 .sidebar {
+  box-sizing: border-box;
   width: 212px;
   background: var(--sidebar-bg);
   color: var(--ink);
@@ -12,8 +13,38 @@
   flex-direction: column;
   padding: 20px 14px;
   border-right: 1px solid var(--line);
-  position: relative;
+  position: sticky;
+  top: 0;
+  height: 100vh;
   z-index: 1;
+}
+
+/* El menú de navegación es la única parte que scrollea cuando la ventana
+   es baja — el switcher de sucursal (arriba) y el perfil/logout (abajo,
+   .sidebarFoot) tienen que quedar siempre visibles. */
+.sidebarNav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.sidebarNav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebarNav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 @keyframes skeletonPulse {
@@ -186,13 +217,13 @@
     top: 0;
     left: 0;
     bottom: 0;
+    height: auto;
     width: 260px;
     max-width: 82vw;
     transform: translateX(-100%);
     transition: transform 0.25s ease;
     z-index: 240;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
-    overflow-y: auto;
   }
 
   .sidebar.mobileOpen {
