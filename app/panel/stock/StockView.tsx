@@ -266,6 +266,10 @@ export function StockView({
   }
 
   const [iaResult, setIaResult] = useState<number | null>(null);
+  const [iaFuente, setIaFuente] = useState<"real" | "simulada" | null>(null);
+  const [iaVersion, setIaVersion] = useState<string | null>(null);
+  const [iaAnioReferencia, setIaAnioReferencia] = useState<number | null>(null);
+  const [iaLoading, setIaLoading] = useState(false);
 
   const [existingFotos, setExistingFotos] = useState<string[]>([]);
   const [fotoFiles, setFotoFiles] = useState<File[]>([]);
@@ -408,6 +412,9 @@ export function StockView({
     setForm({ ...emptyForm, sucursalId: defaultSucursalId });
     setError(null);
     setIaResult(null);
+    setIaFuente(null);
+    setIaVersion(null);
+    setIaAnioReferencia(null);
     setExistingFotos([]);
     setFotoFiles([]);
     setFotoError(null);
@@ -417,15 +424,46 @@ export function StockView({
     setShowModal(true);
   }
 
-  function suggestPrice() {
+  async function suggestPrice() {
     const anio = Number(form.anio);
     if (!anio) return;
+
+    setIaLoading(true);
+    setIaFuente(null);
+    setIaVersion(null);
+    setIaAnioReferencia(null);
+
+    const marca = form.marca.trim();
+    const modelo = form.modelo.trim();
+
+    if (marca && modelo) {
+      try {
+        const params = new URLSearchParams({ marca, modelo, anio: String(anio) });
+        const res = await fetch(`/api/tasacion/mercado?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.referencia) {
+            setIaResult(data.referencia.precioUsd);
+            setIaFuente("real");
+            setIaVersion(`${data.referencia.marca} ${data.referencia.modelo} — ${data.referencia.version}`);
+            setIaAnioReferencia(data.referencia.anio);
+            setIaLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // sigue al fallback simulado — nunca debe romper la sugerencia.
+      }
+    }
+
     const precio = estimarPrecio({
       categoria: form.categoria,
       anio,
       km: Number(form.km) || 0,
     });
     setIaResult(precio);
+    setIaFuente("simulada");
+    setIaLoading(false);
   }
 
   function useIaPrice() {
@@ -1126,27 +1164,57 @@ export function StockView({
                       <Sparkles size={11} style={{ verticalAlign: -1, marginRight: 4 }} />
                       Tasación con IA
                     </span>
-                    <button type="button" className={styles.iaSuggestBtn} onClick={suggestPrice}>
-                      Sugerir precio
+                    <button
+                      type="button"
+                      className={styles.iaSuggestBtn}
+                      onClick={suggestPrice}
+                      disabled={iaLoading}
+                    >
+                      {iaLoading ? "Buscando…" : "Sugerir precio"}
                     </button>
                   </div>
-                  <div className={styles.iaResult}>
+                  <div
+                    className={`${styles.iaResult} ${iaFuente === "real" ? styles.iaResultReal : ""}`}
+                  >
                     {iaResult !== null ? `USD ${iaResult.toLocaleString("es-AR")}` : "—"}
                   </div>
                   <div className={styles.iaNote}>
-                    {iaResult !== null ? (
+                    {iaLoading ? (
+                      "Buscando precio de referencia en Arg Autos API…"
+                    ) : iaResult !== null ? (
                       <>
-                        Estimación simulada según categoría, año y kilometraje.{" "}
-                        <b>Es una demo, no son datos reales de mercado</b> — en producción esto se
-                        conectaría a una fuente real (API de mercado o modelo entrenado con datos
-                        propios).
+                        {iaFuente === "real" ? (
+                          <>
+                            <span className={styles.iaBadgeReal}>● Dato real de mercado</span>
+                            <br />
+                            Precio de referencia CCA
+                            {iaAnioReferencia && iaAnioReferencia !== Number(form.anio)
+                              ? ` (año ${iaAnioReferencia}, más cercano disponible)`
+                              : ""}
+                            : <b>USD {iaResult.toLocaleString("es-AR")}</b> — fuente: Arg Autos API.
+                            {iaVersion && (
+                              <>
+                                <br />
+                                {iaVersion}
+                              </>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <span className={styles.iaBadgeSim}>● Estimación simulada</span>
+                            <br />
+                            Estimación según categoría, año y kilometraje.{" "}
+                            <b>No son datos reales de mercado</b> — no encontramos esta marca/modelo
+                            en Arg Autos API, o el servicio no respondió.
+                          </>
+                        )}
                         <br />
                         <button type="button" className={styles.iaUseBtn} onClick={useIaPrice}>
                           Usar este precio →
                         </button>
                       </>
                     ) : (
-                      'Completá año, km y categoría, y tocá "Sugerir precio" para ver una estimación demo.'
+                      'Completá marca, modelo, año, km y categoría, y tocá "Sugerir precio" para ver una estimación.'
                     )}
                   </div>
                 </div>

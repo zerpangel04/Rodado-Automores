@@ -365,10 +365,34 @@
   margin: 4px 0;
 }
 
+.iaResultReal {
+  color: var(--success);
+}
+
 .iaNote {
   font-size: 11px;
   color: var(--ink-soft);
   line-height: 1.4;
+}
+
+.iaBadgeReal {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--success);
+  margin-bottom: 2px;
+}
+
+.iaBadgeSim {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
 }
 
 .iaUseBtn {
