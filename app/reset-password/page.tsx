@@ -14,11 +14,12 @@ async function findValidToken(token: string) {
   return record;
 }
 
-export default async function ResetPasswordPage({
-  searchParams,
-}: {
-  searchParams: { token?: string; error?: string };
-}) {
+export default async function ResetPasswordPage(
+  props: {
+    searchParams: Promise<{ token?: string; error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const params = searchParams;
   const token = params.token ?? "";
   const validToken = await findValidToken(token);

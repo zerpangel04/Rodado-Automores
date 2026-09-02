@@ -26,11 +26,12 @@ async function getIntentoVigente(intentoId: string) {
   return intento;
 }
 
-export default async function VerificarCodigoPage({
-  searchParams,
-}: {
-  searchParams: { intento?: string; callbackUrl?: string; error?: string; intentos?: string };
-}) {
+export default async function VerificarCodigoPage(
+  props: {
+    searchParams: Promise<{ intento?: string; callbackUrl?: string; error?: string; intentos?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const params = searchParams;
   const intentoId = params.intento ?? "";
   const callbackUrl = params.callbackUrl ?? "/panel";

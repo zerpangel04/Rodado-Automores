@@ -15,11 +15,12 @@ function getBaseUrl(hdrs: Headers) {
   return `${proto}://${host}`;
 }
 
-export default async function ForgotPasswordPage({
-  searchParams,
-}: {
-  searchParams: { sent?: string; error?: string };
-}) {
+export default async function ForgotPasswordPage(
+  props: {
+    searchParams: Promise<{ sent?: string; error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const params = searchParams;
 
   async function forgotPasswordAction(formData: FormData) {

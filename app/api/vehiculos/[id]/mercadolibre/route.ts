@@ -9,10 +9,8 @@ import {
   VEHICLE_CATEGORY_ID,
 } from "@/lib/mercadolibre";
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await currentSession();
   if (!session) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });

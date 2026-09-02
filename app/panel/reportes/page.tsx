@@ -35,11 +35,12 @@ function isoDay(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
-export default async function ReportesPage({
-  searchParams,
-}: {
-  searchParams: { range?: string; from?: string; to?: string };
-}) {
+export default async function ReportesPage(
+  props: {
+    searchParams: Promise<{ range?: string; from?: string; to?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
 

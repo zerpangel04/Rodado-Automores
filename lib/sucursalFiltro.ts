@@ -20,7 +20,7 @@ export const SUCURSAL_COOKIE = "sucursalId";
 export const getSucursalActual = cache(async function getSucursalActual(
   tenantId: string
 ): Promise<{ id: string; nombre: string } | null> {
-  const raw = cookies().get(SUCURSAL_COOKIE)?.value;
+  const raw = (await cookies()).get(SUCURSAL_COOKIE)?.value;
   if (!raw) return null;
 
   const sucursal = await prisma.sucursal.findFirst({

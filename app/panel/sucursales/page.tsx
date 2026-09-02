@@ -106,7 +106,7 @@ export default async function SucursalesPage() {
 
   async function setSucursalYVerStock(sucursalId: string) {
     "use server";
-    cookies().set(SUCURSAL_COOKIE, sucursalId, {
+    (await cookies()).set(SUCURSAL_COOKIE, sucursalId, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",

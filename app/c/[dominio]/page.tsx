@@ -6,11 +6,12 @@ import { AskAssistantChips } from "../AskAssistantChips";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import styles from "../public.module.css";
 
-export default async function CatalogoPublico({
-  params,
-}: {
-  params: { dominio: string };
-}) {
+export default async function CatalogoPublico(
+  props: {
+    params: Promise<{ dominio: string }>;
+  }
+) {
+  const params = await props.params;
   const { dominio } = params;
 
   const tenant = await prisma.tenant.findUnique({

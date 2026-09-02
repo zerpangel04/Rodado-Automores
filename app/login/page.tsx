@@ -26,11 +26,12 @@ const hitos = [
   { title: "Leads y ventas", color: "var(--success)" },
 ];
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string; callbackUrl?: string; reset?: string; intentos?: string; espera?: string };
-}) {
+export default async function LoginPage(
+  props: {
+    searchParams: Promise<{ error?: string; callbackUrl?: string; reset?: string; intentos?: string; espera?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const params = searchParams;
 
   async function loginAction(formData: FormData) {

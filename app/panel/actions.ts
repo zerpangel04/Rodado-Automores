@@ -10,7 +10,7 @@ export async function logoutAction() {
 }
 
 export async function setSucursalAction(sucursalId: string) {
-  const store = cookies();
+  const store = await cookies();
   if (sucursalId) {
     store.set(SUCURSAL_COOKIE, sucursalId, {
       path: "/",

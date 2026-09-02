@@ -5,10 +5,8 @@ import { findOwnedVehiculo } from "@/lib/vehiculos";
 import { uploadVehiculoFoto } from "@/lib/supabase";
 import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/validation";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await currentSession();
   if (!session) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });

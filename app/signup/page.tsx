@@ -7,11 +7,12 @@ import { signIn, CodigoRequeridoError, EnvioCodigoFallidoError } from "@/lib/aut
 import { slugify } from "@/lib/slug";
 import styles from "../auth.module.css";
 
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: { error?: string };
-}) {
+export default async function SignupPage(
+  props: {
+    searchParams: Promise<{ error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const params = searchParams;
 
   async function signupAction(formData: FormData) {

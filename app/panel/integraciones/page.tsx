@@ -4,11 +4,12 @@ import { formatRelativo } from "../actividadDisplay";
 import styles from "../panel.module.css";
 import { IntegracionesView, type ActividadItem } from "./IntegracionesView";
 
-export default async function IntegracionesPage({
-  searchParams,
-}: {
-  searchParams: { ml_connected?: string; ml_error?: string };
-}) {
+export default async function IntegracionesPage(
+  props: {
+    searchParams: Promise<{ ml_connected?: string; ml_error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const session = await auth();
   const { tenantId, rol } = session!.user;
 

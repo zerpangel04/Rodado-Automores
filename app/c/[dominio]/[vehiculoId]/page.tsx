@@ -22,11 +22,12 @@ function mapsUrl(direccion: string) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
 }
 
-export default async function VehiculoDetalle({
-  params,
-}: {
-  params: { dominio: string; vehiculoId: string };
-}) {
+export default async function VehiculoDetalle(
+  props: {
+    params: Promise<{ dominio: string; vehiculoId: string }>;
+  }
+) {
+  const params = await props.params;
   const { dominio, vehiculoId } = params;
 
   const [tenant, vehiculo] = await Promise.all([
