@@ -124,10 +124,12 @@ model Usuario {
   rol          Rol      @default(VENDEDOR)
   createdAt    DateTime @default(now())
 
-  leadsAsignados          Lead[]               @relation("VendedorAsignado")
-  ventas                  Venta[]              @relation("VendedorVenta")
+  leadsAsignados          Lead[]                    @relation("VendedorAsignado")
+  ventas                  Venta[]                   @relation("VendedorVenta")
   passwordResetTokens     PasswordResetToken[]
-  actividadesComoVendedor ActividadLog[]       @relation("VendedorActividad")
+  actividadesComoVendedor ActividadLog[]            @relation("VendedorActividad")
+  dispositivosConfiables  DispositivoConfiable[]
+  codigosVerificacionLogin CodigoVerificacionLogin[]
 }
 
 // Token de un solo uso para el flujo de "olvidé mi contraseña".
@@ -139,6 +141,39 @@ model PasswordResetToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+
+  @@index([usuarioId])
+}
+
+// Dispositivo (navegador) que ya verificó un código de un solo uso para
+// este usuario — mientras el navegador mande la cookie firmada
+// correspondiente (90 días), el login no vuelve a pedir código.
+// tokenHash guarda el hash sha256 del valor de la cookie, nunca el valor
+// en texto plano.
+model DispositivoConfiable {
+  id        String   @id @default(cuid())
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  tokenHash String
+  creadoEn  DateTime @default(now())
+  ultimoUso DateTime @default(now())
+
+  @@index([usuarioId, tokenHash])
+}
+
+// Código de un solo uso (6 dígitos) para verificar un dispositivo nuevo en
+// el login. codigoHash guarda el hash bcrypt del código, nunca el código
+// en texto plano — el espacio chico de combinaciones (10^6) se compensa
+// limitando a CODIGO_MAX_INTENTOS intentos antes de invalidarlo.
+model CodigoVerificacionLogin {
+  id         String    @id @default(cuid())
+  usuarioId  String
+  usuario    Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  codigoHash String
+  intentos   Int       @default(0)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
 
   @@index([usuarioId])
 }
