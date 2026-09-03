@@ -26,6 +26,22 @@ export const vehiculoInputSchema = z.object({
     .optional()
     .nullable()
     .transform((v) => (v ? new Date(v) : null)),
+  // Opcional: si no se manda, Prisma usa su default (now()) al crear. Se
+  // expone editable para que una agencia que migra stock existente pueda
+  // declarar la fecha real en que ese auto entró a su lote — si no, la
+  // rotación de stock en Reportes queda mal calculada para todo lo que
+  // carguen al principio.
+  fechaIngreso: z
+    .string()
+    .optional()
+    .transform((v) => (v ? new Date(v) : undefined))
+    // +1 día de margen: el input es una fecha sin hora (se parsea como
+    // medianoche UTC) comparada contra el instante exacto del server —
+    // sin margen, "hoy" se rechazaría como "futuro" para cualquier
+    // usuario en un huso horario adelantado a UTC.
+    .refine((d) => !d || d.getTime() <= Date.now() + 24 * 60 * 60 * 1000, {
+      message: "La fecha de ingreso no puede ser futura",
+    }),
 });
 
 export const vehiculoUpdateSchema = vehiculoInputSchema.partial();

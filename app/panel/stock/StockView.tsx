@@ -90,6 +90,7 @@ type FormState = {
   docDominio: boolean;
   docLibreDeuda: boolean;
   vtvVencimiento: string;
+  fechaIngreso: string;
 };
 
 const emptyForm: FormState = {
@@ -107,7 +108,19 @@ const emptyForm: FormState = {
   docDominio: false,
   docLibreDeuda: false,
   vtvVencimiento: "",
+  fechaIngreso: "",
 };
+
+function hoyISO() {
+  // Fecha calendario local, no UTC — con toISOString() a la noche en
+  // husos horarios negativos (ej. Argentina, UTC-3) esto mostraba el día
+  // siguiente como default.
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
 
 type SaleForm = {
   vendedorId: string;
@@ -409,7 +422,7 @@ export function StockView({
 
   function openCreate() {
     setEditingId(null);
-    setForm({ ...emptyForm, sucursalId: defaultSucursalId });
+    setForm({ ...emptyForm, sucursalId: defaultSucursalId, fechaIngreso: hoyISO() });
     setError(null);
     setIaResult(null);
     setIaFuente(null);
@@ -488,6 +501,7 @@ export function StockView({
       docDominio: v.docDominio,
       docLibreDeuda: v.docLibreDeuda,
       vtvVencimiento: v.vtvVencimiento ?? "",
+      fechaIngreso: v.fechaIngreso.slice(0, 10),
     });
     setError(null);
     setExistingFotos(v.fotos);
@@ -526,6 +540,7 @@ export function StockView({
       docDominio: form.docDominio,
       docLibreDeuda: form.docLibreDeuda,
       vtvVencimiento: form.vtvVencimiento || null,
+      fechaIngreso: form.fechaIngreso || undefined,
     };
 
     try {
@@ -1121,6 +1136,20 @@ export function StockView({
                   />
                 </div>
               </div>
+              <div className={styles.field}>
+                <label>Fecha de ingreso al stock</label>
+                <input
+                  type="date"
+                  value={form.fechaIngreso}
+                  max={hoyISO()}
+                  onChange={(e) => setForm({ ...form, fechaIngreso: e.target.value })}
+                />
+                <p style={{ fontSize: 11.5, color: "var(--ink-soft)", marginTop: 6 }}>
+                  Cambiala si estás cargando un auto que ya tenías en stock desde antes — así la
+                  rotación de stock en Reportes se calcula bien.
+                </p>
+              </div>
+
               <div className={styles.field}>
                 <label>Categoría</label>
                 <select
