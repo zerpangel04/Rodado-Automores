@@ -62,6 +62,7 @@ model Tenant {
   nombre    String
   plan      String   @default("basico")
   dominio   String?  @unique
+  logoUrl   String?
   createdAt DateTime @default(now())
 
   usuarios   Usuario[]

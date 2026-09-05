@@ -21,7 +21,11 @@ export async function SidebarData({
 }) {
   const sucursalActual = await getSucursalActual(tenantId);
 
-  const [sucursales, stockCount, leadsCount] = await Promise.all([
+  const [tenant, sucursales, stockCount, leadsCount] = await Promise.all([
+    prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { logoUrl: true },
+    }),
     prisma.sucursal.findMany({
       where: { tenantId },
       select: { id: true, nombre: true },
@@ -47,6 +51,7 @@ export async function SidebarData({
   return (
     <Sidebar
       tenantNombre={tenantNombre}
+      tenantLogoUrl={tenant?.logoUrl ?? null}
       userName={userName}
       rol={rol}
       stockCount={stockCount}

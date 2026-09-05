@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
@@ -18,11 +18,14 @@ import {
   Power,
   Menu,
   X,
+  Pencil,
+  Loader2,
   type LucideIcon,
 } from "lucide-react";
 import styles from "./panel.module.css";
 import { FxBox } from "./FxBox";
 import { NotificationBell } from "./NotificationBell";
+import { AgencyMark } from "../AgencyMark";
 
 const initials = (name: string) =>
   name
@@ -32,12 +35,11 @@ const initials = (name: string) =>
     .map((p) => p[0]?.toUpperCase())
     .join("");
 
-const initial = (name: string) => name.trim().charAt(0).toUpperCase() || "?";
-
 type SucursalOption = { id: string; nombre: string };
 
 export function Sidebar({
   tenantNombre,
+  tenantLogoUrl,
   userName,
   rol,
   stockCount,
@@ -48,6 +50,7 @@ export function Sidebar({
   onSelectSucursal,
 }: {
   tenantNombre: string;
+  tenantLogoUrl: string | null;
   userName: string;
   rol: string;
   stockCount: number;
@@ -58,10 +61,38 @@ export function Sidebar({
   onSelectSucursal: (sucursalId: string) => Promise<void>;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [, startTransition] = useTransition();
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setLogoError(null);
+    setUploadingLogo(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/tenant/logo", { method: "POST", body: fd });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setLogoError(data?.error ?? "No se pudo subir el logo");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setLogoError("Error de conexión subiendo el logo");
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -158,7 +189,7 @@ export function Sidebar({
           aria-expanded={open}
           aria-haspopup="listbox"
         >
-          <div className={styles.workspaceMark}>{initial(tenantNombre)}</div>
+          <AgencyMark nombre={tenantNombre} logoUrl={tenantLogoUrl} className={styles.workspaceMark} />
           <div className={styles.workspaceInfo}>
             <div className={styles.workspaceName}>{tenantNombre}</div>
             <div className={styles.workspacePlan}>{subtitle}</div>
@@ -203,6 +234,33 @@ export function Sidebar({
                 )}
               </button>
             ))}
+
+            {rol === "DUENIO" && (
+              <>
+                <div className={styles.workspaceDivider} />
+                <button
+                  type="button"
+                  className={`${styles.workspaceOption} ${styles.workspaceLogoBtn}`}
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={uploadingLogo}
+                >
+                  {uploadingLogo ? (
+                    <Loader2 size={13} className={styles.spinning} />
+                  ) : (
+                    <Pencil size={13} />
+                  )}
+                  {uploadingLogo ? "Subiendo logo…" : "Editar logo"}
+                </button>
+                {logoError && <div className={styles.workspaceLogoError}>{logoError}</div>}
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className={styles.hiddenFileInput}
+                  onChange={handleLogoChange}
+                />
+              </>
+            )}
           </div>
         )}
       </div>

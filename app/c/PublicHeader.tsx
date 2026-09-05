@@ -1,6 +1,7 @@
 import Image from "next/image";
 import styles from "./public.module.css";
 import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
+import { AgencyMark } from "../AgencyMark";
 
 function whatsappUrl(telefono: string) {
   const digits = telefono.replace(/[^\d]/g, "");
@@ -12,10 +13,12 @@ export function PublicHeader({
   nombre,
   sucursalesCount,
   telefono,
+  logoUrl,
 }: {
   nombre: string;
   sucursalesCount: number;
   telefono: string | null;
+  logoUrl?: string | null;
 }) {
   const wa = telefono ? whatsappUrl(telefono) : null;
 
@@ -23,7 +26,7 @@ export function PublicHeader({
     <header className={styles.header}>
       <div className={`${styles.wrap} ${styles.headerInner}`}>
         <div className={styles.agency}>
-          <div className={styles.agencyMark}>{nombre.charAt(0).toUpperCase()}</div>
+          <AgencyMark nombre={nombre} logoUrl={logoUrl} className={styles.agencyMark} />
           <div>
             <div className={styles.agencyName}>{nombre}</div>
             <div className={styles.agencySub}>

@@ -61,6 +61,7 @@ export default async function VehiculoDetalle(
         nombre={tenant.nombre}
         sucursalesCount={tenant.sucursales.length}
         telefono={tenant.sucursales.find((s) => s.telefono)?.telefono ?? null}
+        logoUrl={tenant.logoUrl}
       />
 
       <div className={`${styles.wrap} ${styles.detail}`}>

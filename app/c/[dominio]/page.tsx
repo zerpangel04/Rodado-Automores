@@ -60,6 +60,7 @@ export default async function CatalogoPublico(
         nombre={tenant.nombre}
         sucursalesCount={tenant.sucursales.length}
         telefono={primerTelefono}
+        logoUrl={tenant.logoUrl}
       />
 
       <section className={styles.hero}>

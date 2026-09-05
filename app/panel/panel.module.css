@@ -340,6 +340,45 @@
   align-items: center;
 }
 
+.workspaceLogoBtn {
+  justify-content: flex-start;
+  color: var(--ink-soft);
+}
+
+.workspaceLogoBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.workspaceDivider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 2px;
+}
+
+.workspaceLogoError {
+  padding: 4px 10px 2px;
+  font-size: 11px;
+  color: var(--danger);
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .workspaceMark {
   width: 28px;
   height: 28px;

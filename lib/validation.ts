@@ -4,6 +4,9 @@ export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
 export const FOTO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
+export const LOGO_MAX_BYTES = 3 * 1024 * 1024;
+export const LOGO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+
 export const estadoVehiculoValues = ["DISPONIBLE", "RESERVADO", "VENDIDO"] as const;
 
 export const vehiculoInputSchema = z.object({
