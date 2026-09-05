@@ -1,0 +1,28 @@
+name: OWASP ZAP baseline scan
+
+# Escaneo pasivo (spidering + reglas pasivas, sin payloads de ataque activo)
+# contra producción — deliberadamente no "full scan", para no arriesgar
+# efectos secundarios reales sobre un sitio en vivo (mandar leads/emails
+# de prueba, crear cuentas, etc.). Se dispara a mano, no en cada push.
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "URL a escanear"
+        required: false
+        default: "https://www.rodado.com.ar"
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: ZAP baseline scan
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: ${{ github.event.inputs.target_url || 'https://www.rodado.com.ar' }}
+          allow_issue_writing: false
+          fail_action: false
