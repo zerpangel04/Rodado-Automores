@@ -55,3 +55,50 @@ export async function sendLoginVerificationEmail(to: string, codigo: string) {
 
   console.log("Email de código de verificación enviado, id:", data?.id);
 }
+
+export async function sendSuspiciousActivityAlert({
+  email,
+  count,
+  windowHoras,
+}: {
+  email: string;
+  count: number;
+  windowHoras: number;
+}) {
+  const alertTo = process.env.SECURITY_ALERT_EMAIL;
+  if (!alertTo) {
+    console.warn(
+      "SECURITY_ALERT_EMAIL no está configurado — no se pudo avisar de actividad sospechosa en la cuenta",
+      email
+    );
+    return;
+  }
+
+  const momento = new Date().toLocaleString("es-AR", {
+    timeZone: "America/Argentina/Buenos_Aires",
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const { data, error } = await resend.emails.send({
+    from: FROM,
+    to: alertTo,
+    subject: `⚠ Actividad sospechosa de login — ${email}`,
+    text: `La cuenta ${email} se bloqueó por intentos fallidos de login ${count} veces en las últimas ${windowHoras} horas (último bloqueo: ${momento}).\n\nEsto puede indicar un intento de fuerza bruta contra esta cuenta. El login sigue protegido por el límite normal de intentos — este email es solo un aviso.`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <p><strong>⚠ Actividad sospechosa de login</strong></p>
+        <p>La cuenta <strong>${email}</strong> se bloqueó por intentos fallidos de login <strong>${count} veces</strong> en las últimas ${windowHoras} horas.</p>
+        <p style="color:#63676a; font-size:13px;">Último bloqueo: ${momento}.</p>
+        <p style="color:#63676a; font-size:13px;">Esto puede indicar un intento de fuerza bruta contra esta cuenta. El login sigue protegido por el límite normal de intentos — este email es solo un aviso.</p>
+      </div>
+    `,
+  });
+
+  if (error) {
+    throw new Error(`Resend error: ${error.message}`);
+  }
+
+  console.log("Alerta de actividad sospechosa enviada, id:", data?.id);
+}

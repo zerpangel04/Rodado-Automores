@@ -5,8 +5,8 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
-import { checkRateLimit, recordRateLimitHit, clearRateLimit } from "@/lib/rateLimit";
-import { sendLoginVerificationEmail } from "@/lib/email";
+import { checkRateLimit, recordRateLimitHit, clearRateLimit, getRateLimitStatus } from "@/lib/rateLimit";
+import { sendLoginVerificationEmail, sendSuspiciousActivityAlert } from "@/lib/email";
 import { DISPOSITIVO_COOKIE_NAME, hashDispositivoToken } from "@/lib/dispositivoConfiable";
 
 // Exportadas para que app/login/page.tsx pueda leer el mismo estado de
@@ -16,6 +16,34 @@ import { DISPOSITIVO_COOKIE_NAME, hashDispositivoToken } from "@/lib/dispositivo
 export const LOGIN_MAX_INTENTOS = 5;
 export const LOGIN_VENTANA_MS = 15 * 60 * 1000; // 15 minutos
 export const loginRateLimitKey = (email: string) => `login:${email.toLowerCase().trim()}`;
+
+// Si una misma cuenta se bloquea varias veces seguidas en poco tiempo,
+// probablemente no es el dueño real olvidando su contraseña — es alguien
+// insistiendo. Avisamos por email al 3er bloqueo (y a cada uno después,
+// mientras el patrón siga) dentro de la ventana.
+const LOCKOUT_ALERTA_MAX = 3;
+const LOCKOUT_ALERTA_VENTANA_MS = 3 * 60 * 60 * 1000; // 3 horas
+const loginLockoutKey = (email: string) => `login-lockout:${email}`;
+
+async function registrarLockoutYAvisarSiCorresponde(email: string) {
+  const key = loginLockoutKey(email);
+  await recordRateLimitHit(key);
+  const status = await getRateLimitStatus(key, {
+    max: LOCKOUT_ALERTA_MAX,
+    windowMs: LOCKOUT_ALERTA_VENTANA_MS,
+  });
+  if (status.count < LOCKOUT_ALERTA_MAX) return;
+
+  try {
+    await sendSuspiciousActivityAlert({
+      email,
+      count: status.count,
+      windowHoras: LOCKOUT_ALERTA_VENTANA_MS / (60 * 60 * 1000),
+    });
+  } catch (err) {
+    console.error("No se pudo enviar la alerta de actividad sospechosa:", err);
+  }
+}
 
 // Verificación de dispositivo nuevo: código de 4 dígitos, un solo uso,
 // máximo CODIGO_MAX_INTENTOS intentos antes de invalidarlo, vence a los
@@ -157,7 +185,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const emailNormalizado = email.toLowerCase().trim();
         const rateLimitKey = loginRateLimitKey(emailNormalizado);
 
-        const { allowed } = await checkRateLimit(rateLimitKey, {
+        const { allowed, remaining } = await checkRateLimit(rateLimitKey, {
           max: LOGIN_MAX_INTENTOS,
           windowMs: LOGIN_VENTANA_MS,
         });
@@ -183,6 +211,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!usuario || !valido) {
           await recordRateLimitHit(rateLimitKey);
+          // remaining===1 antes de este hit significa que este intento es
+          // justo el que agota el cupo — el bloqueo empieza ahora mismo.
+          if (remaining <= 1) {
+            await registrarLockoutYAvisarSiCorresponde(emailNormalizado);
+          }
           return null;
         }
 

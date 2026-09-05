@@ -3,6 +3,7 @@ import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { uploadTenantLogo } from "@/lib/supabase";
 import { LOGO_ALLOWED_TYPES, LOGO_MAX_BYTES } from "@/lib/validation";
+import { sniffImageMimeType } from "@/lib/imageSignature";
 
 export async function POST(req: NextRequest) {
   const session = await currentSession();
@@ -27,6 +28,17 @@ export async function POST(req: NextRequest) {
   }
   if (file.size > LOGO_MAX_BYTES) {
     return NextResponse.json({ error: "La imagen pesa más de 3MB" }, { status: 400 });
+  }
+
+  // El Content-Type que manda el cliente es solo una declaración — se
+  // confirma mirando los primeros bytes reales del archivo, para que
+  // subir un archivo cualquiera disfrazado de imagen no alcance.
+  const sniffed = await sniffImageMimeType(file);
+  if (!sniffed || !LOGO_ALLOWED_TYPES.includes(sniffed as (typeof LOGO_ALLOWED_TYPES)[number])) {
+    return NextResponse.json(
+      { error: "El archivo no es una imagen válida" },
+      { status: 400 }
+    );
   }
 
   let logoUrl: string;
