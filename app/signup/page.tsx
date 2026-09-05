@@ -5,6 +5,7 @@ import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import { signIn, CodigoRequeridoError, EnvioCodigoFallidoError } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
+import { sendWelcomeEmail } from "@/lib/email";
 import styles from "../auth.module.css";
 
 export default async function SignupPage(
@@ -63,6 +64,12 @@ export default async function SignupPage(
         },
       },
     });
+
+    try {
+      await sendWelcomeEmail(email, nombre, agencia);
+    } catch (err) {
+      console.error("No se pudo enviar el email de bienvenida:", err);
+    }
 
     try {
       await signIn("credentials", {

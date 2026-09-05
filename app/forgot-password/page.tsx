@@ -52,7 +52,7 @@ export default async function ForgotPasswordPage(
       const resetUrl = `${baseUrl}/reset-password?token=${token}`;
 
       try {
-        await sendPasswordResetEmail(usuario.email, resetUrl);
+        await sendPasswordResetEmail(usuario.email, usuario.nombre, resetUrl);
       } catch (err) {
         console.error("No se pudo enviar el email de reset:", err);
       }

@@ -39,6 +39,7 @@ async function registrarLockoutYAvisarSiCorresponde(email: string) {
       email,
       count: status.count,
       windowHoras: LOCKOUT_ALERTA_VENTANA_MS / (60 * 60 * 1000),
+      blockMinutos: LOGIN_VENTANA_MS / 60_000,
     });
   } catch (err) {
     console.error("No se pudo enviar la alerta de actividad sospechosa:", err);
