@@ -1,17 +1,9 @@
-import { randomBytes } from "crypto";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { signIn, CODIGO_MAX_INTENTOS } from "@/lib/auth";
-import {
-  DISPOSITIVO_COOKIE_NAME,
-  DISPOSITIVO_MAX_AGE_SEGUNDOS,
-  hashDispositivoToken,
-} from "@/lib/dispositivoConfiable";
-import { VerificarCodigoForm } from "./VerificarCodigoForm";
+import { CODIGO_MAX_INTENTOS, generarCodigoVerificacion, EnvioCodigoFallidoError } from "@/lib/auth";
 import styles from "../../auth.module.css";
+import { VerificarCodigoForm } from "./VerificarCodigoForm";
 
 async function getIntentoVigente(intentoId: string) {
   if (!intentoId) return null;
@@ -28,7 +20,7 @@ async function getIntentoVigente(intentoId: string) {
 
 export default async function VerificarCodigoPage(
   props: {
-    searchParams: Promise<{ intento?: string; callbackUrl?: string; error?: string; intentos?: string }>;
+    searchParams: Promise<{ intento?: string; callbackUrl?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -37,71 +29,36 @@ export default async function VerificarCodigoPage(
   const callbackUrl = params.callbackUrl ?? "/panel";
   const intento = await getIntentoVigente(intentoId);
 
-  async function verificarCodigoAction(formData: FormData) {
+  async function resendCodigoAction(formData: FormData) {
     "use server";
 
     const intentoIdForm = String(formData.get("intentoId") ?? "");
-    const codigo = String(formData.get("codigo") ?? "").trim();
     const callbackUrlForm = String(formData.get("callbackUrl") ?? "") || "/panel";
 
-    let redirectUrl: string;
-    try {
-      redirectUrl = (await signIn("credentials", {
-        modo: "codigo",
-        intentoId: intentoIdForm,
-        codigo,
-        redirectTo: callbackUrlForm,
-        redirect: false,
-      })) as string;
-    } catch (error) {
-      if (error instanceof AuthError) {
-        // authorize() ya registró el intento fallido (o el código venció
-        // solo, por tiempo) — leemos el estado actual de la fila para
-        // decidir qué mensaje mostrar, sin duplicar esa lógica acá.
-        const actual = await prisma.codigoVerificacionLogin.findUnique({
-          where: { id: intentoIdForm },
-        });
-        const qs = new URLSearchParams({ intento: intentoIdForm, callbackUrl: callbackUrlForm });
+    // No hace falta la contraseña de nuevo: si llegó hasta acá es porque
+    // ya la puso bien una vez para este mismo intento. Buscamos el usuario
+    // a partir de la fila anterior (puede estar vencida/agotada, no
+    // importa acá — solo la usamos para saber a quién mandarle el nuevo).
+    const anterior = await prisma.codigoVerificacionLogin.findUnique({
+      where: { id: intentoIdForm },
+      select: { usuario: { select: { id: true, email: true } } },
+    });
 
-        if (!actual || actual.usedAt) {
-          qs.set("error", "invalido");
-        } else if (actual.expiresAt < new Date()) {
-          qs.set("error", "vencido");
-        } else if (actual.intentos >= CODIGO_MAX_INTENTOS) {
-          qs.set("error", "bloqueado");
-        } else {
-          qs.set("error", "incorrecto");
-          qs.set("intentos", String(CODIGO_MAX_INTENTOS - actual.intentos));
-        }
-        redirect(`/login/verificar-codigo?${qs.toString()}`);
+    if (!anterior) {
+      redirect("/login");
+    }
+
+    try {
+      const nuevoIntento = await generarCodigoVerificacion(anterior.usuario);
+      redirect(
+        `/login/verificar-codigo?intento=${nuevoIntento.id}&callbackUrl=${encodeURIComponent(callbackUrlForm)}`
+      );
+    } catch (error) {
+      if (error instanceof EnvioCodigoFallidoError) {
+        redirect("/login?error=EnvioFallido");
       }
       throw error;
     }
-
-    // Código correcto y sesión creada: marcamos este navegador como
-    // confiable para que la próxima vez no vuelva a pedir código.
-    const intentoUsado = await prisma.codigoVerificacionLogin.findUnique({
-      where: { id: intentoIdForm },
-    });
-    if (intentoUsado) {
-      const dispositivoToken = randomBytes(32).toString("hex");
-      await prisma.dispositivoConfiable.create({
-        data: {
-          usuarioId: intentoUsado.usuarioId,
-          tokenHash: hashDispositivoToken(dispositivoToken),
-        },
-      });
-      const cookieStore = await cookies();
-      cookieStore.set(DISPOSITIVO_COOKIE_NAME, dispositivoToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: DISPOSITIVO_MAX_AGE_SEGUNDOS,
-      });
-    }
-
-    redirect(redirectUrl);
   }
 
   return (
@@ -128,15 +85,13 @@ export default async function VerificarCodigoPage(
         ) : (
           <>
             <p className={styles.subtitle}>
-              Te enviamos un código de 6 dígitos a {intento.usuario.email}. Vence en 10 minutos.
+              Te enviamos un código de 4 dígitos a {intento.usuario.email}. Vence en 10 minutos.
             </p>
 
             <VerificarCodigoForm
-              verificarCodigoAction={verificarCodigoAction}
               intentoId={intentoId}
               callbackUrl={callbackUrl}
-              errorTipo={params.error}
-              intentosRestantes={params.intentos}
+              resendCodigoAction={resendCodigoAction}
             />
           </>
         )}

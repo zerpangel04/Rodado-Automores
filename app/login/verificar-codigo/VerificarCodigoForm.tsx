@@ -1,112 +1,181 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check } from "lucide-react";
 import authStyles from "../../auth.module.css";
+import styles from "./verificar-codigo.module.css";
+
+const CODIGO_LEN = 4;
+
+type ErrorTipo = "incorrecto" | "vencido" | "bloqueado" | "invalido";
+
+const MENSAJE_TERMINAL: Record<Exclude<ErrorTipo, "incorrecto">, string> = {
+  vencido: "El código venció. Pedí uno nuevo.",
+  bloqueado: "Demasiados intentos. Pedí un código nuevo.",
+  invalido: "Este código ya no es válido. Pedí uno nuevo.",
+};
 
 export function VerificarCodigoForm({
-  verificarCodigoAction,
   intentoId,
   callbackUrl,
-  errorTipo,
-  intentosRestantes,
+  resendCodigoAction,
 }: {
-  verificarCodigoAction: (formData: FormData) => void;
   intentoId: string;
   callbackUrl: string;
-  errorTipo?: string;
-  intentosRestantes?: string;
+  resendCodigoAction: (formData: FormData) => void;
 }) {
-  const [submitting, setSubmitting] = useState(false);
-  const [clientError, setClientError] = useState("");
-  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
+  const [digits, setDigits] = useState<string[]>(Array(CODIGO_LEN).fill(""));
+  const [status, setStatus] = useState<"idle" | "verifying" | "success">("idle");
+  const [errorTipo, setErrorTipo] = useState<ErrorTipo | null>(null);
+  const [intentosRestantes, setIntentosRestantes] = useState<number | null>(null);
+  const [shake, setShake] = useState(false);
+  const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
-  const bloqueado = errorTipo === "vencido" || errorTipo === "bloqueado" || errorTipo === "invalido";
+  const terminal = errorTipo === "vencido" || errorTipo === "bloqueado" || errorTipo === "invalido";
+  const disabled = status !== "idle" || terminal;
 
-  // El redirect() de verificarCodigoAction vuelve a esta misma ruta (solo
-  // cambian los searchParams), así que Next reutiliza la instancia del
-  // client component en vez de remontarla — sin este efecto, "submitting"
-  // se queda pegado en true y el botón no vuelve a habilitarse.
-  useEffect(() => {
-    setSubmitting(false);
-  }, [errorTipo, intentosRestantes]);
+  function focusBox(i: number) {
+    inputsRef.current[i]?.focus();
+    inputsRef.current[i]?.select();
+  }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    const form = formRef.current;
-    if (!form) return;
-    const codigo = (form.elements.namedItem("codigo") as HTMLInputElement)?.value ?? "";
-    if (!/^\d{6}$/.test(codigo)) {
-      e.preventDefault();
-      setClientError("El código tiene 6 dígitos.");
+  async function verificar(codigoCompleto: string) {
+    setStatus("verifying");
+    setErrorTipo(null);
+
+    try {
+      const res = await fetch("/api/auth/verificar-codigo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ intentoId, codigo: codigoCompleto, callbackUrl }),
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        setStatus("success");
+        setTimeout(() => router.push(data.redirectUrl), 1100);
+        return;
+      }
+
+      setErrorTipo(data.error as ErrorTipo);
+      setIntentosRestantes(typeof data.intentosRestantes === "number" ? data.intentosRestantes : null);
+      setShake(true);
+      setTimeout(() => setShake(false), 450);
+
+      if (data.error === "incorrecto") {
+        setDigits(Array(CODIGO_LEN).fill(""));
+        setStatus("idle");
+        setTimeout(() => focusBox(0), 50);
+      } else {
+        setStatus("idle");
+      }
+    } catch {
+      setErrorTipo("invalido");
+      setStatus("idle");
+    }
+  }
+
+  function handleChange(index: number, raw: string) {
+    if (disabled) return;
+    const value = raw.replace(/\D/g, "");
+
+    if (value.length > 1) {
+      // Pegado o autocompletado de un código entero en una sola casilla.
+      const chars = value.slice(0, CODIGO_LEN).split("");
+      const next = Array(CODIGO_LEN).fill("");
+      chars.forEach((c, i) => (next[i] = c));
+      setDigits(next);
+      if (chars.length === CODIGO_LEN) {
+        verificar(chars.join(""));
+      } else {
+        focusBox(chars.length);
+      }
       return;
     }
-    setClientError("");
-    setSubmitting(true);
+
+    const next = [...digits];
+    next[index] = value;
+    setDigits(next);
+
+    if (value && index < CODIGO_LEN - 1) {
+      focusBox(index + 1);
+    }
+
+    if (value && next.every((d) => d !== "")) {
+      verificar(next.join(""));
+    }
+  }
+
+  function handleKeyDown(index: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Backspace" && !digits[index] && index > 0) {
+      focusBox(index - 1);
+    }
+  }
+
+  if (status === "success") {
+    return (
+      <div className={styles.successWrap}>
+        <div className={styles.successIcon}>
+          <Check size={34} strokeWidth={3} />
+        </div>
+        <div className={styles.successText}>Verificado correctamente</div>
+      </div>
+    );
   }
 
   return (
     <>
-      {errorTipo === "vencido" && (
-        <div className={authStyles.errorBox}>
-          <span>⚠</span>
-          El código venció. Volvé a iniciar sesión para pedir uno nuevo.
-        </div>
-      )}
-      {errorTipo === "bloqueado" && (
-        <div className={authStyles.errorBox}>
-          <span>⚠</span>
-          Demasiados intentos. Volvé a iniciar sesión para pedir un código nuevo.
-        </div>
-      )}
-      {errorTipo === "invalido" && (
-        <div className={authStyles.errorBox}>
-          <span>⚠</span>
-          Este código ya no es válido. Volvé a iniciar sesión.
-        </div>
-      )}
       {errorTipo === "incorrecto" && (
         <div className={authStyles.errorBox}>
           <span>⚠</span>
-          Código incorrecto. Te queda{Number(intentosRestantes) === 1 ? "" : "n"} {intentosRestantes}{" "}
-          intento{Number(intentosRestantes) === 1 ? "" : "s"}.
+          Código incorrecto. Te queda{intentosRestantes === 1 ? "" : "n"} {intentosRestantes} intento
+          {intentosRestantes === 1 ? "" : "s"}.
         </div>
       )}
-      {!errorTipo && clientError && (
+      {terminal && errorTipo && (
         <div className={authStyles.errorBox}>
           <span>⚠</span>
-          {clientError}
+          {MENSAJE_TERMINAL[errorTipo]}
         </div>
       )}
 
-      {!bloqueado && (
-        <form
-          ref={formRef}
-          action={verificarCodigoAction}
-          onSubmit={handleSubmit}
-          className={authStyles.form}
-        >
-          <input type="hidden" name="intentoId" value={intentoId} />
-          <input type="hidden" name="callbackUrl" value={callbackUrl} />
-          <div className={authStyles.field}>
-            <label htmlFor="codigo">Código de 6 dígitos</label>
-            <input
-              id="codigo"
-              name="codigo"
-              type="text"
-              inputMode="numeric"
-              pattern="\d{6}"
-              maxLength={6}
-              required
-              autoComplete="one-time-code"
-              placeholder="000000"
-              autoFocus
-              onChange={() => setClientError("")}
-            />
-          </div>
-          <button type="submit" className={authStyles.submit} disabled={submitting}>
-            {submitting ? "Verificando…" : "Verificar código"}
-          </button>
-        </form>
-      )}
+      <div className={`${styles.codeRow} ${shake ? styles.shake : ""}`}>
+        {digits.map((d, i) => (
+          <input
+            key={i}
+            ref={(el) => {
+              inputsRef.current[i] = el;
+            }}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={CODIGO_LEN}
+            autoComplete={i === 0 ? "one-time-code" : "off"}
+            autoFocus={i === 0}
+            disabled={disabled}
+            value={d}
+            onChange={(e) => handleChange(i, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(i, e)}
+            className={`${styles.codeBox} ${d ? styles.filled : ""} ${
+              errorTipo === "incorrecto" ? styles.errored : ""
+            }`}
+            aria-label={`Dígito ${i + 1} del código`}
+          />
+        ))}
+      </div>
+
+      <p className={styles.verifyingNote}>{status === "verifying" ? "Verificando…" : ""}</p>
+
+      <form action={resendCodigoAction} className={styles.resendRow}>
+        <input type="hidden" name="intentoId" value={intentoId} />
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        ¿No recibiste el código?{" "}
+        <button type="submit" className={styles.resendBtn}>
+          Reenviar
+        </button>
+      </form>
 
       <p className={authStyles.foot}>
         <a href="/login">Volver a iniciar sesión</a>

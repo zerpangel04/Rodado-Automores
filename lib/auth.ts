@@ -17,7 +17,7 @@ export const LOGIN_MAX_INTENTOS = 5;
 export const LOGIN_VENTANA_MS = 15 * 60 * 1000; // 15 minutos
 export const loginRateLimitKey = (email: string) => `login:${email.toLowerCase().trim()}`;
 
-// Verificación de dispositivo nuevo: código de 6 dígitos, un solo uso,
+// Verificación de dispositivo nuevo: código de 4 dígitos, un solo uso,
 // máximo CODIGO_MAX_INTENTOS intentos antes de invalidarlo, vence a los
 // CODIGO_TTL_MS.
 export const CODIGO_MAX_INTENTOS = 5;
@@ -48,6 +48,30 @@ export class EnvioCodigoFallidoError extends CredentialsSignin {}
 // de enumerar qué emails están registrados; comparar siempre contra algo
 // pareja los tiempos.
 const DUMMY_HASH = "$2b$10$8t56epYXlHSgQxg1R.tkjej9tSlGiNaeFVrDvQqYeOA3ajkrk2XNS";
+
+// Genera un código de 4 dígitos, lo manda por email y crea la fila de
+// intento — usado tanto por authorize() (primer envío) como por la acción
+// de "reenviar" en la pantalla de verificación (mismo criterio, sin volver
+// a pedir la contraseña).
+export async function generarCodigoVerificacion(usuario: { id: string; email: string }) {
+  const codigoPlano = randomInt(0, 10_000).toString().padStart(4, "0");
+
+  try {
+    await sendLoginVerificationEmail(usuario.email, codigoPlano);
+  } catch (err) {
+    console.error("No se pudo enviar el código de verificación:", err);
+    throw new EnvioCodigoFallidoError();
+  }
+
+  const codigoHash = await bcrypt.hash(codigoPlano, 10);
+  return prisma.codigoVerificacionLogin.create({
+    data: {
+      usuarioId: usuario.id,
+      codigoHash,
+      expiresAt: new Date(Date.now() + CODIGO_TTL_MS),
+    },
+  });
+}
 
 function usuarioToSessionUser(usuario: {
   id: string;
@@ -83,7 +107,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         // Segundo paso del login en dispositivo nuevo: el usuario ya pasó
         // la contraseña (por eso existe intentoId) y ahora manda el código
-        // de 6 dígitos que le llegó por email.
+        // de 4 dígitos que le llegó por email.
         if (credentials?.modo === "codigo") {
           const intentoId = credentials.intentoId;
           const codigoIngresado = credentials.codigo;
@@ -187,24 +211,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Dispositivo nuevo (o cookie borrada): generamos un código de un
         // solo uso y lo mandamos por email antes de dar la contraseña por
         // buena del todo.
-        const codigoPlano = randomInt(0, 1_000_000).toString().padStart(6, "0");
-
-        try {
-          await sendLoginVerificationEmail(usuario.email, codigoPlano);
-        } catch (err) {
-          console.error("No se pudo enviar el código de verificación:", err);
-          throw new EnvioCodigoFallidoError();
-        }
-
-        const codigoHash = await bcrypt.hash(codigoPlano, 10);
-        const intento = await prisma.codigoVerificacionLogin.create({
-          data: {
-            usuarioId: usuario.id,
-            codigoHash,
-            expiresAt: new Date(Date.now() + CODIGO_TTL_MS),
-          },
-        });
-
+        const intento = await generarCodigoVerificacion(usuario);
         throw new CodigoRequeridoError(intento.id);
       },
     }),
