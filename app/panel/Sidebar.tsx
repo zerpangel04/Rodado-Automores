@@ -26,6 +26,8 @@ import styles from "./panel.module.css";
 import { FxBox } from "./FxBox";
 import { NotificationBell } from "./NotificationBell";
 import { AgencyMark } from "../AgencyMark";
+import { LogoCropModal } from "./LogoCropModal";
+import { LOGO_ALLOWED_TYPES, LOGO_MAX_BYTES } from "@/lib/validation";
 
 const initials = (name: string) =>
   name
@@ -67,19 +69,37 @@ export function Sidebar({
   const [, startTransition] = useTransition();
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoCropTarget, setLogoCropTarget] = useState<{ file: File; url: string } | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
 
     setLogoError(null);
+    if (!LOGO_ALLOWED_TYPES.includes(file.type as (typeof LOGO_ALLOWED_TYPES)[number])) {
+      setLogoError("Usá JPG, PNG o WEBP");
+      return;
+    }
+    if (file.size > LOGO_MAX_BYTES) {
+      setLogoError("La imagen pesa más de 3MB");
+      return;
+    }
+    setLogoCropTarget({ file, url: URL.createObjectURL(file) });
+  }
+
+  function cancelLogoCrop() {
+    if (logoCropTarget) URL.revokeObjectURL(logoCropTarget.url);
+    setLogoCropTarget(null);
+  }
+
+  async function confirmLogoCrop(cropped: File) {
     setUploadingLogo(true);
     try {
       const fd = new FormData();
-      fd.append("file", file);
+      fd.append("file", cropped);
       const res = await fetch("/api/tenant/logo", { method: "POST", body: fd });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
@@ -90,6 +110,8 @@ export function Sidebar({
     } catch {
       setLogoError("Error de conexión subiendo el logo");
     } finally {
+      if (logoCropTarget) URL.revokeObjectURL(logoCropTarget.url);
+      setLogoCropTarget(null);
       setUploadingLogo(false);
     }
   }
@@ -300,6 +322,15 @@ export function Sidebar({
         </form>
       </div>
       </aside>
+
+      {logoCropTarget && (
+        <LogoCropModal
+          imageUrl={logoCropTarget.url}
+          fileName={logoCropTarget.file.name}
+          onCancel={cancelLogoCrop}
+          onConfirm={confirmLogoCrop}
+        />
+      )}
     </>
   );
 }
