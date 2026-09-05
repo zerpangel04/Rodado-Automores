@@ -113,6 +113,12 @@ export function LoginForm({
           Email o contraseña incorrectos.
         </div>
       )}
+      {!bloqueado && !clientError && errorTipo === "EnvioFallido" && (
+        <div className={authStyles.errorBox}>
+          <span>⚠</span>
+          No pudimos enviarte el código de verificación por email. Probá de nuevo en un momento.
+        </div>
+      )}
 
       <form ref={formRef} action={loginAction} onSubmit={handleSubmit} className={authStyles.form}>
         <input type="hidden" name="callbackUrl" value={callbackUrl} />

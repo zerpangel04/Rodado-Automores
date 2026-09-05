@@ -1,7 +1,14 @@
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { AuthError } from "next-auth";
-import { signIn, LOGIN_MAX_INTENTOS, LOGIN_VENTANA_MS, loginRateLimitKey } from "@/lib/auth";
+import {
+  signIn,
+  LOGIN_MAX_INTENTOS,
+  LOGIN_VENTANA_MS,
+  loginRateLimitKey,
+  CodigoRequeridoError,
+  EnvioCodigoFallidoError,
+} from "@/lib/auth";
 import { getRateLimitStatus } from "@/lib/rateLimit";
 import { LoginForm } from "./LoginForm";
 import styles from "./login.module.css";
@@ -30,13 +37,25 @@ export default async function LoginPage(
   async function loginAction(formData: FormData) {
     "use server";
     const email = formData.get("email");
+    const callbackUrl = (formData.get("callbackUrl") as string) || "/panel";
     try {
       await signIn("credentials", {
         email,
         password: formData.get("password"),
-        redirectTo: (formData.get("callbackUrl") as string) || "/panel",
+        redirectTo: callbackUrl,
       });
     } catch (error) {
+      if (error instanceof CodigoRequeridoError) {
+        // Contraseña correcta pero dispositivo nuevo: el código ya se
+        // mandó por email desde authorize(), acá solo redirigimos a la
+        // pantalla que lo pide.
+        redirect(
+          `/login/verificar-codigo?intento=${error.intentoId}&callbackUrl=${encodeURIComponent(callbackUrl)}`
+        );
+      }
+      if (error instanceof EnvioCodigoFallidoError) {
+        redirect("/login?error=EnvioFallido");
+      }
       if (error instanceof AuthError) {
         // authorize() ya registró (o bloqueó) el intento — leemos ese
         // mismo estado acá para decidir qué mensaje mostrar, sin duplicar

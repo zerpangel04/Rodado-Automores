@@ -3,7 +3,7 @@ import Image from "next/image";
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { signIn } from "@/lib/auth";
+import { signIn, CodigoRequeridoError, EnvioCodigoFallidoError } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import styles from "../auth.module.css";
 
@@ -71,6 +71,17 @@ export default async function SignupPage(
         redirectTo: "/panel",
       });
     } catch (error) {
+      if (error instanceof CodigoRequeridoError) {
+        // Cuenta recién creada = dispositivo nuevo siempre. El código ya
+        // se mandó por email desde authorize(); lo llevamos a la misma
+        // pantalla que usa el login para pedirlo.
+        redirect(
+          `/login/verificar-codigo?intento=${error.intentoId}&callbackUrl=${encodeURIComponent("/panel")}`
+        );
+      }
+      if (error instanceof EnvioCodigoFallidoError) {
+        redirect("/login?error=EnvioFallido");
+      }
       if (error instanceof AuthError) {
         redirect("/login");
       }
