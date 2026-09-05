@@ -27,7 +27,7 @@ export function VerificarCodigoForm({
 }) {
   const router = useRouter();
   const [digits, setDigits] = useState<string[]>(Array(CODIGO_LEN).fill(""));
-  const [status, setStatus] = useState<"idle" | "verifying" | "success">("idle");
+  const [status, setStatus] = useState<"idle" | "verifying" | "correct" | "success">("idle");
   const [errorTipo, setErrorTipo] = useState<ErrorTipo | null>(null);
   const [intentosRestantes, setIntentosRestantes] = useState<number | null>(null);
   const [shake, setShake] = useState(false);
@@ -54,8 +54,14 @@ export function VerificarCodigoForm({
       const data = await res.json();
 
       if (data.ok) {
-        setStatus("success");
-        setTimeout(() => router.push(data.redirectUrl), 1100);
+        // Los casilleros pasan a verde primero (feedback inmediato sobre
+        // el propio código) y recién después se reemplazan por el check
+        // animado, en vez de saltar directo a la pantalla final.
+        setStatus("correct");
+        setTimeout(() => {
+          setStatus("success");
+          setTimeout(() => router.push(data.redirectUrl), 800);
+        }, 500);
         return;
       }
 
@@ -128,14 +134,14 @@ export function VerificarCodigoForm({
   return (
     <>
       {errorTipo === "incorrecto" && (
-        <div className={authStyles.errorBox}>
+        <div className={`${authStyles.errorBox} ${styles.errorEnter}`}>
           <span>⚠</span>
           Código incorrecto. Te queda{intentosRestantes === 1 ? "" : "n"} {intentosRestantes} intento
           {intentosRestantes === 1 ? "" : "s"}.
         </div>
       )}
       {terminal && errorTipo && (
-        <div className={authStyles.errorBox}>
+        <div className={`${authStyles.errorBox} ${styles.errorEnter}`}>
           <span>⚠</span>
           {MENSAJE_TERMINAL[errorTipo]}
         </div>
@@ -158,9 +164,9 @@ export function VerificarCodigoForm({
             value={d}
             onChange={(e) => handleChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
-            className={`${styles.codeBox} ${d ? styles.filled : ""} ${
-              errorTipo === "incorrecto" ? styles.errored : ""
-            }`}
+            className={`${styles.codeBox} ${
+              status === "correct" ? styles.correct : d ? styles.filled : ""
+            } ${errorTipo === "incorrecto" && !digits.some(Boolean) ? styles.errored : ""}`}
             aria-label={`Dígito ${i + 1} del código`}
           />
         ))}

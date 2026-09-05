@@ -3,6 +3,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { CODIGO_MAX_INTENTOS, generarCodigoVerificacion, EnvioCodigoFallidoError } from "@/lib/auth";
 import styles from "../../auth.module.css";
+import vcStyles from "./verificar-codigo.module.css";
 import { VerificarCodigoForm } from "./VerificarCodigoForm";
 
 async function getIntentoVigente(intentoId: string) {
@@ -64,37 +65,39 @@ export default async function VerificarCodigoPage(
   return (
     <div className={styles.authScreen}>
       <div className={styles.authCard}>
-        <div className={styles.brand}>
-          <div className={styles.logoMark}>
-            <Image src="/logo-icono.png" alt="" width={32} height={32} aria-hidden="true" unoptimized />
-          </div>
-          <span className="disp">Rodado</span>
-        </div>
-        <h1 className={`disp ${styles.title}`}>Verificá tu dispositivo</h1>
-
-        {!intento ? (
-          <>
-            <p className={styles.subtitle}>Este código venció o ya no es válido.</p>
-            <div className={styles.errorBox}>
-              Volvé a iniciar sesión para que te mandemos un código nuevo.
+        <div className={vcStyles.screenEnter}>
+          <div className={styles.brand}>
+            <div className={styles.logoMark}>
+              <Image src="/logo-icono.png" alt="" width={32} height={32} aria-hidden="true" unoptimized />
             </div>
-            <p className={styles.foot}>
-              <a href="/login">Volver a iniciar sesión</a>
-            </p>
-          </>
-        ) : (
-          <>
-            <p className={styles.subtitle}>
-              Te enviamos un código de 4 dígitos a {intento.usuario.email}. Vence en 10 minutos.
-            </p>
+            <span className="disp">Rodado</span>
+          </div>
+          <h1 className={`disp ${styles.title}`}>Verificá tu dispositivo</h1>
 
-            <VerificarCodigoForm
-              intentoId={intentoId}
-              callbackUrl={callbackUrl}
-              resendCodigoAction={resendCodigoAction}
-            />
-          </>
-        )}
+          {!intento ? (
+            <>
+              <p className={styles.subtitle}>Este código venció o ya no es válido.</p>
+              <div className={styles.errorBox}>
+                Volvé a iniciar sesión para que te mandemos un código nuevo.
+              </div>
+              <p className={styles.foot}>
+                <a href="/login">Volver a iniciar sesión</a>
+              </p>
+            </>
+          ) : (
+            <>
+              <p className={styles.subtitle}>
+                Te enviamos un código de 4 dígitos a {intento.usuario.email}. Vence en 10 minutos.
+              </p>
+
+              <VerificarCodigoForm
+                intentoId={intentoId}
+                callbackUrl={callbackUrl}
+                resendCodigoAction={resendCodigoAction}
+              />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,33 @@
+.screenEnter {
+  animation: screenFadeIn 0.45s ease both;
+}
+
+@keyframes screenFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.errorEnter {
+  animation: errorFadeIn 0.25s ease both;
+}
+
+@keyframes errorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .codeRow {
   display: flex;
   gap: 12px;
@@ -52,7 +82,8 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)) border-box;
   outline: none;
   caret-color: var(--accent);
-  transition: transform 0.15s ease, box-shadow 0.25s ease;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease,
+    background 0.3s ease, opacity 0.3s ease;
 }
 
 .codeBox:focus {
@@ -103,6 +134,16 @@
   transform: none;
 }
 
+/* Código correcto: los 4 casilleros pasan a verde antes del check final. */
+.codeBox.correct {
+  background:
+    linear-gradient(var(--input-bg), var(--input-bg)) padding-box,
+    linear-gradient(180deg, #86efac, var(--success)) border-box;
+  box-shadow: 0 0 18px rgba(74, 222, 128, 0.4), 0 0 0 3px rgba(74, 222, 128, 0.14);
+  animation: none;
+  transform: scale(1.04);
+}
+
 .codeBox:disabled {
   opacity: 0.55;
 }
@@ -122,6 +163,7 @@
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .resendBtn:hover:not(:disabled) {
