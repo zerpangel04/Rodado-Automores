@@ -66,7 +66,7 @@ export default async function ForgotPasswordPage(
       <div className={styles.authCard}>
         <div className={styles.brand}>
           <div className={styles.logoMark}>
-            <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+            <Image src="/logo-icono.png" alt="" width={32} height={32} aria-hidden="true" unoptimized />
           </div>
           <span className="disp">Rodado</span>
         </div>

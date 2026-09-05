@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./panel.module.css";
 
 // Placeholder mostrado mientras SidebarData resuelve sus queries (lista de
@@ -15,6 +16,12 @@ export function SidebarSkeleton() {
       </div>
 
       <aside className={styles.sidebar}>
+        <div className={styles.brandRow}>
+          <div className={styles.brandMark}>
+            <Image src="/logo-icono.png" alt="" width={26} height={26} aria-hidden="true" unoptimized />
+          </div>
+          <span className={styles.brandName}>Rodado</span>
+        </div>
         <div className={styles.workspaceWrap}>
           <div className={styles.workspace}>
             <div className={styles.skeletonBlock} style={{ width: 30, height: 30, borderRadius: 9 }} />

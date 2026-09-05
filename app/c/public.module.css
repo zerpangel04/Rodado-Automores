@@ -134,6 +134,32 @@
   gap: 9px;
 }
 
+/* Marca de Rodado (la plataforma) — atribución chica, separada de
+   .agencyMark que es la identidad de CADA agencia cliente. */
+.poweredBy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.poweredByMark {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.poweredByMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 .headerPhone {
   font-size: 12.5px;
   font-weight: 600;

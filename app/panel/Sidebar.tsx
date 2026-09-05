@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -143,6 +144,12 @@ export function Sidebar({
       />
 
       <aside className={`${styles.sidebar} ${mobileOpen ? styles.mobileOpen : ""}`}>
+      <div className={styles.brandRow}>
+        <div className={styles.brandMark}>
+          <Image src="/logo-icono.png" alt="" width={26} height={26} aria-hidden="true" unoptimized />
+        </div>
+        <span className={styles.brandName}>Rodado</span>
+      </div>
       <div className={styles.workspaceWrap} ref={wrapRef}>
         <button
           type="button"

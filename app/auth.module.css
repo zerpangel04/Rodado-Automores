@@ -33,18 +33,15 @@
 .logoMark {
   width: 32px;
   height: 32px;
-  border-radius: 9px;
-  background: var(--accent-mark-grad);
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: none;
-  overflow: hidden;
 }
 
 .logoMark img {
-  width: 26px;
-  height: 26px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 

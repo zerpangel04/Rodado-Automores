@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./public.module.css";
 import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
 
@@ -33,6 +34,12 @@ export function PublicHeader({
         </div>
 
         <div className={styles.headerRight}>
+          <div className={styles.poweredBy}>
+            <div className={styles.poweredByMark}>
+              <Image src="/logo-icono.png" alt="" width={18} height={18} aria-hidden="true" unoptimized />
+            </div>
+            Con Rodado
+          </div>
           {sucursalesCount > 0 && (
             <div className={styles.headerInfo}>
               {sucursalesCount} {sucursalesCount === 1 ? "sucursal" : "sucursales"}

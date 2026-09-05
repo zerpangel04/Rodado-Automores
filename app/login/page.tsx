@@ -85,7 +85,7 @@ export default async function LoginPage(
         <div className={styles.headerRow}>
           <div className={styles.brand}>
             <div className={styles.logoMark}>
-              <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
+              <Image src="/logo-icono.png" alt="" width={30} height={30} aria-hidden="true" unoptimized />
             </div>
             <span className={styles.brandName}>Rodado</span>
           </div>
@@ -132,7 +132,7 @@ export default async function LoginPage(
         <div className={styles.rightPattern} />
 
         <div className={styles.rightMark}>
-          <Image src="/logo-rodado.png" alt="" width={40} height={40} aria-hidden="true" />
+          <Image src="/logo-con-texto.png" alt="Rodado" width={135} height={96} aria-hidden="true" unoptimized />
         </div>
 
         <div className={styles.rightContent}>

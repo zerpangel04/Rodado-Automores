@@ -79,6 +79,20 @@
   object-fit: contain;
 }
 
+/* Logo completo (ícono + "RODADO") — nav y footer tienen espacio horizontal
+   de sobra para el lockup entero, sin necesidad de un texto aparte. */
+.logoCombo {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+.logoCombo img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
 .logoText {
   font-family: var(--font-display), sans-serif;
   font-weight: 700;

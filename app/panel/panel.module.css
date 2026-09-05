@@ -239,6 +239,39 @@
 /* Selector de sucursal (workspace switcher): deja elegir "Todas las
    sucursales" (vista consolidada) o una sucursal puntual para filtrar
    Stock, Leads, Ventas y Reportes. */
+/* Marca de Rodado (la plataforma) arriba del switcher de agencia — no
+   confundir con .workspaceMark, que es la inicial de CADA agencia cliente. */
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 0 2px;
+}
+
+.brandMark {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brandMark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brandName {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+}
+
 .workspaceWrap {
   position: relative;
   margin-bottom: 18px;

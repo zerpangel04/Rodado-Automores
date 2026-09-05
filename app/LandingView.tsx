@@ -213,11 +213,8 @@ export function LandingView() {
 
       <nav className={styles.nav}>
         <div className={styles.navInner}>
-          <div className={styles.logo}>
-            <div className={styles.logoMark}>
-              <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
-            </div>
-            <div className={`${styles.logoText} disp`}>Rodado</div>
+          <div className={styles.logoCombo}>
+            <Image src="/logo-con-texto.png" alt="Rodado" width={56} height={40} priority unoptimized />
           </div>
           <div className={styles.navLinks}>
             <a href="#plataforma">Plataforma</a>
@@ -752,13 +749,8 @@ export function LandingView() {
 
       <footer className={styles.footer}>
         <div className={`${styles.wrap} ${styles.footerInner}`}>
-          <div className={styles.logo}>
-            <div className={styles.logoMark}>
-              <Image src="/logo-rodado.png" alt="Rodado" width={64} height={64} />
-            </div>
-            <div className="disp" style={{ fontSize: 15, fontWeight: 700 }}>
-              Rodado
-            </div>
+          <div className={styles.logoCombo}>
+            <Image src="/logo-con-texto.png" alt="Rodado" width={56} height={40} unoptimized />
           </div>
           <div className={styles.tagline}>La plataforma comercial para concesionarias argentinas</div>
           <div className={styles.footerLinks}>
