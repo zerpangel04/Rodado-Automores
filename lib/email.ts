@@ -58,20 +58,25 @@ function emailShellOpen(preheader: string, title: string) {
      reafirma los mismos fondos oscuros que ya están en línea, para que
      esa inversión automática no le gane a la mano. */
   @media (prefers-color-scheme: dark) {
-    body, .bg-page { background-color:#0b0d10 !important; }
+    body, .bg-page { background-color:#0b0d10 !important; background-image:linear-gradient(#0b0d10, #0b0d10) !important; }
     .wrap { background-color:#171b21 !important; }
     .bg-inset { background-color:#0f1216 !important; }
   }
+  /* Gmail no respeta color-scheme y a veces invierte igual — un
+     background-image sólido junto al background-color es un truco
+     conocido que en algunos casos hace que Gmail respete el color en
+     vez de invertirlo. No es garantía, es un intento más. */
+  .bg-page { background-image:linear-gradient(#0b0d10, #0b0d10); }
 </style>
 </head>
 <body style="margin:0;padding:0;background-color:#0b0d10;">
 <div style="display:none;font-size:1px;color:#0b0d10;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0b0d10" class="bg-page" style="background-color:#0b0d10;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0b0d10" class="bg-page" style="background-color:#0b0d10;background-image:linear-gradient(#0b0d10,#0b0d10);">
   <tr>
     <td align="center" style="padding:32px 12px;">
       <table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#171b21" style="width:600px;max-width:600px;background-color:#171b21;border:1px solid #2b323c;border-radius:14px;">
         <tr>
-          <td bgcolor="#0b0d10" class="bg-page" style="background-color:#0b0d10;padding:24px 32px;border-radius:14px 14px 0 0;border-bottom:1px solid #2b323c;">
+          <td bgcolor="#0b0d10" class="bg-page" style="background-color:#0b0d10;background-image:linear-gradient(#0b0d10,#0b0d10);padding:24px 32px;border-radius:14px 14px 0 0;border-bottom:1px solid #2b323c;">
             <img src="${EMAIL_LOGO_URL}" width="150" alt="Rodado" style="display:block;width:150px;max-width:150px;height:auto;border:0;" />
           </td>
         </tr>
@@ -85,7 +90,7 @@ function emailShellClose() {
           </td>
         </tr>
         <tr>
-          <td class="pad bg-page" bgcolor="#0b0d10" style="background-color:#0b0d10;padding:26px 40px 30px;border-top:1px solid #2b323c;border-radius:0 0 14px 14px;">
+          <td class="pad bg-page" bgcolor="#0b0d10" style="background-color:#0b0d10;background-image:linear-gradient(#0b0d10,#0b0d10);padding:26px 40px 30px;border-top:1px solid #2b323c;border-radius:0 0 14px 14px;">
             <p style="margin:0 0 12px;font-family:${FONT};font-size:13px;line-height:20px;color:#8b94a1;">¿Necesitás una mano? Escribinos por <a href="https://wa.me/541130261955" style="color:#f0a13c;text-decoration:underline;">WhatsApp</a>.</p>
             <p style="margin:0 0 14px;font-family:${FONT};font-size:12px;line-height:18px;color:#98a1ad;">Este mail se envía de forma automática: por favor no respondas a esta dirección.</p>
             <p style="margin:0 0 14px;font-family:${FONT};font-size:12px;line-height:18px;color:#98a1ad;">
