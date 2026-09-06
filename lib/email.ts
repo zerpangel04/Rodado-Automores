@@ -91,7 +91,7 @@ function emailShellClose() {
         </tr>
         <tr>
           <td class="pad bg-page" bgcolor="#0b0d10" style="background-color:#0b0d10;background-image:linear-gradient(#0b0d10,#0b0d10);padding:26px 40px 30px;border-top:1px solid #2b323c;border-radius:0 0 14px 14px;">
-            <p style="margin:0 0 12px;font-family:${FONT};font-size:13px;line-height:20px;color:#8b94a1;">¿Necesitás una mano? Escribinos por <a href="https://wa.me/541130261955" style="color:#f0a13c;text-decoration:underline;">WhatsApp</a>.</p>
+            <p style="margin:0 0 12px;font-family:${FONT};font-size:13px;line-height:20px;color:#8b94a1;">¿Necesitás una mano? Escribinos por <a href="https://wa.me/541130261955" style="color:#f0a13c;text-decoration:underline;">WhatsApp</a> o a <a href="mailto:soporte@rodado.com.ar" style="color:#f0a13c;text-decoration:underline;">soporte@rodado.com.ar</a>.</p>
             <p style="margin:0 0 14px;font-family:${FONT};font-size:12px;line-height:18px;color:#98a1ad;">Este mail se envía de forma automática: por favor no respondas a esta dirección.</p>
             <p style="margin:0 0 14px;font-family:${FONT};font-size:12px;line-height:18px;color:#98a1ad;">
               <a href="https://www.instagram.com/rodado.app" style="color:#8b94a1;text-decoration:none;">Instagram</a>
