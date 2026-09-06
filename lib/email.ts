@@ -35,11 +35,15 @@ function emailShellOpen(preheader: string, title: string) {
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="x-apple-disable-message-reformatting" />
-<meta name="color-scheme" content="dark light" />
-<meta name="supported-color-schemes" content="dark light" />
+<meta name="color-scheme" content="dark" />
+<meta name="supported-color-schemes" content="dark" />
 <title>${title}</title>
 <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
 <style type="text/css">
+  :root {
+    color-scheme: dark;
+    supported-color-schemes: dark;
+  }
   body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;}
   img{-ms-interpolation-mode:bicubic;border:0;outline:none;text-decoration:none;}
   a{color:#f0a13c;}
@@ -49,16 +53,25 @@ function emailShellOpen(preheader: string, title: string) {
     .code{font-size:34px !important;letter-spacing:8px !important;}
     .stack{display:block !important;width:100% !important;padding:0 0 12px 0 !important;}
   }
+  /* Algunos clientes (Gmail, sobre todo) ignoran color-scheme/
+     supported-color-schemes y "ayudan" invirtiendo colores igual — esto
+     reafirma los mismos fondos oscuros que ya están en línea, para que
+     esa inversión automática no le gane a la mano. */
+  @media (prefers-color-scheme: dark) {
+    body, .bg-page { background-color:#0b0d10 !important; }
+    .wrap { background-color:#171b21 !important; }
+    .bg-inset { background-color:#0f1216 !important; }
+  }
 </style>
 </head>
 <body style="margin:0;padding:0;background-color:#0b0d10;">
 <div style="display:none;font-size:1px;color:#0b0d10;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;&nbsp;&#8203;</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0b0d10" style="background-color:#0b0d10;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0b0d10" class="bg-page" style="background-color:#0b0d10;">
   <tr>
     <td align="center" style="padding:32px 12px;">
       <table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#171b21" style="width:600px;max-width:600px;background-color:#171b21;border:1px solid #2b323c;border-radius:14px;">
         <tr>
-          <td bgcolor="#0b0d10" style="background-color:#0b0d10;padding:24px 32px;border-radius:14px 14px 0 0;border-bottom:1px solid #2b323c;">
+          <td bgcolor="#0b0d10" class="bg-page" style="background-color:#0b0d10;padding:24px 32px;border-radius:14px 14px 0 0;border-bottom:1px solid #2b323c;">
             <img src="${EMAIL_LOGO_URL}" width="150" alt="Rodado" style="display:block;width:150px;max-width:150px;height:auto;border:0;" />
           </td>
         </tr>
@@ -72,7 +85,7 @@ function emailShellClose() {
           </td>
         </tr>
         <tr>
-          <td class="pad" bgcolor="#0b0d10" style="background-color:#0b0d10;padding:26px 40px 30px;border-top:1px solid #2b323c;border-radius:0 0 14px 14px;">
+          <td class="pad bg-page" bgcolor="#0b0d10" style="background-color:#0b0d10;padding:26px 40px 30px;border-top:1px solid #2b323c;border-radius:0 0 14px 14px;">
             <p style="margin:0 0 12px;font-family:${FONT};font-size:13px;line-height:20px;color:#8b94a1;">¿Necesitás una mano? Escribinos por <a href="https://wa.me/541130261955" style="color:#f0a13c;text-decoration:underline;">WhatsApp</a>.</p>
             <p style="margin:0 0 14px;font-family:${FONT};font-size:12px;line-height:18px;color:#98a1ad;">Este mail se envía de forma automática: por favor no respondas a esta dirección.</p>
             <p style="margin:0 0 14px;font-family:${FONT};font-size:12px;line-height:18px;color:#98a1ad;">
@@ -124,7 +137,7 @@ function detailsTable(rows: Array<[string, string]>) {
                         </tr>`
     )
     .join("");
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" style="border:1px solid #2b323c;border-radius:8px;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" class="bg-inset" style="background-color:#0f1216;border:1px solid #2b323c;border-radius:8px;">
                     <tr><td style="padding:6px 20px;">
                       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                         ${filas}
@@ -182,7 +195,7 @@ export async function sendLoginVerificationEmail(to: string, codigo: string) {
     bodyText(
       "Detectamos un ingreso desde un dispositivo que no reconocemos. Ingresá este código para confirmar que sos vos:"
     ) +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" style="margin:26px 0 22px;background-color:#0f1216;border:1px solid #2b323c;border-radius:10px;">
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" class="bg-inset" style="margin:26px 0 22px;background-color:#0f1216;border:1px solid #2b323c;border-radius:10px;">
               <tr><td align="center" style="padding:28px 20px 30px;">
                 <p class="code" style="margin:0;font-family:${FONT};font-size:44px;line-height:52px;font-weight:700;letter-spacing:14px;color:#f0a13c;text-indent:14px;">${codigo}</p>
                 <p style="margin:12px 0 0;font-family:${FONT};font-size:13px;line-height:18px;color:#8b94a1;">Vence en 10 minutos</p>
@@ -241,7 +254,7 @@ export async function sendSuspiciousActivityAlert({
     bodyText(
       `Registramos <strong style="color:#ffffff;">${count} bloqueos por intentos fallidos de login</strong> en esta cuenta en las últimas ${windowHoras} horas.`
     ) +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" style="margin:24px 0;background-color:#0f1216;border:1px solid #2b323c;border-left:4px solid #f0a13c;border-radius:8px;">
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" class="bg-inset" style="margin:24px 0;background-color:#0f1216;border:1px solid #2b323c;border-left:4px solid #f0a13c;border-radius:8px;">
               <tr><td style="padding:18px 20px;">
                 <p style="margin:0 0 6px;font-family:${FONT};font-size:14px;line-height:20px;font-weight:700;color:#f0a13c;">Bloqueamos el acceso temporalmente</p>
                 <p style="margin:0;font-family:${FONT};font-size:14px;line-height:21px;color:#b9c0ca;">Como medida preventiva, esta cuenta queda bloqueada por ${blockMinutos} minutos cada vez que se repiten los intentos fallidos. Nadie ingresó a la cuenta.</p>
@@ -301,7 +314,7 @@ export async function sendWelcomeEmail(to: string, nombre: string, agenciaNombre
     bodyText(
       `Ya podés gestionar el stock, las ventas y la documentación de ${agenciaNombre} desde un solo lugar. Estos son los tres pasos para arrancar:`
     ) +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" style="margin:24px 0;background-color:#0f1216;border:1px solid #2b323c;border-radius:8px;">
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#0f1216" class="bg-inset" style="margin:24px 0;background-color:#0f1216;border:1px solid #2b323c;border-radius:8px;">
               <tr><td style="padding:8px 20px;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                   ${pasosHtml}
