@@ -79,6 +79,12 @@ export default async function LoginPage(
     }
   }
 
+  async function googleSignInAction(formData: FormData) {
+    "use server";
+    const callbackUrl = (formData.get("callbackUrl") as string) || "/panel";
+    await signIn("google", { redirectTo: callbackUrl });
+  }
+
   return (
     <div className={styles.wrap}>
       <div className={styles.left}>
@@ -104,6 +110,7 @@ export default async function LoginPage(
 
           <LoginForm
             loginAction={loginAction}
+            googleSignInAction={googleSignInAction}
             callbackUrl={params.callbackUrl ?? ""}
             errorTipo={params.error}
             intentos={params.intentos}

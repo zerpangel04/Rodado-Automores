@@ -2,6 +2,7 @@ import { randomInt } from "crypto";
 import { cookies } from "next/headers";
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
@@ -51,6 +52,11 @@ async function registrarLockoutYAvisarSiCorresponde(email: string) {
 // CODIGO_TTL_MS.
 export const CODIGO_MAX_INTENTOS = 5;
 export const CODIGO_TTL_MS = 10 * 60 * 1000; // 10 minutos
+
+// Cuánto tiempo tiene alguien que entró con Google por primera vez para
+// completar el nombre de la agencia antes de tener que volver a pasar
+// por el consentimiento de Google.
+export const GOOGLE_SIGNUP_TTL_MS = 15 * 60 * 1000; // 15 minutos
 
 // Lanzado desde authorize() cuando la contraseña es correcta pero el
 // dispositivo no está marcado como confiable — ya se generó y mandó el
@@ -123,6 +129,10 @@ function usuarioToSessionUser(usuario: {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
     Credentials({
       credentials: {
         email: { label: "Email", type: "email" },
@@ -252,7 +262,45 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider !== "google") return true;
+
+      // Google es un proveedor de confianza: solo autolinkeamos a una
+      // cuenta existente si el email viene verificado por Google, no
+      // por lo que haya puesto el usuario. Sin esto, alguien podría en
+      // teoría intentar entrar con un email ajeno sin haberlo probado.
+      const email = profile?.email?.toLowerCase().trim();
+      if (!email || profile?.email_verified !== true) return false;
+
+      const existente = await prisma.usuario.findUnique({ where: { email } });
+      if (existente) return true;
+
+      // Email nuevo: no alcanza el perfil de Google para crear el
+      // Tenant (falta el nombre de la agencia) — se guarda el intento y
+      // se manda a completarlo antes de terminar de crear la cuenta.
+      const pendiente = await prisma.googleSignupPendiente.create({
+        data: {
+          email,
+          nombre: (profile?.name ?? user.name ?? "").trim() || "Sin nombre",
+          expiresAt: new Date(Date.now() + GOOGLE_SIGNUP_TTL_MS),
+        },
+      });
+      return `/signup/completar-google?intento=${pendiente.id}`;
+    },
+    async jwt({ token, user, account }) {
+      if (user && account?.provider === "google") {
+        const email = user.email?.toLowerCase().trim();
+        const usuario = email
+          ? await prisma.usuario.findUnique({ where: { email }, include: { tenant: true } })
+          : null;
+        if (usuario) {
+          token.sub = usuario.id;
+          token.tenantId = usuario.tenantId;
+          token.tenantNombre = usuario.tenant.nombre;
+          token.rol = usuario.rol;
+        }
+        return token;
+      }
       if (user) {
         token.tenantId = user.tenantId;
         token.tenantNombre = user.tenantNombre;

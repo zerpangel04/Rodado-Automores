@@ -179,6 +179,20 @@ model CodigoVerificacionLogin {
   @@index([usuarioId])
 }
 
+// Login con Google de un email que todavía no tiene cuenta: no alcanza
+// el perfil de Google (falta el nombre de la agencia) para crear el
+// Tenant, así que se guarda acá temporalmente mientras el usuario
+// completa ese dato en /signup/completar-google. Vencido o usado, ya
+// no sirve — hay que volver a pasar por el consentimiento de Google.
+model GoogleSignupPendiente {
+  id        String    @id @default(cuid())
+  email     String
+  nombre    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
 // Rate limiting genérico (login, formulario de contacto público, chat IA).
 // Cada intento/request relevante inserta una fila; lib/rateLimit.ts cuenta
 // cuántas hay para una "key" dentro de una ventana de tiempo y borra las

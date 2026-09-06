@@ -5,8 +5,6 @@ import authStyles from "../auth.module.css";
 import styles from "./login.module.css";
 import { GoogleIcon } from "./GoogleIcon";
 
-const GOOGLE_PRONTO_MSG = "Muy pronto vas a poder entrar con tu cuenta de Google.";
-
 function formatMMSS(totalSeconds: number) {
   const s = Math.max(0, Math.ceil(totalSeconds));
   const m = Math.floor(s / 60);
@@ -16,12 +14,14 @@ function formatMMSS(totalSeconds: number) {
 
 export function LoginForm({
   loginAction,
+  googleSignInAction,
   callbackUrl,
   errorTipo,
   intentos,
   esperaSegundosInicial,
 }: {
   loginAction: (formData: FormData) => void;
+  googleSignInAction: (formData: FormData) => void;
   callbackUrl: string;
   errorTipo?: string;
   intentos?: string;
@@ -37,19 +37,7 @@ export function LoginForm({
   const [remember, setRemember] = useState(true);
   const [clientError, setClientError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [googleNote, setGoogleNote] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const googleNoteTimer = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    return () => clearTimeout(googleNoteTimer.current);
-  }, []);
-
-  function handleGoogleClick() {
-    setGoogleNote(true);
-    clearTimeout(googleNoteTimer.current);
-    googleNoteTimer.current = setTimeout(() => setGoogleNote(false), 3000);
-  }
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -117,6 +105,18 @@ export function LoginForm({
         <div className={authStyles.errorBox}>
           <span>⚠</span>
           No pudimos enviarte el código de verificación por email. Probá de nuevo en un momento.
+        </div>
+      )}
+      {!bloqueado && !clientError && errorTipo === "GoogleSignupVencido" && (
+        <div className={authStyles.errorBox}>
+          <span>⚠</span>
+          El link para completar tu cuenta venció. Volvé a entrar con Google para generar uno nuevo.
+        </div>
+      )}
+      {!bloqueado && !clientError && errorTipo === "EmailEnUso" && (
+        <div className={authStyles.errorBox}>
+          <span>⚠</span>
+          Ese email ya tiene una cuenta. Iniciá sesión normalmente.
         </div>
       )}
 
@@ -188,17 +188,13 @@ export function LoginForm({
         <span className={styles.orLine} />
       </div>
 
-      <button
-        type="button"
-        className={styles.googleBtn}
-        aria-disabled="true"
-        title={GOOGLE_PRONTO_MSG}
-        onClick={handleGoogleClick}
-      >
-        <GoogleIcon />
-        Entrar con Google
-      </button>
-      {googleNote && <div className={styles.googleNote}>{GOOGLE_PRONTO_MSG}</div>}
+      <form action={googleSignInAction}>
+        <input type="hidden" name="callbackUrl" value={callbackUrl} />
+        <button type="submit" className={styles.googleBtn}>
+          <GoogleIcon />
+          Entrar con Google
+        </button>
+      </form>
     </>
   );
 }
