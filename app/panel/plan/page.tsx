@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getPlanTenant } from "@/lib/planes";
 import styles from "../panel.module.css";
 import { KpiBar } from "../KpiBar";
 import planStyles from "./plan.module.css";
@@ -35,15 +36,13 @@ export default async function PlanPage() {
     );
   }
 
-  const [tenant, sucursalesCount, vehiculosCount, usuariosCount, planes] = await Promise.all([
-    prisma.tenant.findUniqueOrThrow({ where: { id: tenantId }, include: { plan: true } }),
+  const [plan, sucursalesCount, vehiculosCount, usuariosCount, planes] = await Promise.all([
+    getPlanTenant(tenantId),
     prisma.sucursal.count({ where: { tenantId } }),
     prisma.vehiculo.count({ where: { tenantId } }),
     prisma.usuario.count({ where: { tenantId } }),
     prisma.plan.findMany({ orderBy: { createdAt: "asc" } }),
   ]);
-
-  const plan = tenant.plan;
 
   return (
     <>

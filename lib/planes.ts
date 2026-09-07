@@ -1,14 +1,39 @@
 import { prisma } from "@/lib/prisma";
 import type { Plan } from "@prisma/client";
 
-// Trae el plan comercial vigente de un tenant. Nunca null: todo tenant
-// tiene un planId válido (default "basico" en el schema).
+// Plan Básico "hardcodeado" como último recurso: solo se usa si ni el
+// tenant ni la fila del plan Básico aparecen en la base (no debería pasar
+// nunca en operación normal). Evita que una sesión con un tenantId
+// inválido/huérfano tire un 500 en vez de degradar a los límites más
+// restrictivos.
+const PLAN_BASICO_FALLBACK: Plan = {
+  id: "basico",
+  nombre: "Básico",
+  limiteSucursales: 1,
+  limiteVehiculos: 25,
+  limiteUsuarios: 2,
+  reportesAvanzados: false,
+  asistenteIA: false,
+  soportePrioritario: false,
+  createdAt: new Date(0),
+};
+
+// Trae el plan comercial vigente de un tenant. Nunca null ni excepción:
+// si el tenant de la sesión no aparece en la base (sesión vieja apuntando
+// a un tenant borrado, dato inconsistente, etc.) degrada al plan Básico
+// en vez de romper la página con un 500.
 export async function getPlanTenant(tenantId: string): Promise<Plan> {
-  const tenant = await prisma.tenant.findUniqueOrThrow({
+  const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
     include: { plan: true },
   });
-  return tenant.plan;
+  if (tenant) return tenant.plan;
+
+  console.error(
+    `getPlanTenant: no se encontró el tenant ${tenantId} (sesión con tenantId inválido u obsoleto) — usando plan Básico por default`
+  );
+  const basico = await prisma.plan.findUnique({ where: { id: "basico" } });
+  return basico ?? PLAN_BASICO_FALLBACK;
 }
 
 export type LimiteRecurso = "sucursales" | "vehículos" | "usuarios";
