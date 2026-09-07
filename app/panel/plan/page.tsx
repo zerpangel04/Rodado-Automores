@@ -15,6 +15,21 @@ function pct(actual: number, limite: number | null) {
   return Math.round((actual / limite) * 100);
 }
 
+// Misma fuente que ya usa el resto del panel (FxBox en el sidebar,
+// Ventas, ficha de lead) para la cotización del dólar — dolarapi.com.
+// `cache: "no-store"` para que nunca quede pisada: cada carga de la
+// página pide la cotización del momento.
+async function fetchCotizacionOficial(): Promise<number | null> {
+  try {
+    const res = await fetch("https://dolarapi.com/v1/dolares/oficial", { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return typeof data?.venta === "number" ? data.venta : null;
+  } catch {
+    return null;
+  }
+}
+
 export default async function PlanPage() {
   const session = await auth();
   const { tenantId, rol } = session!.user;
@@ -36,12 +51,13 @@ export default async function PlanPage() {
     );
   }
 
-  const [plan, sucursalesCount, vehiculosCount, usuariosCount, planes] = await Promise.all([
+  const [plan, sucursalesCount, vehiculosCount, usuariosCount, planes, cotizacionOficial] = await Promise.all([
     getPlanTenant(tenantId),
     prisma.sucursal.count({ where: { tenantId } }),
     prisma.vehiculo.count({ where: { tenantId } }),
     prisma.usuario.count({ where: { tenantId } }),
     prisma.plan.findMany({ orderBy: { createdAt: "asc" } }),
+    fetchCotizacionOficial(),
   ]);
 
   return (
@@ -84,6 +100,14 @@ export default async function PlanPage() {
               <div key={p.id} className={`${planStyles.card} ${esActual ? planStyles.cardActual : ""}`}>
                 {esActual && <div className={planStyles.badge}>Tu plan actual</div>}
                 <h3 className="disp">{p.nombre}</h3>
+                <div className={planStyles.precio}>
+                  <span className={planStyles.precioUsd}>USD {Number(p.precioUsd).toLocaleString("es-AR")}/mes</span>
+                  {cotizacionOficial !== null && (
+                    <span className={planStyles.precioArs}>
+                      ≈ ${Math.round(Number(p.precioUsd) * cotizacionOficial).toLocaleString("es-AR")} ARS/mes
+                    </span>
+                  )}
+                </div>
                 <ul className={planStyles.features}>
                   <li>{fmtLimite(p.limiteSucursales)} sucursal{p.limiteSucursales === 1 ? "" : "es"}</li>
                   <li>{fmtLimite(p.limiteVehiculos)} vehículos</li>
@@ -112,6 +136,12 @@ export default async function PlanPage() {
             );
           })}
         </div>
+
+        <p className={planStyles.fxNote}>
+          {cotizacionOficial !== null
+            ? `Cotización dólar oficial: $${Math.round(cotizacionOficial).toLocaleString("es-AR")} — actualizado hoy. El precio en pesos varía día a día.`
+            : "No pudimos obtener la cotización del dólar oficial en este momento — mostrando solo precios en USD."}
+        </p>
 
         <p className={planStyles.contacto}>
           ¿Necesitás cambiar de plan ya? Escribinos a{" "}

@@ -87,6 +87,7 @@ model Tenant {
 model Plan {
   id                 String   @id
   nombre             String   @unique
+  precioUsd          Decimal
   limiteSucursales   Int?
   limiteVehiculos    Int?
   limiteUsuarios     Int?

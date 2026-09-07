@@ -1,10 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./landing.module.css";
 import { Reveal } from "./Reveal";
 import { LandingMobileMenu } from "./LandingMobileMenu";
+
+export type PlanPublico = {
+  id: string;
+  nombre: string;
+  precioUsd: number;
+  limiteSucursales: number | null;
+  limiteVehiculos: number | null;
+  limiteUsuarios: number | null;
+  reportesAvanzados: boolean;
+  asistenteIA: boolean;
+  soportePrioritario: boolean;
+};
 
 const NAV_ITEMS = [
   { label: "Panel general", icon: "▣", active: true },
@@ -151,43 +163,59 @@ const CANALES = [
   { name: "Asistente de IA", note: "Responde sobre tu stock real · en desarrollo", color: "#4ade80" },
 ];
 
-const PLANES_BASE = [
-  {
-    name: "Núcleo",
+// Copy de marketing por plan — lo único que no sale del modelo Plan real
+// (precio, límites y features sí vienen de la base, ver `planes` prop).
+const PLAN_COPY: Record<string, { desc: string; items: string[] }> = {
+  basico: {
     desc: "Para la agencia que hoy vive en Excel y quiere ordenar stock y clientes.",
-    items: ["e-Stock con documentación y alertas de VTV", "e-CRM: pipeline kanban y vista de tabla", "Catálogo público con tu marca", "Ventas con comisión automática", "Cotización del dólar en vivo", "1 sucursal · 2 vendedores"],
-    nota: "Ideal hasta 25 autos en stock",
-    precio: "$60.000",
+    items: [
+      "e-Stock con documentación y alertas de VTV",
+      "e-CRM: pipeline kanban y vista de tabla",
+      "Catálogo público con tu marca",
+      "Ventas con comisión automática",
+      "Cotización del dólar en vivo",
+      "Publicación en Mercado Libre (OAuth)",
+    ],
   },
-  {
-    name: "Agencia",
+  profesional: {
     desc: "Para la que publica en varios canales y no quiere cargar el mismo auto tres veces.",
-    items: ["Todo lo del Núcleo", "Publicación en Mercado Libre (OAuth)", "Tasación con IA", "Reportes y analítica completos", "Hasta 3 sucursales", "Vendedores ilimitados"],
-    nota: "Ideal de 25 a 80 autos en stock",
-    precio: "$85.000",
+    items: ["Todo lo del Básico", "Tasación con IA", "Reportes y analítica avanzados"],
   },
-  {
-    name: "Multisucursal",
+  empresa: {
     desc: "Para grupos con varios locales y equipos de venta separados.",
-    items: ["Todo lo del plan Agencia", "Sucursales ilimitadas", "Permisos por equipo y rol", "Reportes consolidados por sucursal", "Soporte dedicado"],
-    nota: "Para más de 80 autos en stock",
-    precio: "$120.000",
+    items: ["Todo lo del Profesional", "Sucursales, usuarios y vehículos ilimitados", "Soporte prioritario"],
   },
-] as const;
+};
 
-const MATRIZ: [string, string, string, string][] = [
-  ["e-Stock con documentación y alertas de VTV", "✓", "✓", "✓"],
-  ["e-CRM: pipeline kanban y vista de tabla", "✓", "✓", "✓"],
-  ["Catálogo público con tu marca", "✓", "✓", "✓"],
-  ["Ventas con comisión automática", "✓", "✓", "✓"],
-  ["Cotización del dólar en vivo", "✓", "✓", "✓"],
-  ["Publicación en Mercado Libre", "—", "✓", "✓"],
-  ["Tasación con IA", "—", "✓", "✓"],
-  ["Reportes y analítica", "Básico", "Completo", "Consolidado"],
-  ["Sucursales", "1", "Hasta 3", "Ilimitadas"],
-  ["Vendedores con rol propio", "2", "Ilimitados", "Ilimitados"],
-  ["Soporte", "Por mail", "Prioritario", "Dedicado"],
-];
+function limitesLine(p: PlanPublico) {
+  const suc = p.limiteSucursales === null ? "sucursales ilimitadas" : `${p.limiteSucursales} sucursal${p.limiteSucursales === 1 ? "" : "es"}`;
+  const usu = p.limiteUsuarios === null ? "usuarios ilimitados" : `${p.limiteUsuarios} usuario${p.limiteUsuarios === 1 ? "" : "s"}`;
+  const veh = p.limiteVehiculos === null ? "vehículos ilimitados" : `hasta ${p.limiteVehiculos} vehículos`;
+  return `${suc} · ${usu} · ${veh}`;
+}
+
+function matrizDesdePlanes(planes: PlanPublico[]): [string, string, string, string][] {
+  const v = (on: boolean) => (on ? "✓" : "—");
+  const [basico, profesional, empresa] = planes;
+  return [
+    ["e-Stock con documentación y alertas de VTV", "✓", "✓", "✓"],
+    ["e-CRM: pipeline kanban y vista de tabla", "✓", "✓", "✓"],
+    ["Catálogo público con tu marca", "✓", "✓", "✓"],
+    ["Ventas con comisión automática", "✓", "✓", "✓"],
+    ["Cotización del dólar en vivo", "✓", "✓", "✓"],
+    ["Publicación en Mercado Libre", "✓", "✓", "✓"],
+    ["Tasación con IA", v(basico.asistenteIA), v(profesional.asistenteIA), v(empresa.asistenteIA)],
+    ["Reportes avanzados", v(basico.reportesAvanzados), v(profesional.reportesAvanzados), v(empresa.reportesAvanzados)],
+    ["Sucursales", fmtLimite(basico.limiteSucursales), fmtLimite(profesional.limiteSucursales), fmtLimite(empresa.limiteSucursales)],
+    ["Vehículos en stock", fmtLimite(basico.limiteVehiculos), fmtLimite(profesional.limiteVehiculos), fmtLimite(empresa.limiteVehiculos)],
+    ["Usuarios", fmtLimite(basico.limiteUsuarios), fmtLimite(profesional.limiteUsuarios), fmtLimite(empresa.limiteUsuarios)],
+    ["Soporte", basico.soportePrioritario ? "Prioritario" : "Por mail", profesional.soportePrioritario ? "Prioritario" : "Por mail", empresa.soportePrioritario ? "Prioritario" : "Por mail"],
+  ];
+}
+
+function fmtLimite(n: number | null) {
+  return n === null ? "Ilimitadas" : String(n);
+}
 
 const SEGURIDAD = [
   { title: "Datos aislados por agencia", desc: "Ninguna concesionaria ve el stock ni los leads de otra." },
@@ -202,7 +230,7 @@ function matrixCellColor(v: string) {
   return "#a8b0b8";
 }
 
-export function LandingView() {
+export function LandingView({ planes }: { planes: PlanPublico[] }) {
   return (
     <>
       <div className={styles.bgLayer}>
@@ -707,7 +735,7 @@ export function LandingView() {
       </section>
 
       <section id="precios" className={styles.section}>
-        <PrecioSection />
+        <PrecioSection planes={planes} />
       </section>
 
       <section className={styles.section}>
@@ -836,18 +864,37 @@ function TabsDemo() {
   );
 }
 
-function PrecioSection() {
+function PrecioSection({ planes }: { planes: PlanPublico[] }) {
   const [autos, setAutos] = useState(40);
-  const rec = autos <= 25 ? 0 : autos <= 80 ? 1 : 2;
-  const sucursales = autos <= 25 ? "1 sucursal" : autos <= 80 ? "1 a 3 sucursales" : "varias sucursales";
-  const recomendado = ["Núcleo", "Agencia", "Multisucursal"][rec];
+  const [cotizacionOficial, setCotizacionOficial] = useState<number | null>(null);
+
+  // Misma fuente que ya usa el resto del sistema (FxBox en el panel,
+  // Ventas, ficha de lead) para la cotización del dólar — dolarapi.com.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("https://dolarapi.com/v1/dolares/oficial")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled && typeof d?.venta === "number") setCotizacionOficial(d.venta);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const limiteBasico = planes[0]?.limiteVehiculos ?? 25;
+  const limiteProfesional = planes[1]?.limiteVehiculos ?? 75;
+  const rec = autos <= limiteBasico ? 0 : autos <= limiteProfesional ? 1 : 2;
+  const sucursales = autos <= limiteBasico ? "1 sucursal" : autos <= limiteProfesional ? "1 a 2 sucursales" : "varias sucursales";
+  const recomendado = planes[rec]?.nombre ?? "";
 
   return (
     <>
       <Reveal>
         <div className={styles.sectionHead}>
           <div className={styles.kicker}>PLANES</div>
-          <h2 className="disp">Empezás por el núcleo y sumás módulos.</h2>
+          <h2 className="disp">Empezás simple y sumás módulos a medida que creces.</h2>
           <p>
             Precios de referencia por mes. El valor final depende de la cantidad de sucursales y
             módulos, y lo cerramos en la demo.
@@ -880,33 +927,36 @@ function PrecioSection() {
       </Reveal>
 
       <div className={styles.planesGrid}>
-        {PLANES_BASE.map((p, i) => {
+        {planes.map((p, i) => {
           const featured = i === rec;
+          const copy = PLAN_COPY[p.id];
+          const items = [...(copy?.items ?? []), limitesLine(p)];
+          const arsMensual = cotizacionOficial !== null ? Math.round(p.precioUsd * cotizacionOficial) : null;
           return (
-            <Reveal key={p.name} delayMs={i * 80}>
+            <Reveal key={p.id} delayMs={i * 80}>
               <div className={`${styles.planCard} ${featured ? styles.featured : ""}`}>
                 <div className={styles.planNameRow}>
                   <div className={styles.name} style={{ color: featured ? "#f7d3a1" : "var(--ink)" }}>
-                    {p.name}
+                    {p.nombre}
                   </div>
                   {featured && <span className={styles.planBadge}>RECOMENDADO</span>}
                 </div>
-                <div style={{ fontSize: 12, color: "#7d848d" }}>
-                  {p.nota}
-                </div>
+                <div style={{ fontSize: 12, color: "#7d848d" }}>{limitesLine(p)}</div>
                 <div className={styles.planPriceRow}>
                   <div className={styles.planPrice} style={{ color: featured ? "#f7d3a1" : "var(--ink)" }}>
-                    {p.precio}
+                    USD {p.precioUsd.toLocaleString("es-AR")}
                   </div>
                   <div className={styles.planPer}>/ mes</div>
                 </div>
-                <div className={styles.planNote}>pesos + IVA · sin costo de instalación</div>
+                <div className={styles.planNote}>
+                  {arsMensual !== null ? `≈ $${arsMensual.toLocaleString("es-AR")} ARS/mes + IVA` : "+ IVA"} · sin costo de instalación
+                </div>
                 <div className={styles.planDesc} style={{ color: featured ? "#b6a891" : "#949ba3" }}>
-                  {p.desc}
+                  {copy?.desc}
                 </div>
                 <div className={styles.planDivider} />
                 <div className={styles.planItems}>
-                  {p.items.map((it) => (
+                  {items.map((it) => (
                     <div key={it} className={styles.planItem} style={{ color: featured ? "#e0d6c7" : "#c3c9cf" }}>
                       <span className={styles.planCheck}>✓</span>
                       {it}
@@ -925,15 +975,21 @@ function PrecioSection() {
         })}
       </div>
 
+      <div style={{ fontSize: 11.5, color: "#7d848d", marginTop: -8, marginBottom: 24 }}>
+        {cotizacionOficial !== null
+          ? `Cotización dólar oficial: $${Math.round(cotizacionOficial).toLocaleString("es-AR")} — actualizado hoy. El precio en pesos varía día a día.`
+          : "Precios de referencia en dólares — el equivalente en pesos se calcula con la cotización oficial del día."}
+      </div>
+
       <Reveal delayMs={120}>
         <div className={styles.matrixCard}>
           <div className={styles.matrixHead}>
             <div>QUÉ INCLUYE CADA PLAN</div>
-            <div className={styles.center}>NÚCLEO</div>
-            <div className={`${styles.center} ${styles.featured}`}>AGENCIA</div>
-            <div className={styles.center}>MULTISUCURSAL</div>
+            <div className={styles.center}>{(planes[0]?.nombre ?? "").toUpperCase()}</div>
+            <div className={`${styles.center} ${styles.featured}`}>{(planes[1]?.nombre ?? "").toUpperCase()}</div>
+            <div className={styles.center}>{(planes[2]?.nombre ?? "").toUpperCase()}</div>
           </div>
-          {MATRIZ.map(([label, c1, c2, c3]) => (
+          {matrizDesdePlanes(planes).map(([label, c1, c2, c3]) => (
             <div key={label} className={styles.matrixRow}>
               <div className={styles.label}>{label}</div>
               <div className={styles.cell} style={{ color: matrixCellColor(c1) }}>

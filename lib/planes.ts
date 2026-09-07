@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Plan } from "@prisma/client";
+import { Prisma, type Plan } from "@prisma/client";
 
 // Plan Básico "hardcodeado" como último recurso: solo se usa si ni el
 // tenant ni la fila del plan Básico aparecen en la base (no debería pasar
@@ -9,6 +9,7 @@ import type { Plan } from "@prisma/client";
 const PLAN_BASICO_FALLBACK: Plan = {
   id: "basico",
   nombre: "Básico",
+  precioUsd: new Prisma.Decimal(20),
   limiteSucursales: 1,
   limiteVehiculos: 25,
   limiteUsuarios: 2,
