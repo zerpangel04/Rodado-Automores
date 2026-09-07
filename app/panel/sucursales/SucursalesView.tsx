@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { MapPin, Phone, Plus, AlertTriangle, Building2 } from "lucide-react";
 import styles from "./sucursales.module.css";
 import { KpiBar } from "../KpiBar";
@@ -78,6 +79,8 @@ export function SucursalesView({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
+  const [limiteAlcanzado, setLimiteAlcanzado] = useState(false);
+  const [avisoLimite, setAvisoLimite] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -105,6 +108,7 @@ export function SucursalesView({
     setEditingId(null);
     setForm(emptyForm);
     setError(null);
+    setLimiteAlcanzado(false);
     setShowModal(true);
   }
 
@@ -112,6 +116,7 @@ export function SucursalesView({
     setEditingId(s.id);
     setForm({ nombre: s.nombre, direccion: s.direccion ?? "", telefono: s.telefono ?? "" });
     setError(null);
+    setLimiteAlcanzado(false);
     setShowModal(true);
   }
 
@@ -122,6 +127,7 @@ export function SucursalesView({
     }
     setSaving(true);
     setError(null);
+    setLimiteAlcanzado(false);
 
     const payload = {
       nombre: form.nombre.trim(),
@@ -138,10 +144,12 @@ export function SucursalesView({
       if (!res.ok) {
         const data = await res.json().catch(() => null);
         setError(data?.error ?? "No se pudo guardar la sucursal");
+        setLimiteAlcanzado(Boolean(data?.limiteAlcanzado));
         setSaving(false);
         return;
       }
       const saved = await res.json();
+      if (saved.aviso) setAvisoLimite(saved.aviso);
       setItems((prev) =>
         editingId
           ? prev.map((i) => (i.id === saved.id ? { ...i, ...saved } : i))
@@ -193,6 +201,14 @@ export function SucursalesView({
 
   return (
     <div className={styles.wrap}>
+      {avisoLimite && (
+        <div className={styles.avisoBox}>
+          <span>{avisoLimite}</span>
+          <Link href="/panel/plan" style={{ textDecoration: "underline", fontWeight: 600, whiteSpace: "nowrap" }}>
+            Actualizar plan →
+          </Link>
+        </div>
+      )}
       <div className={styles.headRow}>
         <button type="button" className={styles.newBtn} onClick={openCreate}>
           <Plus size={14} />
@@ -432,7 +448,19 @@ export function SucursalesView({
         <div className={styles.modal}>
           <h3 className="disp">{editingId ? "Editar sucursal" : "Nueva sucursal"}</h3>
 
-          {error && <div className={styles.errorBox}>{error}</div>}
+          {error && (
+            <div className={styles.errorBox}>
+              {error}
+              {limiteAlcanzado && (
+                <>
+                  {" "}
+                  <Link href="/panel/plan" style={{ textDecoration: "underline", fontWeight: 600 }}>
+                    Actualizar plan →
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
 
           <div className={styles.field}>
             <label>Nombre</label>

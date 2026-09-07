@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
+import { getPlanTenant } from "@/lib/planes";
 import { StockView, type VehiculoDTO, type LeadActivoDTO } from "./StockView";
 import styles from "../panel.module.css";
 
@@ -10,7 +11,7 @@ export default async function StockPage() {
 
   const sucursalActual = await getSucursalActual(tenantId);
 
-  const [vehiculos, usuarios, sucursales, leadsActivos] = await Promise.all([
+  const [vehiculos, usuarios, sucursales, leadsActivos, plan] = await Promise.all([
     prisma.vehiculo.findMany({
       where: {
         tenantId,
@@ -40,6 +41,7 @@ export default async function StockPage() {
       },
       select: { id: true, nombreCliente: true, contacto: true, etapa: true, vehiculoId: true },
     }),
+    getPlanTenant(tenantId),
   ]);
 
   const items: VehiculoDTO[] = vehiculos.map((v) => ({
@@ -107,6 +109,7 @@ export default async function StockPage() {
           userId={userId}
           canRevertirVenta={rol !== "VENDEDOR"}
           leadsActivos={leadsActivosItems}
+          asistenteIA={plan.asistenteIA}
         />
       </div>
     </>

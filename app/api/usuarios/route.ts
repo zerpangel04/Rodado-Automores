@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { usuarioInputSchema } from "@/lib/validation";
+import { getPlanTenant, evaluarLimitePlan } from "@/lib/planes";
 
 export async function GET() {
   const session = await currentSession();
@@ -47,6 +48,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ese email ya está registrado" }, { status: 400 });
   }
 
+  const [plan, actualAntes] = await Promise.all([
+    getPlanTenant(session.user.tenantId),
+    prisma.usuario.count({ where: { tenantId: session.user.tenantId } }),
+  ]);
+  const limite = evaluarLimitePlan({
+    limite: plan.limiteUsuarios,
+    actualAntes,
+    recurso: "usuarios",
+  });
+  if (limite.bloqueado) {
+    return NextResponse.json(
+      { error: limite.error, limiteAlcanzado: true },
+      { status: 403 }
+    );
+  }
+
   const passwordHash = await bcrypt.hash(password, 10);
 
   const usuario = await prisma.usuario.create({
@@ -60,5 +77,8 @@ export async function POST(req: NextRequest) {
     select: { id: true, nombre: true, email: true, rol: true, createdAt: true },
   });
 
-  return NextResponse.json(usuario, { status: 201 });
+  return NextResponse.json(
+    limite.aviso ? { ...usuario, aviso: limite.aviso } : usuario,
+    { status: 201 }
+  );
 }

@@ -14,6 +14,25 @@ export class LeadPublicoError extends Error {
   }
 }
 
+// Mismo criterio que usa el reparto manual de leads
+// (app/api/leads/repartir/route.ts): el vendedor con menos leads activos
+// (no CERRADO) en este momento. Devuelve null si el tenant no tiene
+// vendedores todavía.
+export async function elegirVendedorMenosCargado(tenantId: string): Promise<string | null> {
+  const vendedores = await prisma.usuario.findMany({
+    where: { tenantId, rol: "VENDEDOR" },
+    select: {
+      id: true,
+      _count: { select: { leadsAsignados: { where: { etapa: { not: "CERRADO" } } } } },
+    },
+  });
+  if (vendedores.length === 0) return null;
+
+  return vendedores.reduce((menor, v) =>
+    v._count.leadsAsignados < menor._count.leadsAsignados ? v : menor
+  ).id;
+}
+
 export async function resolverTenantPublico(dominio: string) {
   const tenant = await prisma.tenant.findUnique({ where: { dominio } });
   if (!tenant) {
@@ -44,6 +63,8 @@ export async function crearLeadPublico(params: {
     vehiculoIdFinal = vehiculo.id;
   }
 
+  const vendedorId = await elegirVendedorMenosCargado(tenantId);
+
   const lead = await prisma.lead.create({
     data: {
       tenantId,
@@ -53,6 +74,7 @@ export async function crearLeadPublico(params: {
       mensaje: mensaje || null,
       canal,
       etapa: "NUEVO",
+      vendedorId,
     },
   });
 
@@ -61,6 +83,7 @@ export async function crearLeadPublico(params: {
     tipo: "NUEVO_LEAD",
     descripcion: `${nombreCliente} — nuevo lead vía ${canalLabelEs[canal]}`,
     leadId: lead.id,
+    vendedorId: lead.vendedorId,
   });
 
   return lead;

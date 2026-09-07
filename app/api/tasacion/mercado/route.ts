@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/session";
 import { buscarPrecioReferenciaMercado } from "@/lib/argAutos";
+import { getPlanTenant } from "@/lib/planes";
 
 export async function GET(req: NextRequest) {
   const session = await currentSession();
   if (!session) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  }
+
+  const plan = await getPlanTenant(session.user.tenantId);
+  if (!plan.asistenteIA) {
+    return NextResponse.json(
+      { error: "El asistente de tasación con IA está disponible en plan Profesional o superior" },
+      { status: 403 }
+    );
   }
 
   const { searchParams } = new URL(req.url);

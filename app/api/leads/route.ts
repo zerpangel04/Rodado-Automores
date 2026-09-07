@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { leadInputSchema } from "@/lib/validation";
 import { registrarActividad } from "@/lib/actividad";
 import { canalLabelEs } from "@/lib/labels";
+import { elegirVendedorMenosCargado } from "@/lib/leads";
 
 export async function GET() {
   const session = await currentSession();
@@ -46,7 +47,10 @@ export async function POST(req: NextRequest) {
   }
 
   const data = parsed.data;
-  const vendedorId = rol === "VENDEDOR" ? userId : data.vendedorId || null;
+  let vendedorId = rol === "VENDEDOR" ? userId : data.vendedorId || null;
+  if (!vendedorId) {
+    vendedorId = await elegirVendedorMenosCargado(tenantId);
+  }
 
   if (vendedorId) {
     const vendedor = await prisma.usuario.findUnique({ where: { id: vendedorId } });

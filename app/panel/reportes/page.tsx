@@ -1,6 +1,9 @@
+import Link from "next/link";
+import { Lock } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
+import { getPlanTenant } from "@/lib/planes";
 import styles from "../panel.module.css";
 import reportStyles from "./reportes.module.css";
 import { ReportesView, type Etapa } from "./ReportesView";
@@ -43,6 +46,46 @@ export default async function ReportesPage(
   const searchParams = await props.searchParams;
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
+
+  const plan = await getPlanTenant(tenantId);
+  if (!plan.reportesAvanzados) {
+    return (
+      <>
+        <div className={styles.topbar}>
+          <div>
+            <h1 className="disp">Reportes</h1>
+          </div>
+        </div>
+        <div className={styles.content}>
+          <div className={styles.card} style={{ textAlign: "center", padding: "48px 24px" }}>
+            <Lock size={28} style={{ color: "var(--ink-soft)", marginBottom: 12 }} />
+            <h3 className="disp" style={{ marginBottom: 6 }}>
+              Reportes avanzados disponibles en plan Profesional o superior
+            </h3>
+            <p style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 18 }}>
+              Estás en el plan {plan.nombre}. Actualizá tu plan para ver ventas en el tiempo, embudo de
+              conversión, leads por canal, rotación de stock y performance por vendedor.
+            </p>
+            <Link
+              href="/panel/plan"
+              style={{
+                display: "inline-block",
+                background: "var(--accent)",
+                color: "#1a1206",
+                fontWeight: 600,
+                fontSize: 13,
+                padding: "9px 18px",
+                borderRadius: 8,
+                textDecoration: "none",
+              }}
+            >
+              Actualizar plan →
+            </Link>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   const now = new Date();
   let from: Date;

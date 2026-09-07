@@ -13,6 +13,7 @@ import {
   Building2,
   UserCog,
   Plug,
+  CreditCard,
   ChevronDown,
   Check,
   Power,
@@ -305,6 +306,7 @@ export function Sidebar({
             {navItem("/panel/sucursales", Building2, "Sucursales")}
             {navItem("/panel/equipo", UserCog, "Equipo")}
             {navItem("/panel/integraciones", Plug, "Integraciones")}
+            {navItem("/panel/plan", CreditCard, "Tu plan")}
           </div>
         )}
       </div>

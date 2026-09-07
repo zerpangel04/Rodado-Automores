@@ -60,7 +60,8 @@ enum TipoActividad {
 model Tenant {
   id        String   @id @default(cuid())
   nombre    String
-  plan      String   @default("basico")
+  planId    String   @default("basico")
+  plan      Plan     @relation(fields: [planId], references: [id])
   dominio   String?  @unique
   logoUrl   String?
   createdAt DateTime @default(now())
@@ -76,6 +77,25 @@ model Tenant {
 
   solicitudesIntegracion SolicitudIntegracion[]
   interesesIntegracion   InteresIntegracion[]
+
+  @@index([planId])
+}
+
+// Plan comercial de una agencia. Los límites en null representan "sin
+// límite" (plan Empresa). No hardcodeado en código: se lee de acá para
+// enforcement de límites (lib/planes.ts) y gating de features.
+model Plan {
+  id                 String   @id
+  nombre             String   @unique
+  limiteSucursales   Int?
+  limiteVehiculos    Int?
+  limiteUsuarios     Int?
+  reportesAvanzados  Boolean  @default(false)
+  asistenteIA        Boolean  @default(false)
+  soportePrioritario Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  tenants Tenant[]
 }
 
 // Sucursal física de una agencia. Toda agencia tiene al menos una

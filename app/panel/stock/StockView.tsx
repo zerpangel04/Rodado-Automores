@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
 import {
@@ -8,6 +9,7 @@ import {
   RotateCcw,
   Plus,
   Sparkles,
+  Lock,
   LayoutGrid,
   Table2,
   ArrowUpDown,
@@ -178,6 +180,7 @@ export function StockView({
   userId,
   canRevertirVenta,
   leadsActivos,
+  asistenteIA,
 }: {
   initialItems: VehiculoDTO[];
   usuarios: UsuarioOption[];
@@ -186,6 +189,7 @@ export function StockView({
   userId: string;
   canRevertirVenta: boolean;
   leadsActivos: LeadActivoDTO[];
+  asistenteIA: boolean;
 }) {
   const [items, setItems] = useState<VehiculoDTO[]>(initialItems);
   useEffect(() => {
@@ -199,6 +203,8 @@ export function StockView({
   const [step, setStep] = useState<StepKey>("fotos");
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
+  const [limiteAlcanzado, setLimiteAlcanzado] = useState(false);
+  const [avisoLimite, setAvisoLimite] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
   const [publishingId, setPublishingId] = useState<string | null>(null);
@@ -424,6 +430,7 @@ export function StockView({
     setEditingId(null);
     setForm({ ...emptyForm, sucursalId: defaultSucursalId, fechaIngreso: hoyISO() });
     setError(null);
+    setLimiteAlcanzado(false);
     setIaResult(null);
     setIaFuente(null);
     setIaVersion(null);
@@ -504,6 +511,7 @@ export function StockView({
       fechaIngreso: v.fechaIngreso.slice(0, 10),
     });
     setError(null);
+    setLimiteAlcanzado(false);
     setExistingFotos(v.fotos);
     setFotoFiles([]);
     setFotoError(null);
@@ -524,6 +532,7 @@ export function StockView({
     }
     setSaving(true);
     setError(null);
+    setLimiteAlcanzado(false);
 
     const payload = {
       sucursalId: form.sucursalId,
@@ -555,11 +564,13 @@ export function StockView({
       if (!res.ok) {
         const data = await res.json().catch(() => null);
         setError(data?.error ?? "No se pudo guardar el vehículo");
+        setLimiteAlcanzado(Boolean(data?.limiteAlcanzado));
         setSaving(false);
         return;
       }
-      let saved: VehiculoDTO = await res.json();
+      let saved: VehiculoDTO & { aviso?: string } = await res.json();
       const isNew = !editingId;
+      if (saved.aviso) setAvisoLimite(saved.aviso);
 
       if (fotoFiles.length > 0 || existingFotos.length !== saved.fotos.length) {
         const fd = new FormData();
@@ -738,6 +749,14 @@ export function StockView({
 
   return (
     <>
+      {avisoLimite && (
+        <div className={styles.avisoBox}>
+          <span>{avisoLimite}</span>
+          <Link href="/panel/plan" style={{ textDecoration: "underline", fontWeight: 600, whiteSpace: "nowrap" }}>
+            Actualizar plan →
+          </Link>
+        </div>
+      )}
       <div className={styles.topActions}>
         <button className={styles.btnPrimary} onClick={openCreate}>
           <Plus size={14} />
@@ -1025,7 +1044,19 @@ export function StockView({
             ))}
           </div>
 
-          {error && <div className={styles.errorBox} style={{ marginTop: 14 }}>{error}</div>}
+          {error && (
+            <div className={styles.errorBox} style={{ marginTop: 14 }}>
+              {error}
+              {limiteAlcanzado && (
+                <>
+                  {" "}
+                  <Link href="/panel/plan" style={{ textDecoration: "underline", fontWeight: 600 }}>
+                    Actualizar plan →
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
 
           {step === "fotos" && (
             <div className={styles.field} style={{ marginTop: 16 }}>
@@ -1186,7 +1217,24 @@ export function StockView({
 
           {step === "precio" && (
             <>
-              {!editingId && (
+              {!editingId && !asistenteIA && (
+                <div className={styles.iaBox} style={{ marginTop: 16 }}>
+                  <div className={styles.iaBoxHead}>
+                    <span>
+                      <Lock size={11} style={{ verticalAlign: -1, marginRight: 4 }} />
+                      Tasación con IA
+                    </span>
+                  </div>
+                  <div className={styles.iaNote}>
+                    Disponible en plan Profesional o superior.{" "}
+                    <Link href="/panel/plan" style={{ textDecoration: "underline", fontWeight: 600 }}>
+                      Actualizar plan →
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {!editingId && asistenteIA && (
                 <div className={styles.iaBox} style={{ marginTop: 16 }}>
                   <div className={styles.iaBoxHead}>
                     <span>

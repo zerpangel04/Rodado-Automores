@@ -763,6 +763,19 @@
   margin-bottom: 14px;
 }
 
+.avisoBox {
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+  color: var(--warn-text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .warnText {
   font-size: 13.5px;
   line-height: 1.5;

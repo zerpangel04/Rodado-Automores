@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Search, Plus, Star, UserRound, X } from "lucide-react";
 import styles from "./equipo.module.css";
 import { KpiBar } from "../KpiBar";
@@ -79,6 +80,8 @@ export function EquipoView({
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [error, setError] = useState<string | null>(null);
+  const [limiteAlcanzado, setLimiteAlcanzado] = useState(false);
+  const [avisoLimite, setAvisoLimite] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -120,6 +123,7 @@ export function EquipoView({
   function openCreate() {
     setForm(emptyForm);
     setError(null);
+    setLimiteAlcanzado(false);
     setShowModal(true);
   }
 
@@ -130,6 +134,7 @@ export function EquipoView({
     }
     setSaving(true);
     setError(null);
+    setLimiteAlcanzado(false);
 
     try {
       const res = await fetch("/api/usuarios", {
@@ -142,12 +147,14 @@ export function EquipoView({
           rol: form.rol,
         }),
       });
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
         setError(data?.error ?? "No se pudo crear el usuario");
+        setLimiteAlcanzado(Boolean(data?.limiteAlcanzado));
         setSaving(false);
         return;
       }
+      if (data?.aviso) setAvisoLimite(data.aviso);
       showToast();
       setShowModal(false);
       router.refresh();
@@ -244,6 +251,14 @@ export function EquipoView({
 
   return (
     <div className={styles.wrap}>
+      {avisoLimite && (
+        <div className={styles.avisoBox}>
+          <span>{avisoLimite}</span>
+          <Link href="/panel/plan" style={{ textDecoration: "underline", fontWeight: 600, whiteSpace: "nowrap" }}>
+            Actualizar plan →
+          </Link>
+        </div>
+      )}
       <div className={styles.headRow}>
         <div className={styles.segmented}>
           {(
@@ -510,7 +525,19 @@ export function EquipoView({
         <div className={styles.modal}>
           <h3 className="disp">Invitar usuario</h3>
 
-          {error && <div className={styles.errorBox}>{error}</div>}
+          {error && (
+            <div className={styles.errorBox}>
+              {error}
+              {limiteAlcanzado && (
+                <>
+                  {" "}
+                  <Link href="/panel/plan" style={{ textDecoration: "underline", fontWeight: 600 }}>
+                    Actualizar plan →
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
 
           <div className={styles.field}>
             <label>Nombre</label>
