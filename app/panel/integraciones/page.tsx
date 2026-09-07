@@ -33,7 +33,11 @@ export default async function IntegracionesPage(
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const conexion = await prisma.mercadoLibreConexion.findUnique({ where: { tenantId } });
+  const [conexion, interesesRows] = await Promise.all([
+    prisma.mercadoLibreConexion.findUnique({ where: { tenantId } }),
+    prisma.interesIntegracion.findMany({ where: { tenantId }, select: { tipoIntegracion: true } }),
+  ]);
+  const interesesIniciales = interesesRows.map((i) => i.tipoIntegracion);
 
   let metricas = null;
   let actividad: ActividadItem[] = [];
@@ -101,6 +105,7 @@ export default async function IntegracionesPage(
           actividad={actividad}
           mlConnected={searchParams.ml_connected === "1"}
           mlError={searchParams.ml_error ?? null}
+          interesesIniciales={interesesIniciales}
         />
       </div>
     </>

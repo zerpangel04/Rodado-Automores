@@ -11,6 +11,7 @@ import {
   Calculator,
   Mail,
 } from "lucide-react";
+import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import styles from "./integraciones.module.css";
 
 export type ActividadItem = { id: string; tipo: string; texto: string; hace: string };
@@ -127,12 +128,14 @@ export function IntegracionesView({
   actividad,
   mlConnected,
   mlError,
+  interesesIniciales,
 }: {
   conectada: ConectadaDTO | null;
   metricas: MetricasDTO | null;
   actividad: ActividadItem[];
   mlConnected: boolean;
   mlError: string | null;
+  interesesIniciales: string[];
 }) {
   const router = useRouter();
   const [opciones, setOpciones] = useState(
@@ -143,8 +146,33 @@ export function IntegracionesView({
   const [savingOpcion, setSavingOpcion] = useState<string | null>(null);
   const [openMenu, setOpenMenu] = useState(false);
   const [desconectando, setDesconectando] = useState(false);
-  const [avisos, setAvisos] = useState<Record<string, boolean>>({});
+  const [avisos, setAvisos] = useState<Record<string, boolean>>(
+    Object.fromEntries(interesesIniciales.map((key) => [key, true]))
+  );
+  const [savingAviso, setSavingAviso] = useState<string | null>(null);
+  const [showSolicitud, setShowSolicitud] = useState(false);
   const menuWrapRef = useRef<HTMLDivElement>(null);
+
+  async function toggleAviso(key: string) {
+    setSavingAviso(key);
+    try {
+      const res = await fetch("/api/integraciones/interes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipoIntegracion: key }),
+      });
+      if (!res.ok) {
+        alert("No se pudo guardar, probá de nuevo.");
+        return;
+      }
+      const data = await res.json();
+      setAvisos((prev) => ({ ...prev, [key]: data.on }));
+    } catch {
+      alert("Error de conexión, probá de nuevo.");
+    } finally {
+      setSavingAviso(null);
+    }
+  }
 
   useEffect(() => {
     if (!openMenu) return;
@@ -452,9 +480,10 @@ export function IntegracionesView({
                 <button
                   type="button"
                   className={`${styles.avisarBtn} ${on ? styles.avisarBtnOn : ""}`}
-                  onClick={() => setAvisos((prev) => ({ ...prev, [p.key]: !prev[p.key] }))}
+                  onClick={() => toggleAviso(p.key)}
+                  disabled={savingAviso === p.key}
                 >
-                  {on ? "✓ Te avisamos" : "Avisarme"}
+                  {savingAviso === p.key ? "…" : on ? "✓ Te avisamos" : "Avisarme"}
                 </button>
               </div>
             );
@@ -472,9 +501,97 @@ export function IntegracionesView({
             Contanos cuál y con cuántas publicaciones trabajás. Priorizamos las que más nos piden.
           </div>
         </div>
-        <button type="button" className={styles.requestBtn}>
+        <button type="button" className={styles.requestBtn} onClick={() => setShowSolicitud(true)}>
           Pedir integración
         </button>
+      </div>
+
+      {showSolicitud && <SolicitudIntegracionModal onClose={() => setShowSolicitud(false)} />}
+    </div>
+  );
+}
+
+function SolicitudIntegracionModal({ onClose }: { onClose: () => void }) {
+  const [nombrePlataforma, setNombrePlataforma] = useState("");
+  const [comentario, setComentario] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState("");
+  const [enviada, setEnviada] = useState(false);
+
+  useBodyScrollLock(true);
+
+  async function handleEnviar() {
+    if (!nombrePlataforma.trim()) {
+      setError("Contanos qué plataforma necesitás.");
+      return;
+    }
+    setError("");
+    setEnviando(true);
+    try {
+      const res = await fetch("/api/integraciones/solicitud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombrePlataforma: nombrePlataforma.trim(), comentario: comentario.trim() || null }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? "No se pudo enviar, probá de nuevo.");
+        return;
+      }
+      setEnviada(true);
+      setTimeout(onClose, 1600);
+    } catch {
+      setError("Error de conexión, probá de nuevo.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <div className={`${styles.modalBg} ${styles.show}`} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        {enviada ? (
+          <>
+            <h3 className="disp">¡Gracias, lo tenemos anotado!</h3>
+            <p style={{ fontSize: 13, color: "var(--ink-soft)" }}>
+              Vamos a tenerlo en cuenta para priorizar las próximas integraciones.
+            </p>
+          </>
+        ) : (
+          <>
+            <h3 className="disp">Pedir integración</h3>
+            {error && <div className={styles.errorBox}>{error}</div>}
+            <div className={styles.field}>
+              <label htmlFor="nombrePlataforma">¿Qué plataforma necesitás?</label>
+              <input
+                id="nombrePlataforma"
+                type="text"
+                value={nombrePlataforma}
+                onChange={(e) => setNombrePlataforma(e.target.value)}
+                placeholder="Ej: Tienda Nube, Infoauto..."
+                autoFocus
+              />
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="comentario">Comentario (opcional)</label>
+              <input
+                id="comentario"
+                type="text"
+                value={comentario}
+                onChange={(e) => setComentario(e.target.value)}
+                placeholder="¿Para qué la necesitás?"
+              />
+            </div>
+            <div className={styles.modalActions}>
+              <button type="button" className={styles.btnGhost} onClick={onClose} disabled={enviando}>
+                Cancelar
+              </button>
+              <button type="button" className={styles.btnPrimary} onClick={handleEnviar} disabled={enviando}>
+                {enviando ? "Enviando…" : "Enviar"}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -155,3 +155,17 @@ export const usuarioInputSchema = z.object({
 export const usuarioRolUpdateSchema = z.object({
   rol: z.enum(rolValues),
 });
+
+export const solicitudIntegracionInputSchema = z.object({
+  nombrePlataforma: z.string().trim().min(1, "Contanos qué plataforma necesitás").max(120),
+  comentario: z.string().trim().max(500).optional().nullable(),
+});
+
+// Coincide con las "key" de la lista `proximas` en IntegracionesView —
+// si se agrega una integración nueva a esa lista, hay que sumar su key
+// acá también.
+export const integracionTipoValues = ["wpp", "ig", "fin", "cont"] as const;
+
+export const interesIntegracionInputSchema = z.object({
+  tipoIntegracion: z.enum(integracionTipoValues),
+});

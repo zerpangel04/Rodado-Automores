@@ -73,6 +73,9 @@ model Tenant {
 
   mercadoLibreConexion MercadoLibreConexion?
   actividades          ActividadLog[]
+
+  solicitudesIntegracion SolicitudIntegracion[]
+  interesesIntegracion   InteresIntegracion[]
 }
 
 // Sucursal física de una agencia. Toda agencia tiene al menos una
@@ -191,6 +194,33 @@ model GoogleSignupPendiente {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+}
+
+// Pedido libre de una integración que no está en la lista de
+// "En camino" — lo carga el dueño desde /panel/integraciones. Por ahora
+// no tiene panel propio para revisarlos, se consultan directo en la DB.
+model SolicitudIntegracion {
+  id               String   @id @default(cuid())
+  tenantId         String
+  tenant           Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  nombrePlataforma String
+  comentario       String?
+  createdAt        DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+// "Avisarme" en una de las integraciones "En camino" (WhatsApp,
+// Instagram, etc.) — un tenant solo puede anotarse una vez por tipo
+// (@@unique), reflejado en el botón al recargar la página.
+model InteresIntegracion {
+  id              String   @id @default(cuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tipoIntegracion String
+  createdAt       DateTime @default(now())
+
+  @@unique([tenantId, tipoIntegracion])
 }
 
 // Rate limiting genérico (login, formulario de contacto público, chat IA).
