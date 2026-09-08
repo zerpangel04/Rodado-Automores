@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Cropper, { type Area } from "react-easy-crop";
@@ -10,6 +11,7 @@ import {
   Plus,
   Sparkles,
   Lock,
+  Upload,
   LayoutGrid,
   Table2,
   ArrowUpDown,
@@ -25,6 +27,7 @@ import { KpiBar } from "../KpiBar";
 import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/validation";
 import { getCroppedImageFile } from "@/lib/cropImage";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
+import { ImportarCsvModal } from "./ImportarCsvModal";
 
 const FOTO_ASPECT = 4 / 3;
 
@@ -191,6 +194,7 @@ export function StockView({
   leadsActivos: LeadActivoDTO[];
   asistenteIA: boolean;
 }) {
+  const router = useRouter();
   const [items, setItems] = useState<VehiculoDTO[]>(initialItems);
   useEffect(() => {
     setItems(initialItems);
@@ -199,6 +203,7 @@ export function StockView({
   const [orden, setOrden] = useState<"reciente" | "precio" | "dias">("reciente");
   const [vista, setVista] = useState<"grilla" | "tabla">("grilla");
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [step, setStep] = useState<StepKey>("fotos");
   const [form, setForm] = useState<FormState>(emptyForm);
@@ -762,7 +767,17 @@ export function StockView({
           <Plus size={14} />
           Nuevo vehículo
         </button>
+        <button className={styles.btnGhost} onClick={() => setShowImportModal(true)}>
+          <Upload size={14} />
+          Importar CSV
+        </button>
       </div>
+
+      <ImportarCsvModal
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImported={() => router.refresh()}
+      />
 
       <div className={panelStyles.kpiRow} style={{ marginBottom: 18 }}>
         <KpiBar
