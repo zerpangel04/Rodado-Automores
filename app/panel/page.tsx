@@ -7,6 +7,7 @@ import { KpiRing } from "./KpiRing";
 import { Pill, type PillColor } from "./Pill";
 import { actividadIcon, actividadColor, formatRelativo } from "./actividadDisplay";
 import { PendientesCard, type Pendiente } from "./PendientesCard";
+import { OnboardingChecklist, type OnboardingPaso } from "./OnboardingChecklist";
 
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
@@ -76,6 +77,10 @@ export default async function PanelHome() {
     leadsSinAsignar,
     vehiculosDisponibles,
     usuarios,
+    tenant,
+    vehiculosTotalCount,
+    usuariosTotalCount,
+    vehiculosPublicadosMlCount,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -133,6 +138,10 @@ export default async function PanelHome() {
           orderBy: { nombre: "asc" },
         })
       : Promise.resolve([]),
+    prisma.tenant.findUnique({ where: { id: tenantId }, select: { onboardingOmitido: true } }),
+    prisma.vehiculo.count({ where: { tenantId } }),
+    prisma.usuario.count({ where: { tenantId } }),
+    prisma.vehiculo.count({ where: { tenantId, mlItemId: { not: null } } }),
   ]);
 
   const alertasVtv = vehiculosConVtv
@@ -209,6 +218,27 @@ export default async function PanelHome() {
 
   const primerNombre = (name ?? "").trim().split(" ")[0] || "";
 
+  const onboardingPasos: OnboardingPaso[] = [
+    {
+      id: "vehiculo",
+      titulo: "Cargá tu primer vehículo",
+      descripcion: "Fotos, ficha técnica y precio en menos de dos minutos.",
+      completo: vehiculosTotalCount >= 1,
+    },
+    {
+      id: "equipo",
+      titulo: "Invitá a tu equipo",
+      descripcion: "Sumá vendedores y administrativos con permisos separados.",
+      completo: usuariosTotalCount >= 2,
+    },
+    {
+      id: "stock",
+      titulo: "Publicá tu stock",
+      descripcion: "Sincronizá con los portales donde ya vendés.",
+      completo: vehiculosPublicadosMlCount >= 1,
+    },
+  ];
+
   return (
     <>
       <div className={styles.topbar}>
@@ -222,6 +252,8 @@ export default async function PanelHome() {
       </div>
 
       <div className={styles.content}>
+        {!tenant?.onboardingOmitido && <OnboardingChecklist pasos={onboardingPasos} />}
+
         <div className={styles.kpiRow}>
           <KpiRing
             percent={pctStockDisponible}

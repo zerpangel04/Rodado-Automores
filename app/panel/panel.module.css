@@ -965,6 +965,93 @@
   min-width: 0;
 }
 
+.onboardingCard {
+  margin-bottom: 20px;
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+.onboardingHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.onboardingHead h3 {
+  margin-bottom: 0;
+}
+
+.onboardingOmitir {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.onboardingOmitir:hover {
+  color: var(--ink);
+}
+
+.onboardingPasos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.onboardingPaso {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.onboardingPasoOk {
+  border-color: color-mix(in srgb, var(--success) 45%, var(--line));
+  background: color-mix(in srgb, var(--success) 8%, transparent);
+}
+
+.onboardingCheck {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--success);
+  margin-top: 1px;
+}
+
+.onboardingPasoOk .onboardingCheck {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 20%, transparent);
+}
+
+.onboardingPasoTitulo {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.onboardingPasoOk .onboardingPasoTitulo {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+
+.onboardingPasoDesc {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
 .card h3 {
   font-size: 15.5px;
   margin-bottom: 14px;

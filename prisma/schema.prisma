@@ -65,6 +65,10 @@ model Tenant {
   dominio   String?  @unique
   logoUrl   String?
   createdAt DateTime @default(now())
+  // El checklist de "Primeros pasos" del Panel general deja de mostrarse
+  // para siempre una vez que el dueño toca "Omitir" o una vez que ya se
+  // vio la animación de cierre por completar los 3 pasos naturalmente.
+  onboardingOmitido Boolean @default(false)
 
   usuarios   Usuario[]
   vehiculos  Vehiculo[]
