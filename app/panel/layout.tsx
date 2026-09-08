@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { SidebarData } from "./SidebarData";
 import { SidebarSkeleton } from "./SidebarSkeleton";
 import { NotificationBell } from "./NotificationBell";
+import { AsistentePanel } from "./AsistentePanel";
 import styles from "./panel.module.css";
 
 export default async function PanelLayout({
@@ -32,6 +33,7 @@ export default async function PanelLayout({
         <NotificationBell />
       </div>
       <div className={styles.main}>{children}</div>
+      <AsistentePanel />
     </div>
   );
 }

@@ -96,6 +96,10 @@ export const chatInputSchema = z.object({
   vehiculoId: z.string().trim().optional().nullable(),
 });
 
+export const panelChatInputSchema = z.object({
+  messages: z.array(chatMensajeSchema).min(1).max(40),
+});
+
 export const leadUpdateSchema = z.object({
   nombreCliente: z.string().trim().min(1).max(120).optional(),
   contacto: z.string().trim().max(120).optional().nullable(),
