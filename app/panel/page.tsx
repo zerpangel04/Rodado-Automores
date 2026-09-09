@@ -1,13 +1,16 @@
+import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { diasHastaVtv } from "@/lib/docs";
 import { canalLabelEs, etapaLabelEs } from "@/lib/labels";
+import { getBaseUrl } from "@/lib/url";
 import styles from "./panel.module.css";
 import { KpiRing } from "./KpiRing";
 import { Pill, type PillColor } from "./Pill";
 import { actividadIcon, actividadColor, formatRelativo } from "./actividadDisplay";
 import { PendientesCard, type Pendiente } from "./PendientesCard";
 import { OnboardingChecklist, type OnboardingPaso } from "./OnboardingChecklist";
+import { CatalogLinkCard } from "./CatalogLinkCard";
 
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
@@ -138,7 +141,7 @@ export default async function PanelHome() {
           orderBy: { nombre: "asc" },
         })
       : Promise.resolve([]),
-    prisma.tenant.findUnique({ where: { id: tenantId }, select: { onboardingOmitido: true } }),
+    prisma.tenant.findUnique({ where: { id: tenantId }, select: { onboardingOmitido: true, dominio: true } }),
     prisma.vehiculo.count({ where: { tenantId } }),
     prisma.usuario.count({ where: { tenantId } }),
     prisma.vehiculo.count({ where: { tenantId, mlItemId: { not: null } } }),
@@ -218,6 +221,9 @@ export default async function PanelHome() {
 
   const primerNombre = (name ?? "").trim().split(" ")[0] || "";
 
+  const baseUrl = getBaseUrl(await headers());
+  const catalogUrl = tenant?.dominio ? `${baseUrl}/c/${tenant.dominio}` : null;
+
   const onboardingPasos: OnboardingPaso[] = [
     {
       id: "vehiculo",
@@ -252,6 +258,8 @@ export default async function PanelHome() {
       </div>
 
       <div className={styles.content}>
+        {catalogUrl && <CatalogLinkCard catalogUrl={catalogUrl} />}
+
         {!tenant?.onboardingOmitido && <OnboardingChecklist pasos={onboardingPasos} />}
 
         <div className={styles.kpiRow}>

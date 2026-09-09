@@ -1,5 +1,7 @@
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
+import { getBaseUrl } from "@/lib/url";
 import { Sidebar } from "./Sidebar";
 import { logoutAction, setSucursalAction } from "./actions";
 
@@ -24,7 +26,7 @@ export async function SidebarData({
   const [tenant, sucursales, stockCount, leadsCount] = await Promise.all([
     prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { logoUrl: true },
+      select: { logoUrl: true, dominio: true },
     }),
     prisma.sucursal.findMany({
       where: { tenantId },
@@ -48,10 +50,14 @@ export async function SidebarData({
     }),
   ]);
 
+  const baseUrl = getBaseUrl(await headers());
+  const catalogUrl = tenant?.dominio ? `${baseUrl}/c/${tenant.dominio}` : null;
+
   return (
     <Sidebar
       tenantNombre={tenantNombre}
       tenantLogoUrl={tenant?.logoUrl ?? null}
+      catalogUrl={catalogUrl}
       userName={userName}
       rol={rol}
       stockCount={stockCount}

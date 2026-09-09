@@ -21,6 +21,8 @@ import {
   X,
   Pencil,
   Loader2,
+  Copy,
+  ExternalLink,
   type LucideIcon,
 } from "lucide-react";
 import styles from "./panel.module.css";
@@ -43,6 +45,7 @@ type SucursalOption = { id: string; nombre: string };
 export function Sidebar({
   tenantNombre,
   tenantLogoUrl,
+  catalogUrl,
   userName,
   rol,
   stockCount,
@@ -54,6 +57,7 @@ export function Sidebar({
 }: {
   tenantNombre: string;
   tenantLogoUrl: string | null;
+  catalogUrl: string | null;
   userName: string;
   rol: string;
   stockCount: number;
@@ -71,8 +75,20 @@ export function Sidebar({
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [logoCropTarget, setLogoCropTarget] = useState<{ file: File; url: string } | null>(null);
+  const [catalogLinkCopiado, setCatalogLinkCopiado] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  async function copiarCatalogLink() {
+    if (!catalogUrl) return;
+    try {
+      await navigator.clipboard.writeText(catalogUrl);
+      setCatalogLinkCopiado(true);
+      setTimeout(() => setCatalogLinkCopiado(false), 2000);
+    } catch {
+      // el navegador bloqueó el acceso al portapapeles — nada más que hacer
+    }
+  }
 
   function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -257,6 +273,31 @@ export function Sidebar({
                 )}
               </button>
             ))}
+
+            {catalogUrl && (
+              <>
+                <div className={styles.workspaceDivider} />
+                <div className={styles.workspaceCatalogRow}>
+                  <button
+                    type="button"
+                    className={styles.workspaceCatalogBtn}
+                    onClick={copiarCatalogLink}
+                  >
+                    {catalogLinkCopiado ? <Check size={13} /> : <Copy size={13} />}
+                    {catalogLinkCopiado ? "¡Copiado!" : "Copiar link"}
+                  </button>
+                  <a
+                    href={catalogUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.workspaceCatalogViewBtn}
+                    title="Ver catálogo"
+                  >
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
+              </>
+            )}
 
             {rol === "DUENIO" && (
               <>
