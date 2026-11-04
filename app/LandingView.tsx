@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./landing.module.css";
 import { Reveal } from "./Reveal";
-import { LandingMobileMenu } from "./LandingMobileMenu";
+import { SiteHeader } from "./SiteHeader";
+import { SiteFooter } from "./SiteFooter";
 
 export type PlanPublico = {
   id: string;
@@ -250,29 +251,7 @@ export function LandingView({ planes }: { planes: PlanPublico[] }) {
         <div className={styles.bgFade} />
       </div>
 
-      <nav className={styles.nav}>
-        <div className={styles.navInner}>
-          <div className={styles.logoCombo}>
-            <Image src="/logo-con-texto.png" alt="Rodado" width={56} height={40} priority unoptimized />
-          </div>
-          <div className={styles.navLinks}>
-            <a href="#plataforma">Plataforma</a>
-            <a href="#modulos">Módulos</a>
-            <a href="#movil">Celular</a>
-            <a href="#catalogo">Catálogo</a>
-            <a href="#precios">Precios</a>
-          </div>
-          <div className={styles.navRight}>
-            <a className={styles.loginLink} href="/login">
-              Iniciar sesión
-            </a>
-            <a className={styles.btnGlow} href="/signup">
-              Pedí tu demo →
-            </a>
-            <LandingMobileMenu />
-          </div>
-        </div>
-      </nav>
+      <SiteHeader />
 
       <section className={styles.hero}>
         <Reveal>
@@ -787,19 +766,7 @@ export function LandingView({ planes }: { planes: PlanPublico[] }) {
         </Reveal>
       </section>
 
-      <footer className={styles.footer}>
-        <div className={`${styles.wrap} ${styles.footerInner}`}>
-          <div className={styles.logoCombo}>
-            <Image src="/logo-con-texto.png" alt="Rodado" width={56} height={40} unoptimized />
-          </div>
-          <div className={styles.tagline}>La plataforma comercial para concesionarias argentinas</div>
-          <div className={styles.footerLinks}>
-            <a href="#plataforma">Plataforma</a>
-            <a href="#precios">Precios</a>
-            <a href="mailto:soporte@rodado.com.ar">Contacto</a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

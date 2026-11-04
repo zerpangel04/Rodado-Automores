@@ -177,3 +177,17 @@
 .foot a:hover {
   color: var(--accent-light);
 }
+
+.legalLinks {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 11.5px;
+  color: #6a7179;
+}
+
+.legalLinks a:hover {
+  color: var(--ink);
+}

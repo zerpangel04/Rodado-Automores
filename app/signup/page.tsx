@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { signIn, CodigoRequeridoError, EnvioCodigoFallidoError } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { sendWelcomeEmail } from "@/lib/email";
+import { LegalLinks } from "../LegalLinks";
 import styles from "../auth.module.css";
 
 export default async function SignupPage(
@@ -151,6 +152,7 @@ export default async function SignupPage(
         <p className={styles.foot}>
           ¿Ya tenés cuenta? <a href="/login">Iniciá sesión</a>
         </p>
+        <LegalLinks />
       </div>
     </div>
   );

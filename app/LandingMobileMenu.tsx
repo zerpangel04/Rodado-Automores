@@ -40,19 +40,19 @@ export function LandingMobileMenu() {
         <>
           <div className={styles.overlay} onClick={close} />
           <nav className={styles.panel}>
-            <a href="#plataforma" onClick={close}>
+            <a href="/#plataforma" onClick={close}>
               Plataforma
             </a>
-            <a href="#modulos" onClick={close}>
+            <a href="/#modulos" onClick={close}>
               Módulos
             </a>
-            <a href="#movil" onClick={close}>
+            <a href="/#movil" onClick={close}>
               Celular
             </a>
-            <a href="#catalogo" onClick={close}>
+            <a href="/#catalogo" onClick={close}>
               Catálogo
             </a>
-            <a href="#precios" onClick={close}>
+            <a href="/#precios" onClick={close}>
               Precios
             </a>
             <div className={styles.divider} />

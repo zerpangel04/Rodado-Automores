@@ -11,6 +11,7 @@ import {
 } from "@/lib/auth";
 import { getRateLimitStatus } from "@/lib/rateLimit";
 import { LoginForm } from "./LoginForm";
+import { LegalLinks } from "../LegalLinks";
 import styles from "./login.module.css";
 import authStyles from "../auth.module.css";
 
@@ -130,6 +131,7 @@ export default async function LoginPage(
           <a href="/forgot-password" className={styles.problemsLink}>
             ¿Problemas para entrar?
           </a>
+          <LegalLinks className={styles.legalRow} />
         </div>
       </div>
 
