@@ -160,7 +160,7 @@ const CANALES = [
   { name: "Mercado Libre", note: "Conexión OAuth con tu propia cuenta", logo: "/logos/mercadolibre.svg" },
   { name: "Tu catálogo público", note: "Formularios que entran como lead", color: "#60a5fa" },
   { name: "Email", note: "Notificaciones y recupero de cuenta", color: "#c084fc" },
-  { name: "Asistente de IA", note: "Responde sobre tu stock real · en desarrollo", color: "#4ade80" },
+  { name: "Asistente de IA", note: "Responde sobre tu stock real", color: "#4ade80" },
 ];
 
 // Copy de marketing por plan — lo único que no sale del modelo Plan real
@@ -228,6 +228,17 @@ function matrixCellColor(v: string) {
   if (v === "—") return "#4d545b";
   if (v === "✓") return "var(--success-text)";
   return "#a8b0b8";
+}
+
+// Zona horaria fija para que el server y el navegador rendericen la misma fecha.
+function fechaDeHoy() {
+  const fecha = new Intl.DateTimeFormat("es-AR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(new Date());
+  return fecha.charAt(0).toUpperCase() + fecha.slice(1);
 }
 
 export function LandingView({ planes }: { planes: PlanPublico[] }) {
@@ -354,7 +365,9 @@ export function LandingView({ planes }: { planes: PlanPublico[] }) {
               <div className={styles.mockContent}>
                 <div className={styles.mockGreeting}>
                   <div>
-                    <div className={styles.date}>Domingo, 30 de agosto</div>
+                    <div className={styles.date} suppressHydrationWarning>
+                      {fechaDeHoy()}
+                    </div>
                     <div className={styles.hi}>Buenos días, Alejandro</div>
                   </div>
                 </div>
@@ -634,8 +647,7 @@ export function LandingView({ planes }: { planes: PlanPublico[] }) {
                 </div>
                 <div className={styles.checkItem}>
                   <span className={styles.checkMark}>✓</span>
-                  Asistente de IA anclado a tu stock real{" "}
-                  <span style={{ fontSize: 10, color: "#7d848d" }}>· en desarrollo</span>
+                  Asistente de IA anclado a tu stock real
                 </div>
               </div>
             </div>
@@ -784,7 +796,7 @@ export function LandingView({ planes }: { planes: PlanPublico[] }) {
           <div className={styles.footerLinks}>
             <a href="#plataforma">Plataforma</a>
             <a href="#precios">Precios</a>
-            <a href="/signup">Contacto</a>
+            <a href="mailto:soporte@rodado.com.ar">Contacto</a>
           </div>
         </div>
       </footer>
