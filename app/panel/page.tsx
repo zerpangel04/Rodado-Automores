@@ -84,6 +84,7 @@ export default async function PanelHome() {
     vehiculosTotalCount,
     usuariosTotalCount,
     vehiculosPublicadosMlCount,
+    mlConexionesCount,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -145,6 +146,7 @@ export default async function PanelHome() {
     prisma.vehiculo.count({ where: { tenantId } }),
     prisma.usuario.count({ where: { tenantId } }),
     prisma.vehiculo.count({ where: { tenantId, mlItemId: { not: null } } }),
+    prisma.mercadoLibreConexion.count({ where: { tenantId } }),
   ]);
 
   const alertasVtv = vehiculosConVtv
@@ -224,24 +226,45 @@ export default async function PanelHome() {
   const baseUrl = getBaseUrl(await headers());
   const catalogUrl = tenant?.dominio ? `${baseUrl}/c/${tenant.dominio}` : null;
 
+  // Equipo e Integraciones son solo para el dueño, así que los otros roles
+  // no reciben link a esas pantallas. Si el paso ya está hecho, el link va a
+  // la sección sin abrir el formulario de alta.
+  const esDuenio = rol === "DUENIO";
+  const vehiculoCompleto = vehiculosTotalCount >= 1;
+  const equipoCompleto = usuariosTotalCount >= 2;
+  const stockCompleto = vehiculosPublicadosMlCount >= 1;
+  const mlConectado = mlConexionesCount >= 1;
+
+  const hrefEquipo = esDuenio ? (equipoCompleto ? "/panel/equipo" : "/panel/equipo?invitar=1") : null;
+  // Sin Mercado Libre conectado no se puede publicar: primero hay que conectarlo.
+  const hrefStock = mlConectado || stockCompleto ? "/panel/stock" : esDuenio ? "/panel/integraciones" : null;
+
   const onboardingPasos: OnboardingPaso[] = [
     {
       id: "vehiculo",
       titulo: "Cargá tu primer vehículo",
       descripcion: "Fotos, ficha técnica y precio en menos de dos minutos.",
-      completo: vehiculosTotalCount >= 1,
+      completo: vehiculoCompleto,
+      href: vehiculoCompleto ? "/panel/stock" : "/panel/stock?nuevo=1",
     },
     {
       id: "equipo",
       titulo: "Invitá a tu equipo",
-      descripcion: "Sumá vendedores y administrativos con permisos separados.",
-      completo: usuariosTotalCount >= 2,
+      descripcion:
+        hrefEquipo || equipoCompleto
+          ? "Sumá vendedores y administrativos con permisos separados."
+          : "Lo hace el dueño de la cuenta desde Equipo.",
+      completo: equipoCompleto,
+      href: hrefEquipo,
     },
     {
       id: "stock",
       titulo: "Publicá tu stock",
-      descripcion: "Sincronizá con los portales donde ya vendés.",
-      completo: vehiculosPublicadosMlCount >= 1,
+      descripcion: hrefStock
+        ? "Sincronizá con los portales donde ya vendés."
+        : "El dueño de la cuenta tiene que conectar Mercado Libre primero.",
+      completo: stockCompleto,
+      href: hrefStock,
     },
   ];
 

@@ -184,6 +184,7 @@ export function StockView({
   canRevertirVenta,
   leadsActivos,
   asistenteIA,
+  abrirNuevo = false,
 }: {
   initialItems: VehiculoDTO[];
   usuarios: UsuarioOption[];
@@ -193,12 +194,22 @@ export function StockView({
   canRevertirVenta: boolean;
   leadsActivos: LeadActivoDTO[];
   asistenteIA: boolean;
+  abrirNuevo?: boolean;
 }) {
   const router = useRouter();
   const [items, setItems] = useState<VehiculoDTO[]>(initialItems);
   useEffect(() => {
     setItems(initialItems);
   }, [initialItems]);
+
+  // Llega desde "Primeros pasos": abre el alta y limpia la URL para que
+  // recargar la página no vuelva a abrir el formulario.
+  useEffect(() => {
+    if (!abrirNuevo) return;
+    openCreate();
+    router.replace("/panel/stock", { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abrirNuevo]);
   const [filter, setFilter] = useState<"todos" | EstadoVehiculo>("todos");
   const [orden, setOrden] = useState<"reciente" | "precio" | "dias">("reciente");
   const [vista, setVista] = useState<"grilla" | "tabla">("grilla");

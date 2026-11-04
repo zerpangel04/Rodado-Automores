@@ -65,15 +65,26 @@ export function EquipoView({
   userId,
   resumen,
   carga,
+  abrirInvitar = false,
 }: {
   initialItems: UsuarioDTO[];
   userId: string;
   resumen: ResumenDTO;
   carga: CargaItem[];
+  abrirInvitar?: boolean;
 }) {
   const router = useRouter();
   const [items, setItems] = useState<UsuarioDTO[]>(initialItems);
   useEffect(() => setItems(initialItems), [initialItems]);
+
+  // Llega desde "Primeros pasos": abre la invitación y limpia la URL para
+  // que recargar la página no vuelva a abrirla.
+  useEffect(() => {
+    if (!abrirInvitar) return;
+    openCreate();
+    router.replace("/panel/equipo", { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abrirInvitar]);
 
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const [searchQuery, setSearchQuery] = useState("");

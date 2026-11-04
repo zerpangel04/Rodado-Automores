@@ -6,7 +6,8 @@ import styles from "../panel.module.css";
 
 const SUC_PALETA = ["var(--accent)", "var(--info)", "var(--secondary)", "var(--success)"];
 
-export default async function EquipoPage() {
+export default async function EquipoPage(props: { searchParams: Promise<{ invitar?: string }> }) {
+  const { invitar } = await props.searchParams;
   const session = await auth();
   const { tenantId, rol, id: userId } = session!.user;
 
@@ -172,7 +173,13 @@ export default async function EquipoPage() {
         </div>
       </div>
       <div className={styles.content}>
-        <EquipoView initialItems={items} userId={userId} resumen={resumen} carga={carga} />
+        <EquipoView
+          initialItems={items}
+          userId={userId}
+          resumen={resumen}
+          carga={carga}
+          abrirInvitar={invitar === "1"}
+        />
       </div>
     </>
   );

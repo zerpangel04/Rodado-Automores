@@ -1127,6 +1127,26 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
+.onboardingPasoLink {
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.onboardingPasoLink:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.onboardingPasoTexto {
+  flex: 1;
+  min-width: 0;
+}
+
+.onboardingPasoFlecha {
+  flex: none;
+  align-self: center;
+  color: var(--ink-soft);
+}
+
 .onboardingPasoOk {
   border-color: color-mix(in srgb, var(--success) 45%, var(--line));
   background: color-mix(in srgb, var(--success) 8%, transparent);

@@ -5,7 +5,8 @@ import { getPlanTenant } from "@/lib/planes";
 import { StockView, type VehiculoDTO, type LeadActivoDTO } from "./StockView";
 import styles from "../panel.module.css";
 
-export default async function StockPage() {
+export default async function StockPage(props: { searchParams: Promise<{ nuevo?: string }> }) {
+  const { nuevo } = await props.searchParams;
   const session = await auth();
   const { tenantId, id: userId, rol } = session!.user;
 
@@ -102,6 +103,7 @@ export default async function StockPage() {
       </div>
       <div className={styles.content}>
         <StockView
+          abrirNuevo={nuevo === "1"}
           initialItems={items}
           usuarios={usuarios}
           sucursales={sucursales}

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
+import Link from "next/link";
+import { Check, ChevronRight } from "lucide-react";
 import styles from "./panel.module.css";
 
 export type OnboardingPaso = {
@@ -10,6 +11,8 @@ export type OnboardingPaso = {
   titulo: string;
   descripcion: string;
   completo: boolean;
+  // null cuando este usuario no puede hacer el paso (depende del rol).
+  href: string | null;
 };
 
 async function marcarOnboardingCerrado() {
@@ -21,6 +24,14 @@ export function OnboardingChecklist({ pasos }: { pasos: OnboardingPaso[] }) {
   const [oculto, setOculto] = useState(false);
   const [cerrando, setCerrando] = useState(false);
   const todosCompletos = pasos.every((p) => p.completo);
+
+  // Al volver con el botón "atrás", Next puede mostrar esta pantalla desde
+  // su caché: sin este refresh, un paso recién completado seguiría sin
+  // tildarse hasta recargar.
+  useEffect(() => {
+    if (!todosCompletos) router.refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Si los 3 pasos ya están completos cuando se monta (se completó el
   // último en otra pantalla y volvieron acá), muestra un momento la
@@ -69,18 +80,32 @@ export function OnboardingChecklist({ pasos }: { pasos: OnboardingPaso[] }) {
         </button>
       </div>
       <div className={styles.onboardingPasos}>
-        {pasos.map((p) => (
-          <div
-            key={p.id}
-            className={`${styles.onboardingPaso} ${p.completo ? styles.onboardingPasoOk : ""}`}
-          >
-            <span className={styles.onboardingCheck}>{p.completo && <Check size={13} />}</span>
-            <div>
-              <div className={styles.onboardingPasoTitulo}>{p.titulo}</div>
-              <div className={styles.onboardingPasoDesc}>{p.descripcion}</div>
-            </div>
-          </div>
-        ))}
+        {pasos.map((p) => {
+          const clase = `${styles.onboardingPaso} ${p.completo ? styles.onboardingPasoOk : ""}`;
+          const contenido = (
+            <>
+              <span className={styles.onboardingCheck}>{p.completo && <Check size={13} />}</span>
+              <div className={styles.onboardingPasoTexto}>
+                <div className={styles.onboardingPasoTitulo}>{p.titulo}</div>
+                <div className={styles.onboardingPasoDesc}>{p.descripcion}</div>
+              </div>
+            </>
+          );
+
+          if (!p.href) {
+            return (
+              <div key={p.id} className={clase}>
+                {contenido}
+              </div>
+            );
+          }
+          return (
+            <Link key={p.id} href={p.href} className={`${clase} ${styles.onboardingPasoLink}`}>
+              {contenido}
+              <ChevronRight size={16} className={styles.onboardingPasoFlecha} />
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
