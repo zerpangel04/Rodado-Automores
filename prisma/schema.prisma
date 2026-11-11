@@ -70,6 +70,11 @@ model Tenant {
   // vio la animación de cierre por completar los 3 pasos naturalmente.
   onboardingOmitido Boolean @default(false)
 
+  // Bloque "Sobre nosotros" del catálogo público. Se guarda el año de
+  // inicio (no los años) para que "N años en el mercado" no quede viejo.
+  sobreNosotros String? @db.VarChar(300)
+  anioInicio    Int?
+
   usuarios   Usuario[]
   vehiculos  Vehiculo[]
   leads      Lead[]
@@ -113,6 +118,8 @@ model Sucursal {
   nombre    String
   direccion String?
   telefono  String?
+  // Texto libre que se muestra en el catálogo, ej. "Lun a vie 9 a 18 · Sáb 9 a 13".
+  horarios  String?  @db.VarChar(200)
   createdAt DateTime @default(now())
 
   vehiculos Vehiculo[]

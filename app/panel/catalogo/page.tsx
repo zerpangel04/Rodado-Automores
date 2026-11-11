@@ -28,7 +28,15 @@ export default async function CatalogoPanelPage() {
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
-    select: { dominio: true },
+    select: {
+      dominio: true,
+      sobreNosotros: true,
+      anioInicio: true,
+      sucursales: {
+        select: { id: true, nombre: true, direccion: true, horarios: true },
+        orderBy: { createdAt: "asc" },
+      },
+    },
   });
   const baseUrl = getBaseUrl(await headers());
   const catalogUrl = tenant?.dominio ? `${baseUrl}/c/${tenant.dominio}` : null;
@@ -42,7 +50,14 @@ export default async function CatalogoPanelPage() {
         </div>
       </div>
       <div className={styles.content}>
-        <CatalogoPanelView catalogUrl={catalogUrl} />
+        <CatalogoPanelView
+          catalogUrl={catalogUrl}
+          general={{
+            sobreNosotros: tenant?.sobreNosotros ?? null,
+            anioInicio: tenant?.anioInicio ?? null,
+            sucursales: tenant?.sucursales ?? [],
+          }}
+        />
       </div>
     </>
   );

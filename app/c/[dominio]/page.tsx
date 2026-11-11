@@ -4,6 +4,7 @@ import { PublicHeader } from "../PublicHeader";
 import { ChatWidget } from "../ChatWidget";
 import { AskAssistantChips } from "../AskAssistantChips";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
+import { textoAniosEnMercado } from "@/lib/catalogo";
 import styles from "../public.module.css";
 
 export default async function CatalogoPublico(
@@ -23,7 +24,7 @@ export default async function CatalogoPublico(
         include: { sucursal: { select: { nombre: true } } },
       },
       sucursales: {
-        select: { id: true, nombre: true, direccion: true, telefono: true },
+        select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -51,6 +52,9 @@ export default async function CatalogoPublico(
     marcas: new Set(items.map((v) => v.marca)).size,
     menosKm: items.length > 0 ? Math.min(...items.map((v) => v.km)) : 0,
   };
+
+  const aniosEnMercado = textoAniosEnMercado(tenant.anioInicio);
+  const mostrarSobreNosotros = Boolean(tenant.sobreNosotros || aniosEnMercado);
 
   const primerTelefono = tenant.sucursales.find((s) => s.telefono)?.telefono ?? null;
 
@@ -116,6 +120,21 @@ export default async function CatalogoPublico(
         </div>
       </section>
 
+      {mostrarSobreNosotros && (
+        <section className={styles.sobre} aria-labelledby="sobre-nosotros">
+          <div className={styles.wrap}>
+            <div className={styles.sobreTexto}>
+              <span className={styles.sobreEyebrow}>SOBRE NOSOTROS</span>
+              <h2 id="sobre-nosotros" className={styles.sobreTitulo}>
+                {tenant.nombre}
+              </h2>
+              {aniosEnMercado && <span className={styles.sobreAnios}>{aniosEnMercado}</span>}
+              {tenant.sobreNosotros && <p>{tenant.sobreNosotros}</p>}
+            </div>
+          </div>
+        </section>
+      )}
+
       <footer className={styles.footer}>
         <div className={`${styles.wrap} ${styles.footerGrid}`}>
           <div className={styles.footerAbout}>
@@ -137,6 +156,7 @@ export default async function CatalogoPublico(
               <div className={styles.footerSucursalLine}>
                 {s.direccion || "Dirección a confirmar"}
               </div>
+              {s.horarios && <div className={styles.footerSucursalLine}>{s.horarios}</div>}
               {s.telefono && <div className={styles.footerSucursalLine}>{s.telefono}</div>}
             </div>
           ))}

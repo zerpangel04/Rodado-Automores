@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SOBRE_NOSOTROS_MAX, HORARIOS_MAX, ANIO_INICIO_MIN } from "./catalogo";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -172,4 +173,32 @@ export const integracionTipoValues = ["wpp", "ig", "fin", "cont"] as const;
 
 export const interesIntegracionInputSchema = z.object({
   tipoIntegracion: z.enum(integracionTipoValues),
+});
+
+export const catalogoGeneralSchema = z.object({
+  sobreNosotros: z
+    .string()
+    .trim()
+    .max(SOBRE_NOSOTROS_MAX, `Máximo ${SOBRE_NOSOTROS_MAX} caracteres`)
+    .nullable()
+    .transform((v) => v || null),
+  anioInicio: z
+    .number()
+    .int()
+    .min(ANIO_INICIO_MIN, `El año tiene que ser ${ANIO_INICIO_MIN} o posterior`)
+    .max(new Date().getFullYear(), "El año no puede ser futuro")
+    .nullable(),
+  sucursales: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        horarios: z
+          .string()
+          .trim()
+          .max(HORARIOS_MAX, `Máximo ${HORARIOS_MAX} caracteres`)
+          .nullable()
+          .transform((v) => v || null),
+      })
+    )
+    .max(50),
 });
