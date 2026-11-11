@@ -55,7 +55,7 @@
   display: flex;
   align-items: center;
   gap: 22px;
-  padding: 14px 0;
+  padding-block: 14px;
   flex-wrap: wrap;
 }
 
@@ -242,7 +242,7 @@
 
 .heroInner {
   position: relative;
-  padding: 46px 0 34px;
+  padding-block: 46px 34px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -250,7 +250,7 @@
 
 @media (max-width: 640px) {
   .heroInner {
-    padding: 30px 0 24px;
+    padding-block: 30px 24px;
   }
 }
 
@@ -832,7 +832,7 @@
   display: grid;
   grid-template-columns: 1.1fr 1fr 1fr;
   gap: 30px;
-  padding: 34px 0;
+  padding-block: 34px;
 }
 
 @media (max-width: 700px) {
@@ -984,7 +984,7 @@
 /* --- Detalle --- */
 
 .detail {
-  padding: 26px 0 60px;
+  padding-block: 26px 60px;
 }
 
 .backBtn {
