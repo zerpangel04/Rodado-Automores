@@ -6,6 +6,8 @@ import { AskAssistantChips } from "../AskAssistantChips";
 import { SucursalMapa } from "../SucursalMapa";
 import { WhatsAppFlotante } from "../WhatsAppFlotante";
 import { urlWhatsapp, whatsappDelCatalogo } from "@/lib/whatsapp";
+import { acentoVigente } from "@/lib/colorAcento";
+import { estiloAcento } from "../estiloAcento";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import { textoAniosEnMercado } from "@/lib/catalogo";
 import styles from "../public.module.css";
@@ -30,6 +32,7 @@ export default async function CatalogoPublico(
         select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
         orderBy: { createdAt: "asc" },
       },
+      plan: { select: { catalogoPersonalizado: true } },
     },
   });
 
@@ -68,8 +71,10 @@ export default async function CatalogoPublico(
     ? urlWhatsapp(numeroWhatsapp, `Hola, vi el catálogo de ${tenant.nombre} y quería hacer una consulta.`)
     : null;
 
+  const acento = acentoVigente(tenant.colorAcento, tenant.plan);
+
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={acento ? estiloAcento(acento) : undefined}>
       <PublicHeader
         nombre={tenant.nombre}
         sucursalesCount={tenant.sucursales.length}

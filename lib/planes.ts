@@ -16,6 +16,7 @@ const PLAN_BASICO_FALLBACK: Plan = {
   reportesAvanzados: false,
   asistenteIA: false,
   soportePrioritario: false,
+  catalogoPersonalizado: false,
   createdAt: new Date(0),
 };
 

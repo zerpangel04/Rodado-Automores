@@ -57,6 +57,8 @@ const AGENCIAS = [
     // Básico sin "Sobre nosotros" cargado: el bloque no debería aparecer.
     sobreNosotros: null,
     anioInicio: null,
+    // Color guardado de cuando tenía un plan más alto: no se tiene que aplicar.
+    colorAcento: "#22c55e",
     sucursales: [
       { nombre: "Casa central", direccion: "Av. Hipólito Yrigoyen 8450, Lomas de Zamora", telefono: "11 4244-1020", horarios: null },
     ],
@@ -108,6 +110,7 @@ const AGENCIAS = [
     sobreNosotros:
       "Desde 1995 acompañamos a las familias de zona norte en la compra de su auto. Tres locales, más de 60 unidades en stock y un equipo de posventa propio.",
     anioInicio: 1995,
+    colorAcento: "#60a5fa",
     sucursales: [
       { nombre: "San Isidro", direccion: "Av. Centenario 1450, San Isidro", telefono: "11 4747-2020", horarios: "Lun a vie 9 a 19 · Sáb 9 a 14" },
       { nombre: "Pilar", direccion: "Panamericana Km 49,5, Pilar", telefono: "230 442-8800", horarios: "Lun a sáb 9 a 19 · Dom 10 a 14" },
@@ -175,6 +178,7 @@ async function main() {
         sobreNosotros: a.sobreNosotros,
         anioInicio: a.anioInicio,
         whatsapp: a.whatsapp ?? null,
+        colorAcento: a.colorAcento ?? null,
         onboardingOmitido: true,
       },
     });

@@ -199,7 +199,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(900px 380px at 18% -20%, rgba(240, 161, 60, 0.15), transparent 70%);
+  background: radial-gradient(900px 380px at 18% -20%, rgba(var(--accent-rgb), 0.15), transparent 70%);
 }
 
 .heroInner {
@@ -239,7 +239,7 @@
 }
 
 .heroName {
-  background: linear-gradient(100deg, #f7c584, var(--accent) 45%, #c9762a);
+  background: linear-gradient(100deg, var(--accent-hero-light), var(--accent) 45%, var(--accent-dark));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -376,7 +376,7 @@
 
 .vitrinaAskChip:hover {
   color: var(--accent-xlight);
-  border-color: rgba(240, 161, 60, 0.4);
+  border-color: rgba(var(--accent-rgb), 0.4);
 }
 
 /* --- Filtros --- */
@@ -402,7 +402,7 @@
 }
 
 .searchWrap:focus-within {
-  border-color: rgba(240, 161, 60, 0.35);
+  border-color: rgba(var(--accent-rgb), 0.35);
 }
 
 .searchWrap svg {
@@ -477,7 +477,7 @@
 }
 
 .marcaChipActive .marcaChipCount {
-  color: rgba(23, 19, 12, 0.6);
+  color: rgba(var(--accent-ink-rgb), 0.6);
 }
 
 /* --- Lista --- */
@@ -538,7 +538,7 @@
 
 .card:hover {
   transform: translateY(-4px);
-  border-color: rgba(240, 161, 60, 0.34);
+  border-color: rgba(var(--accent-rgb), 0.34);
   box-shadow: 0 26px 54px rgba(0, 0, 0, 0.45);
 }
 
@@ -768,8 +768,8 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--accent-light);
-  background: rgba(240, 161, 60, 0.1);
-  border: 1px solid rgba(240, 161, 60, 0.24);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.24);
 }
 
 .sobreTexto p {
@@ -903,7 +903,7 @@
 }
 
 .mapaBtn:hover {
-  border-color: rgba(240, 161, 60, 0.35);
+  border-color: rgba(var(--accent-rgb), 0.35);
   color: var(--accent-light);
 }
 
@@ -1155,8 +1155,8 @@
   align-items: center;
   justify-content: center;
   color: var(--accent-light);
-  background: rgba(240, 161, 60, 0.12);
-  border: 1px solid rgba(240, 161, 60, 0.24);
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.24);
 }
 
 .locationText {
@@ -1237,8 +1237,8 @@
   margin-top: 18px;
   padding: 17px 17px 18px;
   border-radius: 13px;
-  background: linear-gradient(150deg, rgba(240, 161, 60, 0.1), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(240, 161, 60, 0.24);
+  background: linear-gradient(150deg, rgba(var(--accent-rgb), 0.1), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(var(--accent-rgb), 0.24);
 }
 
 .contactForm h4 {
@@ -1281,7 +1281,7 @@
 
 .field input:focus,
 .field textarea:focus {
-  border-color: rgba(240, 161, 60, 0.6);
+  border-color: rgba(var(--accent-rgb), 0.6);
 }
 
 .submitBtn {

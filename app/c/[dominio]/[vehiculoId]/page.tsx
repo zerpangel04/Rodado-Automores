@@ -10,6 +10,8 @@ import { ContactForm } from "./ContactForm";
 import { WhatsAppFlotante } from "../../WhatsAppFlotante";
 import { urlWhatsapp, whatsappDelCatalogo } from "@/lib/whatsapp";
 import { getBaseUrl } from "@/lib/url";
+import { acentoVigente } from "@/lib/colorAcento";
+import { estiloAcento } from "../../estiloAcento";
 import styles from "../../public.module.css";
 
 const estadoLabel: Record<string, string> = {
@@ -37,7 +39,10 @@ export default async function VehiculoDetalle(
   const [tenant, vehiculo] = await Promise.all([
     prisma.tenant.findUnique({
       where: { dominio },
-      include: { sucursales: { select: { id: true, nombre: true, direccion: true, telefono: true } } },
+      include: {
+        sucursales: { select: { id: true, nombre: true, direccion: true, telefono: true } },
+        plan: { select: { catalogoPersonalizado: true } },
+      },
     }),
     prisma.vehiculo.findUnique({
       where: { id: vehiculoId },
@@ -65,6 +70,7 @@ export default async function VehiculoDetalle(
     tenant.whatsapp,
     tenant.sucursales.map((s) => s.telefono)
   );
+  const acento = acentoVigente(tenant.colorAcento, tenant.plan);
   const linkVehiculo = `${getBaseUrl(await headers())}/c/${dominio}/${vehiculo.id}`;
   const whatsappHref = numeroWhatsapp
     ? urlWhatsapp(
@@ -74,7 +80,7 @@ export default async function VehiculoDetalle(
     : null;
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={acento ? estiloAcento(acento) : undefined}>
       <PublicHeader
         nombre={tenant.nombre}
         sucursalesCount={tenant.sucursales.length}

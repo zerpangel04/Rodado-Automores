@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { SOBRE_NOSOTROS_MAX, HORARIOS_MAX, ANIO_INICIO_MIN } from "./catalogo";
 import { WHATSAPP_MAX, normalizarWhatsappAR } from "./whatsapp";
+import { CONTRASTE_MINIMO, contrasteSuficiente, normalizarHex } from "./colorAcento";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -213,4 +214,17 @@ export const catalogoGeneralSchema = z.object({
       })
     )
     .max(50),
+});
+
+export const catalogoPersonalizacionSchema = z.object({
+  // null = volver al ámbar original de Rodado.
+  colorAcento: z
+    .string()
+    .trim()
+    .nullable()
+    .transform((v) => (v ? normalizarHex(v) ?? "invalido" : null))
+    .refine((v) => v !== "invalido", { message: "El color tiene que ser un código como #F0A13C" })
+    .refine((v) => v === null || v === "invalido" || contrasteSuficiente(v), {
+      message: `Ese color se lee poco sobre el fondo oscuro del catálogo (contraste mínimo ${CONTRASTE_MINIMO}:1). Probá con uno más claro.`,
+    }),
 });

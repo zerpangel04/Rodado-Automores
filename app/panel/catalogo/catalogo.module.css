@@ -302,3 +302,136 @@
     margin-left: 0;
   }
 }
+
+/* --- Pestaña Personalización --- */
+
+.bloqueada {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.bloqueadaIcono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--accent-light);
+  background: rgba(240, 161, 60, 0.12);
+  border: 1px solid rgba(240, 161, 60, 0.26);
+}
+
+.bloqueada .btnPrimary {
+  display: inline-block;
+  margin-top: 6px;
+  text-decoration: none;
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.colorPicker {
+  width: 44px;
+  height: 40px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--input-bg);
+  cursor: pointer;
+}
+
+.field .colorTexto {
+  width: 110px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-transform: uppercase;
+}
+
+.contrasteBien,
+.contrasteMal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+}
+
+.contrasteBien {
+  color: var(--success-text);
+}
+
+.contrasteMal {
+  color: var(--danger-text);
+}
+
+/* Muestra con el fondo real del catálogo; las variables --accent* vienen
+   del style inline (misma paleta que usa el catálogo). */
+.preview {
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: radial-gradient(500px 180px at 10% -30%, rgba(var(--accent-rgb), 0.15), transparent 70%),
+    #0b0d10;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.previewEtiqueta {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ink-soft);
+}
+
+.previewFila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.previewTitulo {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.previewNombre {
+  background: linear-gradient(100deg, var(--accent-hero-light), var(--accent) 45%, var(--accent-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.previewPrecio {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.previewChip {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent-light);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.24);
+}
+
+.previewBoton {
+  margin-left: auto;
+  padding: 7px 13px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent-grad);
+}

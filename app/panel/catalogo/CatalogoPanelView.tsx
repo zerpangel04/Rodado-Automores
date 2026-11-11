@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { CatalogLinkCard } from "../CatalogLinkCard";
 import { CatalogoGeneralForm, type CatalogoGeneralDTO } from "./CatalogoGeneralForm";
+import {
+  CatalogoPersonalizacion,
+  type CatalogoPersonalizacionDTO,
+} from "./CatalogoPersonalizacion";
 import styles from "./catalogo.module.css";
 
 const PESTANIAS = [
@@ -10,16 +14,20 @@ const PESTANIAS = [
   { key: "personalizacion", label: "Personalización" },
 ] as const;
 
-type Pestania = (typeof PESTANIAS)[number]["key"];
+export type Pestania = (typeof PESTANIAS)[number]["key"];
 
 export function CatalogoPanelView({
   catalogUrl,
   general,
+  personalizacion,
+  pestaniaInicial,
 }: {
   catalogUrl: string | null;
   general: CatalogoGeneralDTO;
+  personalizacion: CatalogoPersonalizacionDTO;
+  pestaniaInicial: Pestania;
 }) {
-  const [pestania, setPestania] = useState<Pestania>("general");
+  const [pestania, setPestania] = useState<Pestania>(pestaniaInicial);
 
   return (
     <>
@@ -48,9 +56,7 @@ export function CatalogoPanelView({
         </>
       )}
 
-      {pestania === "personalizacion" && (
-        <p className={styles.vacio}>Acá vas a poder personalizar el diseño de tu catálogo.</p>
-      )}
+      {pestania === "personalizacion" && <CatalogoPersonalizacion inicial={personalizacion} />}
     </>
   );
 }

@@ -79,6 +79,9 @@ model Tenant {
   // WhatsApp del catálogo (botón flotante y header). Si es null se usa el
   // primer teléfono de sucursal. Se guarda como lo escribió el dueño.
   whatsapp      String? @db.VarChar(30)
+  // Color de acento del catálogo (#RRGGBB). Solo se aplica si el plan tiene
+  // catalogoPersonalizado; si bajan de plan queda guardado pero no se usa.
+  colorAcento   String? @db.VarChar(7)
 
   usuarios   Usuario[]
   vehiculos  Vehiculo[]
@@ -108,6 +111,8 @@ model Plan {
   reportesAvanzados  Boolean  @default(false)
   asistenteIA        Boolean  @default(false)
   soportePrioritario Boolean  @default(false)
+  // Color de acento, portada y destacados del catálogo público.
+  catalogoPersonalizado Boolean @default(false)
   createdAt          DateTime @default(now())
 
   tenants Tenant[]

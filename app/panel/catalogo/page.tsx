@@ -3,9 +3,18 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/url";
 import styles from "../panel.module.css";
-import { CatalogoPanelView } from "./CatalogoPanelView";
+import { CatalogoPanelView, type Pestania } from "./CatalogoPanelView";
 
-export default async function CatalogoPanelPage() {
+// ?pestania=personalizacion abre esa pestaña directo (links desde otras
+// secciones del panel).
+function pestaniaDeQuery(v: string | string[] | undefined): Pestania {
+  return v === "personalizacion" ? "personalizacion" : "general";
+}
+
+export default async function CatalogoPanelPage(props: {
+  searchParams: Promise<{ pestania?: string | string[] }>;
+}) {
+  const { pestania } = await props.searchParams;
   const session = await auth();
   const { tenantId, rol } = session!.user;
 
@@ -34,6 +43,8 @@ export default async function CatalogoPanelPage() {
       anioInicio: true,
       mostrarMapa: true,
       whatsapp: true,
+      colorAcento: true,
+      plan: { select: { catalogoPersonalizado: true } },
       sucursales: {
         select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
         orderBy: { createdAt: "asc" },
@@ -61,6 +72,11 @@ export default async function CatalogoPanelPage() {
             whatsapp: tenant?.whatsapp ?? null,
             sucursales: tenant?.sucursales ?? [],
           }}
+          personalizacion={{
+            habilitada: tenant?.plan.catalogoPersonalizado ?? false,
+            colorAcento: tenant?.colorAcento ?? null,
+          }}
+          pestaniaInicial={pestaniaDeQuery(pestania)}
         />
       </div>
     </>
