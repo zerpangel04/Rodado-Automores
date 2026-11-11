@@ -1326,3 +1326,46 @@
   font-size: 12.5px;
   margin-bottom: 10px;
 }
+
+/* --- WhatsApp flotante (abajo a la izquierda; el chat está a la derecha) --- */
+
+.waFlotante {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 55;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  color: #ffffff;
+  background: linear-gradient(140deg, #4ade80, #16a34a);
+  box-shadow: 0 16px 36px rgba(22, 163, 74, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.waFlotante:hover {
+  transform: translateY(-2px);
+}
+
+.waFlotante:focus-visible {
+  outline: 2px solid #86efac;
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .waFlotante {
+    left: 14px;
+    bottom: 14px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waFlotante {
+    transition: none;
+  }
+}

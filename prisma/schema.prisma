@@ -76,6 +76,9 @@ model Tenant {
   anioInicio    Int?
   // Muestra "Ver mapa" y "Cómo llegar" junto a cada local con dirección.
   mostrarMapa   Boolean @default(true)
+  // WhatsApp del catálogo (botón flotante y header). Si es null se usa el
+  // primer teléfono de sucursal. Se guarda como lo escribió el dueño.
+  whatsapp      String? @db.VarChar(30)
 
   usuarios   Usuario[]
   vehiculos  Vehiculo[]

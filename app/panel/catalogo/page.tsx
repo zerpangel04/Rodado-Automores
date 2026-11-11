@@ -33,8 +33,9 @@ export default async function CatalogoPanelPage() {
       sobreNosotros: true,
       anioInicio: true,
       mostrarMapa: true,
+      whatsapp: true,
       sucursales: {
-        select: { id: true, nombre: true, direccion: true, horarios: true },
+        select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
         orderBy: { createdAt: "asc" },
       },
     },
@@ -57,6 +58,7 @@ export default async function CatalogoPanelPage() {
             sobreNosotros: tenant?.sobreNosotros ?? null,
             anioInicio: tenant?.anioInicio ?? null,
             mostrarMapa: tenant?.mostrarMapa ?? true,
+            whatsapp: tenant?.whatsapp ?? null,
             sucursales: tenant?.sucursales ?? [],
           }}
         />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +7,9 @@ import { PublicHeader } from "../../PublicHeader";
 import { PhotoGallery } from "../../PhotoGallery";
 import { ChatWidget } from "../../ChatWidget";
 import { ContactForm } from "./ContactForm";
+import { WhatsAppFlotante } from "../../WhatsAppFlotante";
+import { urlWhatsapp, whatsappDelCatalogo } from "@/lib/whatsapp";
+import { getBaseUrl } from "@/lib/url";
 import styles from "../../public.module.css";
 
 const estadoLabel: Record<string, string> = {
@@ -55,12 +59,27 @@ export default async function VehiculoDetalle(
   ];
   const hayDocsCargados = docs.some((d) => d.ok);
 
+  // El mensaje nombra el auto y trae el link, así el vendedor sabe por cuál
+  // escriben sin tener que preguntar.
+  const numeroWhatsapp = whatsappDelCatalogo(
+    tenant.whatsapp,
+    tenant.sucursales.map((s) => s.telefono)
+  );
+  const linkVehiculo = `${getBaseUrl(await headers())}/c/${dominio}/${vehiculo.id}`;
+  const whatsappHref = numeroWhatsapp
+    ? urlWhatsapp(
+        numeroWhatsapp,
+        `Hola, me interesa el ${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio} que vi en su catálogo: ${linkVehiculo}`
+      )
+    : null;
+
   return (
     <div className={styles.page}>
       <PublicHeader
         nombre={tenant.nombre}
         sucursalesCount={tenant.sucursales.length}
         telefono={tenant.sucursales.find((s) => s.telefono)?.telefono ?? null}
+        whatsappHref={whatsappHref}
         logoUrl={tenant.logoUrl}
       />
 
@@ -184,6 +203,7 @@ export default async function VehiculoDetalle(
         </div>
       </footer>
 
+      {whatsappHref && <WhatsAppFlotante href={whatsappHref} />}
       <ChatWidget dominio={dominio} nombreAgencia={tenant.nombre} vehiculoId={vehiculo.id} />
     </div>
   );

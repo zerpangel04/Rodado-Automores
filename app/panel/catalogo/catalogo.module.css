@@ -134,6 +134,21 @@
   color: var(--danger-text);
 }
 
+.field .whatsappInput {
+  max-width: 240px;
+}
+
+.fieldAyudaAbajo {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 .locales {
   display: flex;
   flex-direction: column;

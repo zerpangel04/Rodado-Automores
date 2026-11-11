@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SOBRE_NOSOTROS_MAX, HORARIOS_MAX, ANIO_INICIO_MIN } from "./catalogo";
+import { WHATSAPP_MAX, normalizarWhatsappAR } from "./whatsapp";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -189,6 +190,16 @@ export const catalogoGeneralSchema = z.object({
     .max(new Date().getFullYear(), "El año no puede ser futuro")
     .nullable(),
   mostrarMapa: z.boolean(),
+  whatsapp: z
+    .string()
+    .trim()
+    .max(WHATSAPP_MAX, "El WhatsApp es demasiado largo")
+    .nullable()
+    .transform((v) => v || null)
+    .refine((v) => v === null || normalizarWhatsappAR(v) !== null, {
+      message:
+        "El WhatsApp no parece un celular argentino. Escribilo con código de área, ej. 11 2345 6789",
+    }),
   sucursales: z
     .array(
       z.object({

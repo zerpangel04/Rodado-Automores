@@ -3,24 +3,22 @@ import styles from "./public.module.css";
 import { WhatsAppGlyph } from "../icons/WhatsAppGlyph";
 import { AgencyMark } from "../AgencyMark";
 
-function whatsappUrl(telefono: string) {
-  const digits = telefono.replace(/[^\d]/g, "");
-  if (digits.length < 8) return null;
-  return `https://wa.me/${digits.startsWith("54") ? digits : `54${digits}`}`;
-}
-
+// whatsappHref llega ya armado (lib/whatsapp.ts), con el 9 de celular y el
+// mensaje que corresponda a la página.
 export function PublicHeader({
   nombre,
   sucursalesCount,
   telefono,
+  whatsappHref,
   logoUrl,
 }: {
   nombre: string;
   sucursalesCount: number;
   telefono: string | null;
+  whatsappHref: string | null;
   logoUrl?: string | null;
 }) {
-  const wa = telefono ? whatsappUrl(telefono) : null;
+  const wa = whatsappHref;
 
   return (
     <header className={styles.header}>
@@ -54,7 +52,7 @@ export function PublicHeader({
               <a
                 href={wa}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className={styles.headerWa}
                 aria-label="Escribinos por WhatsApp"
                 title="WhatsApp"

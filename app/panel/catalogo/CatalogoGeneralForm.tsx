@@ -10,19 +10,28 @@ import {
   SOBRE_NOSOTROS_MAX,
   textoAniosEnMercado,
 } from "@/lib/catalogo";
+import { normalizarWhatsappAR, whatsappDelCatalogo } from "@/lib/whatsapp";
 import styles from "./catalogo.module.css";
 
 export type CatalogoGeneralDTO = {
   sobreNosotros: string | null;
   anioInicio: number | null;
   mostrarMapa: boolean;
-  sucursales: { id: string; nombre: string; direccion: string | null; horarios: string | null }[];
+  whatsapp: string | null;
+  sucursales: {
+    id: string;
+    nombre: string;
+    direccion: string | null;
+    telefono: string | null;
+    horarios: string | null;
+  }[];
 };
 
 type FormState = {
   sobreNosotros: string;
   anioInicio: string;
   mostrarMapa: boolean;
+  whatsapp: string;
   horarios: Record<string, string>;
 };
 
@@ -31,6 +40,7 @@ function aForm(d: CatalogoGeneralDTO): FormState {
     sobreNosotros: d.sobreNosotros ?? "",
     anioInicio: d.anioInicio != null ? String(d.anioInicio) : "",
     mostrarMapa: d.mostrarMapa,
+    whatsapp: d.whatsapp ?? "",
     horarios: Object.fromEntries(d.sucursales.map((s) => [s.id, s.horarios ?? ""])),
   };
 }
@@ -49,11 +59,22 @@ export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }
     anioNum === null || (Number.isInteger(anioNum) && anioNum >= ANIO_INICIO_MIN && anioNum <= anioMax);
   const vistaPreviaAnios = anioValido ? textoAniosEnMercado(anioNum) : null;
 
+  const whatsappNormalizado = form.whatsapp.trim() ? normalizarWhatsappAR(form.whatsapp) : null;
+  const whatsappValido = !form.whatsapp.trim() || whatsappNormalizado !== null;
+  const respaldo = whatsappDelCatalogo(
+    null,
+    inicial.sucursales.map((s) => s.telefono)
+  );
+
   const cambiado = useMemo(() => JSON.stringify(form) !== JSON.stringify(guardado), [form, guardado]);
 
   async function guardar() {
     if (!anioValido) {
       setError(`El año tiene que estar entre ${ANIO_INICIO_MIN} y ${anioMax}`);
+      return;
+    }
+    if (!whatsappValido) {
+      setError("El WhatsApp no parece un celular argentino. Escribilo con código de área, ej. 11 2345 6789");
       return;
     }
     setSaving(true);
@@ -66,6 +87,7 @@ export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }
           sobreNosotros: form.sobreNosotros.trim() || null,
           anioInicio: anioNum,
           mostrarMapa: form.mostrarMapa,
+          whatsapp: form.whatsapp.trim() || null,
           sucursales: inicial.sucursales.map((s) => ({
             id: s.id,
             horarios: form.horarios[s.id]?.trim() || null,
@@ -134,6 +156,38 @@ export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }
             </span>
           )}
         </div>
+      </div>
+
+      <div className={styles.field}>
+        <label htmlFor="whatsapp">WhatsApp del catálogo</label>
+        <input
+          id="whatsapp"
+          className={styles.whatsappInput}
+          inputMode="tel"
+          maxLength={30}
+          value={form.whatsapp}
+          onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+          placeholder="11 2345 6789"
+          aria-invalid={!whatsappValido}
+        />
+        <p className={styles.fieldAyudaAbajo}>
+          {whatsappNormalizado ? (
+            <>
+              Abre el chat con <span className={styles.mono}>+{whatsappNormalizado}</span>.
+            </>
+          ) : !whatsappValido ? (
+            <span className={styles.anioError}>
+              No parece un celular argentino. Escribilo con código de área, ej. 11 2345 6789.
+            </span>
+          ) : respaldo ? (
+            <>
+              Vacío: se usa el teléfono de la sucursal ({respaldo}). Si es un fijo, el botón no va a
+              funcionar: cargá acá el celular de WhatsApp.
+            </>
+          ) : (
+            <>Sin WhatsApp cargado, el catálogo no muestra el botón.</>
+          )}
+        </p>
       </div>
 
       <div className={styles.field}>

@@ -4,6 +4,8 @@ import { PublicHeader } from "../PublicHeader";
 import { ChatWidget } from "../ChatWidget";
 import { AskAssistantChips } from "../AskAssistantChips";
 import { SucursalMapa } from "../SucursalMapa";
+import { WhatsAppFlotante } from "../WhatsAppFlotante";
+import { urlWhatsapp, whatsappDelCatalogo } from "@/lib/whatsapp";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import { textoAniosEnMercado } from "@/lib/catalogo";
 import styles from "../public.module.css";
@@ -58,6 +60,13 @@ export default async function CatalogoPublico(
   const mostrarSobreNosotros = Boolean(tenant.sobreNosotros || aniosEnMercado);
 
   const primerTelefono = tenant.sucursales.find((s) => s.telefono)?.telefono ?? null;
+  const numeroWhatsapp = whatsappDelCatalogo(
+    tenant.whatsapp,
+    tenant.sucursales.map((s) => s.telefono)
+  );
+  const whatsappHref = numeroWhatsapp
+    ? urlWhatsapp(numeroWhatsapp, `Hola, vi el catálogo de ${tenant.nombre} y quería hacer una consulta.`)
+    : null;
 
   return (
     <div className={styles.page}>
@@ -65,6 +74,7 @@ export default async function CatalogoPublico(
         nombre={tenant.nombre}
         sucursalesCount={tenant.sucursales.length}
         telefono={primerTelefono}
+        whatsappHref={whatsappHref}
         logoUrl={tenant.logoUrl}
       />
 
@@ -175,6 +185,7 @@ export default async function CatalogoPublico(
         </div>
       </footer>
 
+      {whatsappHref && <WhatsAppFlotante href={whatsappHref} />}
       <ChatWidget dominio={dominio} nombreAgencia={tenant.nombre} />
     </div>
   );

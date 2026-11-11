@@ -79,6 +79,8 @@ const AGENCIAS = [
     sobreNosotros:
       "Somos una agencia familiar de Caballito. Vendemos usados seleccionados, todos con informe de dominio y garantía mecánica de 3 meses, y te ayudamos con la financiación y la permuta.",
     anioInicio: 2008,
+    // Escrito con 0 y 15 a propósito: el link tiene que salir 5491123456789.
+    whatsapp: "011 15 2345-6789",
     sucursales: [
       { nombre: "Casa central", direccion: "Av. Rivadavia 5230, CABA", telefono: "11 2345-6789", horarios: "Lun a vie 9 a 18 · Sáb 9 a 13" },
       { nombre: "Sucursal Flores", direccion: "Av. Directorio 2810, CABA", telefono: "11 4612-3300", horarios: "Lun a sáb 10 a 19" },
@@ -172,6 +174,7 @@ async function main() {
         planId: a.planId,
         sobreNosotros: a.sobreNosotros,
         anioInicio: a.anioInicio,
+        whatsapp: a.whatsapp ?? null,
         onboardingOmitido: true,
       },
     });
