@@ -74,6 +74,8 @@ model Tenant {
   // inicio (no los años) para que "N años en el mercado" no quede viejo.
   sobreNosotros String? @db.VarChar(300)
   anioInicio    Int?
+  // Muestra "Ver mapa" y "Cómo llegar" junto a cada local con dirección.
+  mostrarMapa   Boolean @default(true)
 
   usuarios   Usuario[]
   vehiculos  Vehiculo[]

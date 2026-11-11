@@ -13,7 +13,7 @@ export default function PoliticaPrivacidadPage() {
     <LegalShell
       titulo="Política de privacidad"
       bajada="Qué datos maneja Rodado, para qué los usa, con quién los comparte y cómo podés pedir que se borren."
-      actualizado="4 de noviembre de 2026"
+      actualizado="11 de noviembre de 2026"
     >
       <h2>1. Quiénes somos</h2>
       <p>
@@ -113,6 +113,12 @@ export default function PoliticaPrivacidadPage() {
           cuenta. Te recomendamos no escribir información sensible en esos chats.
         </li>
         <li>
+          <strong>Google Maps</strong>: solo si un visitante del catálogo toca “Ver mapa” en un
+          local. Ahí su navegador carga el mapa desde Google, que recibe la dirección del local y
+          datos técnicos de la conexión, como la IP, y puede guardar sus propias cookies. Si no se
+          toca “Ver mapa”, no se carga nada de Google.
+        </li>
+        <li>
           <strong>Mercado Libre</strong>: solo si la agencia activa la integración. Recibe los datos
           de los vehículos que se publican. La agencia puede desconectarla desde el panel.
         </li>
@@ -143,6 +149,12 @@ export default function PoliticaPrivacidadPage() {
         Usamos solo las cookies necesarias para mantener tu sesión iniciada y para recordar un
         dispositivo de confianza durante hasta 90 días, así no te pedimos un código en cada ingreso.
         No usamos cookies publicitarias.
+      </p>
+      <p>
+        En el catálogo público, el mapa de cada local es de Google Maps y se carga solo si el
+        visitante toca “Ver mapa”. A partir de ese momento, Google puede usar sus propias cookies
+        según su{" "}
+        <a href="https://policies.google.com/privacy">política de privacidad</a>.
       </p>
 
       <h2>10. Tus derechos y cómo pedir que se borren tus datos</h2>

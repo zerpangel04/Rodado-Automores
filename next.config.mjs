@@ -17,6 +17,9 @@ const csp = [
   // dolarapi.com: la cotización del dólar en el sidebar se pide desde el
   // browser (app/panel/FxBox.tsx), no desde el server.
   "connect-src 'self' https://dolarapi.com",
+  // Mapa de cada local en el catálogo público (app/c/SucursalMapa.tsx). Solo
+  // se carga cuando el visitante toca "Ver mapa".
+  "frame-src 'self' https://www.google.com https://maps.google.com",
   "frame-ancestors 'self'",
   "object-src 'none'",
   "base-uri 'self'",

@@ -32,6 +32,7 @@ export default async function CatalogoPanelPage() {
       dominio: true,
       sobreNosotros: true,
       anioInicio: true,
+      mostrarMapa: true,
       sucursales: {
         select: { id: true, nombre: true, direccion: true, horarios: true },
         orderBy: { createdAt: "asc" },
@@ -55,6 +56,7 @@ export default async function CatalogoPanelPage() {
           general={{
             sobreNosotros: tenant?.sobreNosotros ?? null,
             anioInicio: tenant?.anioInicio ?? null,
+            mostrarMapa: tenant?.mostrarMapa ?? true,
             sucursales: tenant?.sucursales ?? [],
           }}
         />

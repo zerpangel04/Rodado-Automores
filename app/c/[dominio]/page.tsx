@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { PublicHeader } from "../PublicHeader";
 import { ChatWidget } from "../ChatWidget";
 import { AskAssistantChips } from "../AskAssistantChips";
+import { SucursalMapa } from "../SucursalMapa";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import { textoAniosEnMercado } from "@/lib/catalogo";
 import styles from "../public.module.css";
@@ -158,6 +159,9 @@ export default async function CatalogoPublico(
               </div>
               {s.horarios && <div className={styles.footerSucursalLine}>{s.horarios}</div>}
               {s.telefono && <div className={styles.footerSucursalLine}>{s.telefono}</div>}
+              {tenant.mostrarMapa && s.direccion && (
+                <SucursalMapa nombre={s.nombre} direccion={s.direccion} />
+              )}
             </div>
           ))}
         </div>

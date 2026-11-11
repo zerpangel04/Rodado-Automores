@@ -188,6 +188,7 @@ export const catalogoGeneralSchema = z.object({
     .min(ANIO_INICIO_MIN, `El año tiene que ser ${ANIO_INICIO_MIN} o posterior`)
     .max(new Date().getFullYear(), "El año no puede ser futuro")
     .nullable(),
+  mostrarMapa: z.boolean(),
   sucursales: z
     .array(
       z.object({

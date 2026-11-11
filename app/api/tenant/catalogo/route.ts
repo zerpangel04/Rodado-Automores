@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { catalogoGeneralSchema } from "@/lib/validation";
 
 // Guarda la pestaña "General" de /panel/catalogo: sobre nosotros, año de
-// inicio y los horarios de cada sucursal, todo en una sola transacción.
+// inicio, si se muestra el mapa y los horarios de cada sucursal, todo en
+// una sola transacción.
 export async function PATCH(req: NextRequest) {
   const session = await currentSession();
   if (!session) {
@@ -25,7 +26,7 @@ export async function PATCH(req: NextRequest) {
       { status: 400 }
     );
   }
-  const { sobreNosotros, anioInicio, sucursales } = parsed.data;
+  const { sobreNosotros, anioInicio, mostrarMapa, sucursales } = parsed.data;
 
   // Solo se pueden tocar sucursales del propio tenant.
   const ids = sucursales.map((s) => s.id);
@@ -40,7 +41,7 @@ export async function PATCH(req: NextRequest) {
     }
     return tx.tenant.update({
       where: { id: tenantId },
-      data: { sobreNosotros, anioInicio },
+      data: { sobreNosotros, anioInicio, mostrarMapa },
       select: { dominio: true },
     });
   });

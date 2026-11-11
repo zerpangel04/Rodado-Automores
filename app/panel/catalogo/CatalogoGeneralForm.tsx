@@ -15,12 +15,14 @@ import styles from "./catalogo.module.css";
 export type CatalogoGeneralDTO = {
   sobreNosotros: string | null;
   anioInicio: number | null;
+  mostrarMapa: boolean;
   sucursales: { id: string; nombre: string; direccion: string | null; horarios: string | null }[];
 };
 
 type FormState = {
   sobreNosotros: string;
   anioInicio: string;
+  mostrarMapa: boolean;
   horarios: Record<string, string>;
 };
 
@@ -28,6 +30,7 @@ function aForm(d: CatalogoGeneralDTO): FormState {
   return {
     sobreNosotros: d.sobreNosotros ?? "",
     anioInicio: d.anioInicio != null ? String(d.anioInicio) : "",
+    mostrarMapa: d.mostrarMapa,
     horarios: Object.fromEntries(d.sucursales.map((s) => [s.id, s.horarios ?? ""])),
   };
 }
@@ -62,6 +65,7 @@ export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }
         body: JSON.stringify({
           sobreNosotros: form.sobreNosotros.trim() || null,
           anioInicio: anioNum,
+          mostrarMapa: form.mostrarMapa,
           sucursales: inicial.sucursales.map((s) => ({
             id: s.id,
             horarios: form.horarios[s.id]?.trim() || null,
@@ -161,6 +165,21 @@ export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }
           ))}
         </div>
       </div>
+
+      <label className={styles.check}>
+        <input
+          type="checkbox"
+          checked={form.mostrarMapa}
+          onChange={(e) => setForm({ ...form, mostrarMapa: e.target.checked })}
+        />
+        <span>
+          <span className={styles.checkTitulo}>Mostrar mapa en el catálogo</span>
+          <span className={styles.checkDetalle}>
+            Agrega “Ver mapa” y “Cómo llegar” a cada local con dirección. El mapa se carga recién
+            cuando el visitante toca “Ver mapa”.
+          </span>
+        </span>
+      </label>
 
       <div className={styles.acciones}>
         <button
