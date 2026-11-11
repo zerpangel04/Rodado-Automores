@@ -11,6 +11,7 @@ import {
   HandCoins,
   BarChart3,
   Building2,
+  Store,
   UserCog,
   Plug,
   CreditCard,
@@ -344,6 +345,7 @@ export function Sidebar({
         {rol === "DUENIO" && (
           <div className={styles.navGroup}>
             <span className={styles.navLabel}>Agencia</span>
+            {navItem("/panel/catalogo", Store, "Catálogo")}
             {navItem("/panel/sucursales", Building2, "Sucursales")}
             {navItem("/panel/equipo", UserCog, "Equipo")}
             {navItem("/panel/integraciones", Plug, "Integraciones")}

@@ -1,0 +1,34 @@
+.pestanias {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.pestania {
+  flex: none;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pestania:hover {
+  color: var(--ink);
+}
+
+.pestaniaActiva {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+.vacio {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
