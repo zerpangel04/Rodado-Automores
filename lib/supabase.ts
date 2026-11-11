@@ -49,3 +49,38 @@ export async function uploadTenantLogo(tenantId: string, file: File): Promise<st
 
   return storage.getPublicUrl(path).data.publicUrl;
 }
+
+const PORTADAS_BUCKET = "agencia-portadas";
+
+export async function uploadTenantPortada(tenantId: string, file: File): Promise<string> {
+  const storage = getStorageClient(PORTADAS_BUCKET);
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${tenantId}/${randomUUID()}.${ext}`;
+
+  const { error } = await storage.upload(path, file, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) {
+    throw new Error(`No se pudo subir la portada: ${error.message}`);
+  }
+
+  return storage.getPublicUrl(path).data.publicUrl;
+}
+
+// Borra una portada anterior a partir de su URL pública. Solo toca archivos
+// del bucket de portadas y de la carpeta del propio tenant. Si falla no
+// interrumpe nada: un archivo huérfano no rompe el catálogo.
+export async function deleteTenantPortada(tenantId: string, publicUrl: string): Promise<void> {
+  const marca = `/storage/v1/object/public/${PORTADAS_BUCKET}/`;
+  const i = publicUrl.indexOf(marca);
+  if (i === -1) return;
+  const path = decodeURIComponent(publicUrl.slice(i + marca.length));
+  if (!path.startsWith(`${tenantId}/`) || path.includes("..")) return;
+  try {
+    const { error } = await getStorageClient(PORTADAS_BUCKET).remove([path]);
+    if (error) console.error("No se pudo borrar la portada anterior:", error.message);
+  } catch (err) {
+    console.error("No se pudo borrar la portada anterior:", err);
+  }
+}

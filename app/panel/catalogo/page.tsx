@@ -44,6 +44,7 @@ export default async function CatalogoPanelPage(props: {
       mostrarMapa: true,
       whatsapp: true,
       colorAcento: true,
+      portadaUrl: true,
       plan: { select: { catalogoPersonalizado: true } },
       sucursales: {
         select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
@@ -75,6 +76,7 @@ export default async function CatalogoPanelPage(props: {
           personalizacion={{
             habilitada: tenant?.plan.catalogoPersonalizado ?? false,
             colorAcento: tenant?.colorAcento ?? null,
+            portadaUrl: tenant?.portadaUrl ?? null,
           }}
           pestaniaInicial={pestaniaDeQuery(pestania)}
         />

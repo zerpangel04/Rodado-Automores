@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { PublicHeader } from "../PublicHeader";
@@ -72,6 +73,8 @@ export default async function CatalogoPublico(
     : null;
 
   const acento = acentoVigente(tenant.colorAcento, tenant.plan);
+  // Si bajan de plan, la portada queda guardada pero no se muestra.
+  const portada = tenant.plan.catalogoPersonalizado ? tenant.portadaUrl : null;
 
   return (
     <div className={styles.page} style={acento ? estiloAcento(acento) : undefined}>
@@ -84,6 +87,19 @@ export default async function CatalogoPublico(
       />
 
       <section className={styles.hero}>
+        {portada && (
+          <div className={styles.heroPortada} aria-hidden="true">
+            <Image
+              src={portada}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className={styles.heroPortadaImg}
+            />
+            <div className={styles.heroPortadaVelo} />
+          </div>
+        )}
         <div className={styles.heroGlow} />
         <div className={`${styles.wrap} ${styles.heroInner}`}>
           <div className={styles.heroRow}>

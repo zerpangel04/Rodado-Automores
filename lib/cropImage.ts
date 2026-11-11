@@ -20,11 +20,12 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 export async function getCroppedImageFile(
   imageSrc: string,
   area: CropAreaPixels,
-  fileName: string
+  fileName: string,
+  maxDimension: number = MAX_OUTPUT_DIMENSION
 ): Promise<File> {
   const image = await loadImage(imageSrc);
 
-  const scale = Math.min(1, MAX_OUTPUT_DIMENSION / Math.max(area.width, area.height));
+  const scale = Math.min(1, maxDimension / Math.max(area.width, area.height));
   const outputWidth = Math.round(area.width * scale);
   const outputHeight = Math.round(area.height * scale);
 

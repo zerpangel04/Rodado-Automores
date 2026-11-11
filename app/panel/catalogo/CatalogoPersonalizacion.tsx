@@ -11,11 +11,13 @@ import {
   normalizarHex,
   variablesAcento,
 } from "@/lib/colorAcento";
+import { CatalogoPortada } from "./CatalogoPortada";
 import styles from "./catalogo.module.css";
 
 export type CatalogoPersonalizacionDTO = {
   habilitada: boolean;
   colorAcento: string | null;
+  portadaUrl: string | null;
 };
 
 export function CatalogoPersonalizacion({ inicial }: { inicial: CatalogoPersonalizacionDTO }) {
@@ -28,12 +30,11 @@ export function CatalogoPersonalizacion({ inicial }: { inicial: CatalogoPersonal
         <h2 className={styles.seccionTitulo}>Personalizá tu catálogo</h2>
         <p className={styles.seccionDetalle}>
           Con los planes Profesional y Empresa podés elegir el color de tu catálogo para que combine
-          con tu marca. Pronto también vas a poder sumar una foto de portada y destacar vehículos.
+          con tu marca y sumar una foto de portada. Pronto también vas a poder destacar vehículos.
         </p>
-        {inicial.colorAcento && (
+        {(inicial.colorAcento || inicial.portadaUrl) && (
           <p className={styles.seccionDetalle}>
-            Tu color guardado ({inicial.colorAcento}) se conserva y vuelve a aplicarse si actualizás
-            el plan.
+            Lo que ya tenías guardado ({[inicial.colorAcento && `color ${inicial.colorAcento}`, inicial.portadaUrl && "foto de portada"].filter(Boolean).join(" y ")}) se conserva y vuelve a aplicarse si actualizás el plan.
           </p>
         )}
         <Link href="/panel/plan" className={styles.btnPrimary}>
@@ -42,7 +43,12 @@ export function CatalogoPersonalizacion({ inicial }: { inicial: CatalogoPersonal
       </div>
     );
   }
-  return <FormularioColor inicial={inicial.colorAcento} />;
+  return (
+    <>
+      <FormularioColor inicial={inicial.colorAcento} />
+      <CatalogoPortada inicial={inicial.portadaUrl} />
+    </>
+  );
 }
 
 function FormularioColor({ inicial }: { inicial: string | null }) {

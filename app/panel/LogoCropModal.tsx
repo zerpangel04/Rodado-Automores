@@ -4,6 +4,7 @@
 // (app/panel/stock/StockView.tsx) — mismo paso "seleccionar → recortar →
 // confirmar" con react-easy-crop, forzando 1:1 en vez de 4:3 porque acá
 // se recorta el logo de la agencia, que se muestra como ícono cuadrado.
+// También lo usa la portada del catálogo (aspect 3:1, más resolución).
 
 import { useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
@@ -18,11 +19,17 @@ export function LogoCropModal({
   fileName,
   onCancel,
   onConfirm,
+  aspect = LOGO_ASPECT,
+  titulo = "Encuadrá el logo",
+  maxDimension,
 }: {
   imageUrl: string;
   fileName: string;
   onCancel: () => void;
   onConfirm: (file: File) => Promise<void> | void;
+  aspect?: number;
+  titulo?: string;
+  maxDimension?: number;
 }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -35,7 +42,7 @@ export function LogoCropModal({
     if (!croppedAreaPixels) return;
     setSaving(true);
     try {
-      const cropped = await getCroppedImageFile(imageUrl, croppedAreaPixels, fileName);
+      const cropped = await getCroppedImageFile(imageUrl, croppedAreaPixels, fileName, maxDimension);
       await onConfirm(cropped);
     } finally {
       setSaving(false);
@@ -45,7 +52,7 @@ export function LogoCropModal({
   return (
     <div className={styles.modalBg}>
       <div className={styles.modal}>
-        <h3 className="disp">Encuadrá el logo</h3>
+        <h3 className="disp">{titulo}</h3>
         <p className={styles.tip}>Arrastrá para mover y usá el control para hacer zoom.</p>
 
         <div className={styles.cropArea}>
@@ -53,7 +60,7 @@ export function LogoCropModal({
             image={imageUrl}
             crop={crop}
             zoom={zoom}
-            aspect={LOGO_ASPECT}
+            aspect={aspect}
             cropShape="rect"
             onCropChange={setCrop}
             onZoomChange={setZoom}

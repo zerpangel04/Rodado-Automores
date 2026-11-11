@@ -82,6 +82,9 @@ model Tenant {
   // Color de acento del catálogo (#RRGGBB). Solo se aplica si el plan tiene
   // catalogoPersonalizado; si bajan de plan queda guardado pero no se usa.
   colorAcento   String? @db.VarChar(7)
+  // Foto de portada del catálogo (bucket agencia-portadas). Mismo gating
+  // que colorAcento.
+  portadaUrl    String?
 
   usuarios   Usuario[]
   vehiculos  Vehiculo[]

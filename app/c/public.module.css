@@ -195,6 +195,44 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* Portada de la agencia (plan Profesional/Empresa): foto de fondo a todo
+   el ancho, con un velo que oscurece de arriba hacia abajo hasta fundirse
+   con el fondo, para que el título y la vitrina se lean igual que sin foto. */
+.heroPortada {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Solo la franja de arriba: adentro del hero también está la grilla de
+     vehículos, y la foto no tiene que estirarse a lo largo de todo eso. */
+  height: 460px;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .heroPortada {
+    height: 340px;
+  }
+}
+
+.heroPortadaImg {
+  object-fit: cover;
+  object-position: center;
+}
+
+.heroPortadaVelo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      180deg,
+      rgba(11, 13, 16, 0.55) 0%,
+      rgba(11, 13, 16, 0.78) 45%,
+      rgba(11, 13, 16, 0.94) 75%,
+      var(--bg) 100%
+    ),
+    linear-gradient(90deg, rgba(11, 13, 16, 0.55), transparent 60%);
+}
+
 .heroGlow {
   position: absolute;
   inset: 0;

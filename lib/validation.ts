@@ -10,6 +10,13 @@ export const FOTO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as c
 export const LOGO_MAX_BYTES = 3 * 1024 * 1024;
 export const LOGO_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
+// La portada llega ya recortada (JPEG del canvas), pero se acepta el mismo
+// set de formatos por si se sube sin pasar por el recorte.
+export const PORTADA_MAX_BYTES = 5 * 1024 * 1024;
+export const PORTADA_ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+// Franja horizontal 3:1 para el fondo del hero del catálogo.
+export const PORTADA_ASPECT = 3;
+
 export const estadoVehiculoValues = ["DISPONIBLE", "RESERVADO", "VENDIDO"] as const;
 
 export const vehiculoInputSchema = z.object({
