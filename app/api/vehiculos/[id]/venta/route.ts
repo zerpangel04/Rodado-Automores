@@ -68,7 +68,9 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
     }),
     prisma.vehiculo.update({
       where: { id },
-      data: { estado: "VENDIDO" },
+      // Un vendido deja de ser destacado (y no vuelve a serlo si se
+      // revierte la venta).
+      data: { estado: "VENDIDO", destacadoEn: null },
     }),
   ]);
 

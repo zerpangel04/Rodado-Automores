@@ -12,7 +12,7 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
 
   const sucursalActual = await getSucursalActual(tenantId);
 
-  const [vehiculos, usuarios, sucursales, leadsActivos, plan] = await Promise.all([
+  const [vehiculos, usuarios, sucursales, leadsActivos, plan, marcados] = await Promise.all([
     prisma.vehiculo.findMany({
       where: {
         tenantId,
@@ -43,6 +43,13 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
       select: { id: true, nombreCliente: true, contacto: true, etapa: true, vehiculoId: true },
     }),
     getPlanTenant(tenantId),
+    // Destacados de todo el tenant (no solo la sucursal elegida): el límite
+    // del plan es por agencia.
+    prisma.vehiculo.findMany({
+      where: { tenantId, destacadoEn: { not: null }, estado: { not: "VENDIDO" } },
+      orderBy: { destacadoEn: "asc" },
+      select: { id: true },
+    }),
   ]);
 
   const items: VehiculoDTO[] = vehiculos.map((v) => ({
@@ -112,6 +119,9 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
           canRevertirVenta={rol !== "VENDEDOR"}
           leadsActivos={leadsActivosItems}
           asistenteIA={plan.asistenteIA}
+          destacadosIniciales={marcados.map((v) => v.id)}
+          limiteDestacados={plan.limiteDestacados}
+          puedeDestacar={rol !== "VENDEDOR"}
         />
       </div>
     </>

@@ -11,6 +11,7 @@ import { acentoVigente } from "@/lib/colorAcento";
 import { estiloAcento } from "../estiloAcento";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import { textoAniosEnMercado } from "@/lib/catalogo";
+import { idsDestacadosVigentes } from "@/lib/destacados";
 import styles from "../public.module.css";
 
 export default async function CatalogoPublico(
@@ -33,13 +34,24 @@ export default async function CatalogoPublico(
         select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
         orderBy: { createdAt: "asc" },
       },
-      plan: { select: { catalogoPersonalizado: true } },
+      plan: { select: { catalogoPersonalizado: true, limiteDestacados: true } },
     },
   });
 
   if (!tenant) notFound();
 
-  const items: VehiculoCatalogoDTO[] = tenant.vehiculos.map((v) => ({
+  // Orden por defecto ("más nuevos"): primero los destacados vigentes en el
+  // orden en que se marcaron, después el resto por fecha de ingreso. Los
+  // demás órdenes del catálogo (precio, km) los ignoran.
+  const destacados = idsDestacadosVigentes(tenant.vehiculos, tenant.plan.limiteDestacados);
+  const vehiculosOrdenados = [
+    ...tenant.vehiculos
+      .filter((v) => destacados.has(v.id))
+      .sort((a, b) => a.destacadoEn!.getTime() - b.destacadoEn!.getTime()),
+    ...tenant.vehiculos.filter((v) => !destacados.has(v.id)),
+  ];
+
+  const items: VehiculoCatalogoDTO[] = vehiculosOrdenados.map((v) => ({
     id: v.id,
     marca: v.marca,
     modelo: v.modelo,
@@ -51,6 +63,7 @@ export default async function CatalogoPublico(
     transmision: v.transmision,
     combustible: v.motor,
     sucursal: v.sucursal.nombre,
+    destacado: destacados.has(v.id),
   }));
 
   const vitrina = {

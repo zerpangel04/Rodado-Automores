@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
+  Star,
 } from "lucide-react";
 import styles from "./stock.module.css";
 import panelStyles from "../panel.module.css";
@@ -184,6 +185,9 @@ export function StockView({
   canRevertirVenta,
   leadsActivos,
   asistenteIA,
+  destacadosIniciales,
+  limiteDestacados,
+  puedeDestacar,
   abrirNuevo = false,
 }: {
   initialItems: VehiculoDTO[];
@@ -194,6 +198,11 @@ export function StockView({
   canRevertirVenta: boolean;
   leadsActivos: LeadActivoDTO[];
   asistenteIA: boolean;
+  // Ids de los marcados como destacados en toda la agencia, en orden de
+  // marcado. Se muestran en el catálogo los primeros `limiteDestacados`.
+  destacadosIniciales: string[];
+  limiteDestacados: number;
+  puedeDestacar: boolean;
   abrirNuevo?: boolean;
 }) {
   const router = useRouter();
@@ -201,6 +210,12 @@ export function StockView({
   useEffect(() => {
     setItems(initialItems);
   }, [initialItems]);
+  const [destacados, setDestacados] = useState<string[]>(destacadosIniciales);
+  useEffect(() => {
+    setDestacados(destacadosIniciales);
+  }, [destacadosIniciales]);
+  const [destacandoId, setDestacandoId] = useState<string | null>(null);
+  const [avisoDestacado, setAvisoDestacado] = useState<string | null>(null);
 
   // Llega desde "Primeros pasos": abre el alta y limpia la URL para que
   // recargar la página no vuelva a abrir el formulario.
@@ -650,6 +665,88 @@ export function StockView({
     }
   }
 
+  // "vigente": se muestra destacado en el catálogo. "excedido": marcado
+  // pero fuera del límite del plan (bajó de plan), queda guardado y no se
+  // muestra. null: no está marcado.
+  function estadoDestacado(id: string): "vigente" | "excedido" | null {
+    const i = destacados.indexOf(id);
+    if (i === -1) return null;
+    return i < limiteDestacados ? "vigente" : "excedido";
+  }
+
+  async function toggleDestacado(v: VehiculoDTO) {
+    const destacar = !destacados.includes(v.id);
+    setDestacandoId(v.id);
+    setAvisoDestacado(null);
+    try {
+      const res = await fetch(`/api/vehiculos/${v.id}/destacado`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destacado: destacar }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setAvisoDestacado(data?.error ?? "No se pudo actualizar el destacado");
+        return;
+      }
+      setDestacados(data.marcados);
+      showToast();
+    } catch {
+      setAvisoDestacado("Error de conexión, intentá de nuevo");
+    } finally {
+      setDestacandoId(null);
+    }
+  }
+
+  function tituloDestacado(id: string): string {
+    const estado = estadoDestacado(id);
+    if (estado === "excedido") {
+      return puedeDestacar
+        ? "Destacado guardado, pero no se muestra: superás el límite de tu plan. Tocá para quitarlo."
+        : "Destacado guardado, pero no se muestra por el límite del plan";
+    }
+    if (estado === "vigente") {
+      return puedeDestacar ? "Destacado en el catálogo. Tocá para quitarlo." : "Destacado en el catálogo";
+    }
+    return "Destacar en el catálogo";
+  }
+
+  function renderDestacado(v: VehiculoDTO, className: string) {
+    const estado = estadoDestacado(v.id);
+    // Sin plan con destacados solo se ve si quedó alguno guardado, para
+    // poder quitarlo.
+    if (v.estado === "VENDIDO" || (!estado && (limiteDestacados <= 0 || !puedeDestacar))) {
+      return null;
+    }
+    const clases = `${className} ${estado === "vigente" ? styles.destacadoOn : ""} ${
+      estado === "excedido" ? styles.destacadoExcedido : ""
+    }`;
+    const icono = <Star size={12} fill={estado ? "currentColor" : "none"} />;
+    if (!puedeDestacar) {
+      return (
+        <span className={clases} title={tituloDestacado(v.id)} aria-label={tituloDestacado(v.id)}>
+          {icono}
+        </span>
+      );
+    }
+    return (
+      <button
+        type="button"
+        className={clases}
+        title={tituloDestacado(v.id)}
+        aria-label={tituloDestacado(v.id)}
+        aria-pressed={!!estado}
+        disabled={destacandoId === v.id}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleDestacado(v);
+        }}
+      >
+        {icono}
+      </button>
+    );
+  }
+
   async function publishToMercadoLibre(v: VehiculoDTO) {
     setPublishingId(v.id);
     try {
@@ -723,6 +820,8 @@ export function StockView({
       setItems((prev) =>
         prev.map((i) => (i.id === saleTarget.id ? { ...i, estado: "VENDIDO" } : i))
       );
+      // El server limpia el destacado al registrar la venta.
+      setDestacados((prev) => prev.filter((id) => id !== saleTarget.id));
       showToast();
       setSaleTarget(null);
       setSaleWarningLeads(null);
@@ -782,7 +881,46 @@ export function StockView({
           <Upload size={14} />
           Importar CSV
         </button>
+        {(limiteDestacados > 0 || destacados.length > 0) && (
+          <span
+            className={styles.destacadosContador}
+            title="Vehículos destacados en el catálogo público (toda la agencia)"
+          >
+            <Star size={13} fill="currentColor" />
+            {limiteDestacados <= 0 ? (
+              // Bajó a un plan sin destacados: quedan guardados pero no se ven.
+              <span className={styles.destacadosExtra}>
+                {destacados.length} destacado{destacados.length === 1 ? "" : "s"} guardado
+                {destacados.length === 1 ? "" : "s"}, no se muestra{destacados.length === 1 ? "" : "n"} con
+                tu plan
+              </span>
+            ) : (
+              <>
+                Destacados {Math.min(destacados.length, limiteDestacados)}/{limiteDestacados}
+              </>
+            )}
+            {limiteDestacados > 0 && destacados.length > limiteDestacados && (
+              <span className={styles.destacadosExtra}>
+                · {destacados.length - limiteDestacados} sin mostrar
+              </span>
+            )}
+          </span>
+        )}
       </div>
+
+      {avisoDestacado && (
+        <div className={styles.avisoBox}>
+          <span>{avisoDestacado}</span>
+          <button
+            type="button"
+            className={styles.avisoCerrar}
+            onClick={() => setAvisoDestacado(null)}
+            aria-label="Cerrar aviso"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       <ImportarCsvModal
         open={showImportModal}
@@ -879,6 +1017,7 @@ export function StockView({
                 return (
                   <tr key={v.id} onClick={() => openEdit(v)} style={{ cursor: "pointer" }}>
                     <td>
+                      {renderDestacado(v, styles.destacadoInline)}
                       {v.marca} {v.modelo}
                       <div className={panelStyles.tableSub}>
                         {v.anio} · {v.km.toLocaleString("es-AR")} km
@@ -944,6 +1083,7 @@ export function StockView({
                       </span>
                     )}
                   </div>
+                  {renderDestacado(v, styles.destacadoBtn)}
                   {vendido ? (
                     canRevertirVenta && (
                       <button

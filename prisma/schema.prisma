@@ -114,8 +114,10 @@ model Plan {
   reportesAvanzados  Boolean  @default(false)
   asistenteIA        Boolean  @default(false)
   soportePrioritario Boolean  @default(false)
-  // Color de acento, portada y destacados del catálogo público.
+  // Color de acento y portada del catálogo público.
   catalogoPersonalizado Boolean @default(false)
+  // Vehículos destacados en el catálogo público (Básico 0, Prof 3, Empresa 4).
+  limiteDestacados   Int      @default(0)
   createdAt          DateTime @default(now())
 
   tenants Tenant[]
@@ -312,6 +314,11 @@ model Vehiculo {
   docDominio     Boolean   @default(false)
   docLibreDeuda  Boolean   @default(false)
   vtvVencimiento DateTime?
+
+  // Destacado en el catálogo público: fecha en que se marcó (null = no
+  // destacado). Si el plan baja, se muestran solo los primeros N marcados.
+  // Al registrar la venta se limpia.
+  destacadoEn DateTime?
 
   leads       Lead[]
   venta       Venta?

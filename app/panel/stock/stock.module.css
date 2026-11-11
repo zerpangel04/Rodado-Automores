@@ -1014,3 +1014,84 @@
     margin-top: 16px;
   }
 }
+
+/* --- Destacados del catálogo --- */
+
+.destacadosContador {
+  order: -1;
+  margin-right: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-light);
+}
+
+.destacadosExtra {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.avisoCerrar {
+  display: inline-flex;
+  padding: 2px;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.avisoCerrar:hover {
+  opacity: 1;
+}
+
+/* Botón estrella en la foto de la tarjeta, a la izquierda del de borrar. */
+.destacadoBtn {
+  position: absolute;
+  top: 10px;
+  right: 40px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(11, 13, 16, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f2f5f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* En la tabla, delante del nombre del vehículo. */
+.destacadoInline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -2px;
+  margin-right: 6px;
+  padding: 0;
+  color: var(--ink-soft);
+}
+
+button.destacadoBtn,
+button.destacadoInline {
+  cursor: pointer;
+}
+
+button.destacadoBtn:disabled,
+button.destacadoInline:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.destacadoOn {
+  color: var(--accent);
+}
+
+/* Marcado pero fuera del límite del plan: se ve apagado. */
+.destacadoExcedido {
+  color: var(--ink-soft);
+  opacity: 0.75;
+}

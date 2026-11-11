@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { Search, Star } from "lucide-react";
 import { CarSVG } from "../CarSVG";
 import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
 import styles from "../public.module.css";
@@ -22,6 +22,8 @@ export type VehiculoCatalogoDTO = {
   transmision: string | null;
   combustible: string | null;
   sucursal: string;
+  // Destacado vigente (dentro del límite del plan).
+  destacado: boolean;
 };
 
 const estadoLabel: Record<EstadoVehiculo, string> = {
@@ -69,9 +71,10 @@ export function CatalogoView({
     } else if (ordenKey === "km") {
       lista = lista.slice().sort((a, b) => a.km - b.km);
     }
-    // "nuevos": ya viene ordenado desde el server por fechaIngreso desc
-    // (ver app/c/[dominio]/page.tsx), y filter() preserva ese orden — no
-    // hace falta (ni conviene) re-ordenar acá por año del modelo.
+    // "nuevos": ya viene ordenado desde el server (destacados primero y
+    // después por fechaIngreso desc, ver app/c/[dominio]/page.tsx), y
+    // filter() preserva ese orden — no hace falta (ni conviene) re-ordenar
+    // acá. Los órdenes por precio o km no les dan prioridad a los destacados.
     return lista;
   }, [items, marca, busqueda, ordenIdx]);
 
@@ -149,11 +152,21 @@ export function CatalogoView({
                   </div>
                 )}
                 <div className={styles.cardPhotoOverlay} />
-                {v.estado === "RESERVADO" && (
-                  <span className={`${styles.cardBadge} ${styles.reservado}`}>
-                    <span className={styles.cardBadgeDot} />
-                    {estadoLabel[v.estado]}
-                  </span>
+                {(v.destacado || v.estado === "RESERVADO") && (
+                  <div className={styles.cardBadges}>
+                    {v.destacado && (
+                      <span className={`${styles.cardBadge} ${styles.destacado}`}>
+                        <Star size={11} fill="currentColor" aria-hidden="true" />
+                        Destacado
+                      </span>
+                    )}
+                    {v.estado === "RESERVADO" && (
+                      <span className={`${styles.cardBadge} ${styles.reservado}`}>
+                        <span className={styles.cardBadgeDot} />
+                        {estadoLabel[v.estado]}
+                      </span>
+                    )}
+                  </div>
                 )}
                 {v.fotos.length > 0 && (
                   <span className={styles.cardFotosCount}>

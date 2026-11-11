@@ -634,6 +634,28 @@
   color: var(--warn-text);
 }
 
+/* Destacado + Reservado pueden ir juntos: se apilan arriba a la izquierda. */
+.cardBadges {
+  position: absolute;
+  top: 13px;
+  left: 13px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.cardBadges .cardBadge {
+  position: static;
+}
+
+.cardBadge.destacado {
+  gap: 5px;
+  color: var(--accent-ink);
+  background: var(--accent-grad);
+  border-color: transparent;
+}
+
 .cardBadgeDot {
   width: 5px;
   height: 5px;
