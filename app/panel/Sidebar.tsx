@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -79,6 +79,55 @@ export function Sidebar({
   const [catalogLinkCopiado, setCatalogLinkCopiado] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const indicadorRef = useRef<HTMLSpanElement>(null);
+  const primeraRuta = useRef(pathname);
+
+  // Indicador de la sección activa: una sola pastilla que se desliza con
+  // transform (GPU) hasta el ítem activo. La posición se lee una vez por
+  // cambio de ruta (offsetTop), nunca por frame, y se escribe directo en el
+  // DOM para no re-renderizar el sidebar.
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    const indicador = indicadorRef.current;
+    if (!nav || !indicador) return;
+
+    const ubicar = () => {
+      const activo = nav.querySelector<HTMLElement>('[data-nav-activo="true"]');
+      if (!activo) {
+        indicador.style.opacity = "0";
+        return;
+      }
+      indicador.style.height = `${activo.offsetHeight}px`;
+      indicador.style.transform = `translateY(${activo.offsetTop}px)`;
+      indicador.style.opacity = "1";
+    };
+    ubicar();
+
+    // La primera vez se ubica sin animar; recién después se habilita la
+    // transición (un frame más tarde, para que el navegador no la anime).
+    const raf = requestAnimationFrame(() => indicador.classList.add(styles.navIndicadorListo));
+
+    // Si cambia el alto del menú (carga de fuentes, cambia el rol) se reubica.
+    // Se observan los grupos (no el contenedor, que tiene alto fijo y scroll).
+    const ro = new ResizeObserver(ubicar);
+    for (const grupo of Array.from(nav.children)) {
+      if (grupo !== indicador) ro.observe(grupo);
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [pathname, rol]);
+
+  // Marca que hubo navegación dentro del panel: el fundido del título solo
+  // corre en esas navegaciones, no en la primera carga (así no demora el
+  // primer pintado de la página).
+  useEffect(() => {
+    if (pathname !== primeraRuta.current) {
+      document.documentElement.dataset.panelNavegado = "1";
+    }
+  }, [pathname]);
 
   async function copiarCatalogLink() {
     if (!catalogUrl) return;
@@ -176,6 +225,8 @@ export function Sidebar({
       <Link
         href={href}
         className={`${styles.navItem} ${active ? styles.active : ""}`}
+        data-nav-activo={active ? "true" : undefined}
+        aria-current={active ? "page" : undefined}
       >
         <span className={styles.navIcon}>
           <Icon size={14} />
@@ -332,7 +383,8 @@ export function Sidebar({
 
       <FxBox />
 
-      <div className={styles.sidebarNav}>
+      <div className={styles.sidebarNav} ref={navRef}>
+        <span ref={indicadorRef} className={styles.navIndicador} aria-hidden="true" />
         <div className={styles.navGroup}>
           <span className={styles.navLabel}>Operación</span>
           {navItem("/panel", LayoutDashboard, "Panel general")}

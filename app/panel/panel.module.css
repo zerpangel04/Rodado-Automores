@@ -23,6 +23,8 @@
    es baja — el switcher de sucursal (arriba) y el perfil/logout (abajo,
    .sidebarFoot) tienen que quedar siempre visibles. */
 .sidebarNav {
+  /* Referencia para el indicador de la sección activa (.navIndicador). */
+  position: relative;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -534,6 +536,9 @@
   width: 100%;
   text-align: left;
   margin-bottom: 2px;
+  /* Por encima del indicador deslizante. */
+  position: relative;
+  z-index: 1;
 }
 
 .navItem:hover {
@@ -541,10 +546,37 @@
   color: var(--ink);
 }
 
+/* El fondo del ítem activo lo pinta .navIndicador, que se desliza entre
+   ítems; acá solo cambia el color del texto. */
 .navItem.active {
-  background: var(--sidebar-hover);
   color: var(--ink);
+}
+
+.navItem.active:hover {
+  background: none;
+}
+
+/* Pastilla de la sección activa. Solo anima transform y opacity (GPU);
+   el alto se fija una vez por ítem y no se anima. */
+.navIndicador {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--sidebar-hover);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--violet) 30%, transparent) inset;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+  z-index: 0;
+}
+
+.navIndicadorListo {
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1),
+    opacity 150ms ease;
 }
 
 .navItem.disabled {
@@ -569,13 +601,40 @@
   font-weight: 700;
   font-size: 11px;
   flex: none;
+  position: relative;
+}
+
+/* El dorado del ícono activo es una capa aparte que aparece con opacity,
+   así el cambio de ítem es un fundido corto y no un salto. */
+.navIcon::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--accent-grad);
+  box-shadow: 0 0 12px rgba(240, 161, 60, 0.4);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.navIcon > svg {
+  position: relative;
 }
 
 .navItem.active .navIcon {
-  background: var(--accent-grad);
   border-color: transparent;
   color: var(--accent-ink);
-  box-shadow: 0 0 12px rgba(240, 161, 60, 0.4);
+}
+
+.navItem.active .navIcon::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navIndicadorListo,
+  .navIcon::before {
+    transition: none;
+  }
 }
 
 .navBadge {
@@ -660,6 +719,31 @@
 .topbar h1 {
   font-size: 19px;
   font-weight: 700;
+}
+
+/* Fundido del título al cambiar de sección. Solo en navegaciones dentro
+   del panel (el Sidebar marca <html data-panel-navegado>), nunca en la
+   primera carga: así no se demora el primer pintado. Arranca en 0.3 de
+   opacidad para que el título se lea desde el primer frame. */
+:global(html[data-panel-navegado]) .topbar h1 {
+  animation: tituloEntra 200ms ease-out both;
+}
+
+@keyframes tituloEntra {
+  from {
+    opacity: 0.3;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html[data-panel-navegado]) .topbar h1 {
+    animation: none;
+  }
 }
 
 .topbarSub {
