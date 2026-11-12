@@ -15,6 +15,7 @@ import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { LeadDetailModal } from "./LeadDetailModal";
 import { ChannelBadge } from "./ChannelBadge";
 import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
+import { entradaEscalonada } from "../entrada";
 
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
@@ -568,15 +569,17 @@ export function KanbanView({
                         {filtrosActivos ? "Sin resultados con estos filtros" : "Sin leads en esta etapa"}
                       </p>
                     )}
-                    {stageItems.map((lead) => {
+                    {stageItems.map((lead, i) => {
                       const idx = stages.findIndex((s) => s.key === lead.etapa);
                       const next = stages[idx + 1];
                       const dias = diasDesde(lead.createdAt);
                       const urg = urgenciaColor(lead.etapa, dias);
                       const wa = whatsappUrl(lead.contacto);
+                      const entrada = entradaEscalonada(i);
                       return (
                         <div
-                          className={`${styles.kcard} ${urg === "red" ? styles.kcardUrgent : ""}`}
+                          className={`${styles.kcard} ${urg === "red" ? styles.kcardUrgent : ""} ${entrada.className}`}
+                          style={entrada.style}
                           key={lead.id}
                           role="button"
                           tabIndex={0}

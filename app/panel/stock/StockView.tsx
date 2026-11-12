@@ -29,6 +29,7 @@ import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/valid
 import { getCroppedImageFile } from "@/lib/cropImage";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { ImportarCsvModal } from "./ImportarCsvModal";
+import { entradaEscalonada } from "../entrada";
 
 const FOTO_ASPECT = 4 / 3;
 
@@ -1057,11 +1058,17 @@ export function StockView({
         </div>
       ) : (
         <div className={styles.grid}>
-          {visible.map((v) => {
+          {visible.map((v, i) => {
             const ds = docStatus(v);
             const vendido = v.estado === "VENDIDO";
+            const entrada = entradaEscalonada(i);
             return (
-              <div className={styles.card} key={v.id} onClick={() => openEdit(v)}>
+              <div
+                className={`${styles.card} ${entrada.className}`}
+                style={entrada.style}
+                key={v.id}
+                onClick={() => openEdit(v)}
+              >
                 <div className={styles.photo}>
                   <div className={styles.state}>
                     <button
