@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, X, ArrowRight } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
+import { RodiAvatar } from "../icons/RodiAvatar";
 import styles from "./chat.module.css";
 import { ASK_ASSISTANT_EVENT } from "./chatEvents";
 
@@ -95,10 +96,10 @@ export function ChatWidget({
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div className={styles.panelIcon}>
-              <Sparkles size={15} />
+              <RodiAvatar size={34} />
             </div>
             <div>
-              <div className={styles.panelTitle}>Asistente de {nombreAgencia}</div>
+              <div className={styles.panelTitle}>Rodi</div>
               <div className={styles.panelSub}>
                 <span className={styles.panelDot} />
                 Responde con el stock en vivo
@@ -116,8 +117,9 @@ export function ChatWidget({
 
           <div className={styles.messages} ref={listRef}>
             <div className={`${styles.bubble} ${styles.bubbleAssistant}`}>
-              ¡Hola! 👋 Soy el asistente de {nombreAgencia}. Preguntame por el stock, precios o
-              características, y si no puedo resolverlo te conecto con un vendedor.
+              ¡Hola! 👋 Soy Rodi, el asistente de {nombreAgencia}. Estoy para ayudarte a encontrar el
+              vehículo que buscás: preguntame por el stock, precios o características, y si no puedo
+              resolverlo te conecto con un vendedor.
             </div>
 
             {messages.map((m, i) => (
@@ -174,7 +176,7 @@ export function ChatWidget({
       {!open && (
         <button type="button" className={styles.bubbleBtn} onClick={() => setOpen(true)}>
           <span className={styles.bubbleIcon}>
-            <Sparkles size={15} />
+            <RodiAvatar size={30} />
             <span className={styles.bubbleIconDot} />
           </span>
           <span className={styles.bubbleText}>

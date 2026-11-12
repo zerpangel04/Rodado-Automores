@@ -1,0 +1,88 @@
+/* Rodi, el asistente de IA. La imagen va recortada en círculo; encima, capas
+   posicionadas por porcentaje (medido sobre la imagen de 512 px) que animan
+   solo opacity: un parpadeo breve de los ojos y el pulso del foco de la
+   antena. */
+.rodi {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Párpados: tapan cada ojo con el color del visor durante un instante.
+   Ojos medidos en la imagen: x 40,4–43,9 % y 56,1–59,6 %, y 39,3–45,1 %;
+   el párpado los cubre con margen para tapar también su brillo (el visor
+   alrededor es del mismo color oscuro). */
+.ojo {
+  position: absolute;
+  top: 37%;
+  width: 6.4%;
+  height: 10.4%;
+  border-radius: 40%;
+  /* Color medido en el visor de la imagen, para que el párpado se funda. */
+  background: #181b20;
+  opacity: 0;
+  pointer-events: none;
+  animation: parpadeo 4.2s linear infinite;
+}
+
+.ojoIzq {
+  left: 38.9%;
+}
+
+.ojoDer {
+  left: 54.7%;
+}
+
+@keyframes parpadeo {
+  0%,
+  91%,
+  97%,
+  100% {
+    opacity: 0;
+  }
+  93%,
+  95% {
+    opacity: 1;
+  }
+}
+
+/* Foco de la antena (medido: x 48–51,8 %, y 4,9–8,8 %): un halo cálido
+   que pulsa. */
+.antena {
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  width: 11%;
+  height: 11%;
+  margin: -5.5% 0 0 -5.5%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 236, 170, 0.95) 0%, rgba(255, 196, 92, 0.55) 40%, transparent 70%);
+  opacity: 0.25;
+  pointer-events: none;
+  animation: antena 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes antena {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ojo,
+  .antena {
+    animation: none;
+  }
+}

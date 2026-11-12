@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, X, ArrowRight } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
+import { RodiAvatar } from "../icons/RodiAvatar";
 import styles from "./asistente.module.css";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -77,10 +78,10 @@ export function AsistentePanel() {
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div className={styles.panelIcon}>
-              <Sparkles size={15} />
+              <RodiAvatar size={34} />
             </div>
             <div>
-              <div className={styles.panelTitle}>Asistente de Rodado</div>
+              <div className={styles.panelTitle}>Rodi</div>
               <div className={styles.panelSub}>
                 <span className={styles.panelDot} />
                 Conoce tu cuenta en vivo
@@ -98,8 +99,9 @@ export function AsistentePanel() {
 
           <div className={styles.messages} ref={listRef}>
             <div className={`${styles.bubble} ${styles.bubbleAssistant}`}>
-              ¡Hola! 👋 Soy el asistente de Rodado. Preguntame cómo funciona algo del panel o sobre
-              tu plan y tu cuenta — te respondo con tus datos reales.
+              ¡Hola! 👋 Soy Rodi, el asistente de Rodado. Puedo ayudarte con tu stock, leads, reportes
+              y lo que necesites del panel: preguntame cómo funciona algo o sobre tu plan y tu cuenta
+              — te respondo con tus datos reales.
             </div>
 
             {messages.map((m, i) => (
@@ -158,9 +160,9 @@ export function AsistentePanel() {
           type="button"
           className={styles.bubbleBtn}
           onClick={() => setOpen(true)}
-          aria-label="Abrir asistente de Rodado"
+          aria-label="Abrir a Rodi, el asistente de Rodado"
         >
-          <Sparkles size={18} />
+          <RodiAvatar size={48} />
         </button>
       )}
     </div>
