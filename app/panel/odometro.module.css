@@ -1,5 +1,5 @@
-/* Odómetro: solo anima transform (GPU). El alto de cada fila es fijo
-   (--odo-alto) para que la columna recorte exacto un dígito. */
+/* Odómetro: solo anima transform y opacity (GPU). El alto de cada fila es
+   fijo (--odo-alto) para que la columna recorte exacto un dígito. */
 .odometro {
   --odo-alto: 1.1em;
   position: relative;
@@ -17,6 +17,7 @@
 }
 
 .digitos {
+  position: relative;
   display: inline-flex;
   align-items: flex-start;
   line-height: var(--odo-alto);
@@ -29,9 +30,26 @@
   overflow: hidden;
 }
 
+/* La pila tiene 30 filas (tres vueltas de 0-9); --fila (inline) dice cuál se
+   muestra. En reposo es la vuelta del medio (10 + dígito). */
 .pila {
   display: flex;
   flex-direction: column;
+  transform: translateY(calc(var(--fila, 10) * -100% / 30));
+  /* Ruleta de entrada: al montarse, cada columna rueda una vuelta completa
+     hacia arriba y cae en su dígito real. Escalonada de izquierda a derecha
+     (30 ms por columna, máximo 60 ms): todo termina antes de los 400 ms.
+     Corre con el HTML del servidor, en el primer pintado. */
+  animation: odoEntrada 340ms cubic-bezier(0.15, 0.75, 0.25, 1) backwards;
+  animation-delay: calc(min(var(--col, 0), 2) * 30ms);
+}
+
+@keyframes odoEntrada {
+  from {
+    /* Mismo dígito, una vuelta más arriba: el número real se ve desde el
+       primer frame. */
+    transform: translateY(calc((var(--fila, 10) - 10) * -100% / 30));
+  }
 }
 
 .pila > span {
@@ -42,13 +60,59 @@
   white-space: pre;
 }
 
-/* La transición se habilita después de montar: el primer pintado no anima. */
-.listo .pila {
-  transition: transform 280ms cubic-bezier(0.2, 0.7, 0.3, 1);
+/* Destello detrás del número cuando cambia (solo pantallas chicas: en las
+   grandes no se monta porque no hay vuelta). Solo opacity. */
+.destello {
+  position: absolute;
+  inset: -3px -8px;
+  border-radius: 8px;
+  background: var(--accent, #f0a13c);
+  opacity: 0;
+  pointer-events: none;
+  animation: destello 400ms ease-out;
+}
+
+@keyframes destello {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.32;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Pantallas grandes: el dígito rueda una fila hasta el valor nuevo. La
+   transición se habilita después de montar: el primer pintado no anima. */
+@media (min-width: 769px) {
+  .listo .pila {
+    transition: transform 280ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+}
+
+/* Pantallas chicas: los dígitos que cambian dan una vuelta completa
+   (efecto tragamonedas). La transición existe solo durante la vuelta; al
+   terminar, la columna vuelve a la vuelta del medio sin animar (mismo
+   dígito, no se nota). Duración: VUELTA_MS en Odometro.tsx. */
+@media (max-width: 768px) {
+  .listo.enVuelta .pila {
+    transition: transform 380ms cubic-bezier(0.15, 0.75, 0.25, 1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .listo .pila {
+  .pila {
+    animation: none;
+  }
+
+  .listo .pila,
+  .listo.enVuelta .pila {
     transition: none;
+  }
+
+  .destello {
+    animation: none;
   }
 }

@@ -1,6 +1,6 @@
 /* Entrada escalonada de tarjetas (Stock, Leads). Solo transform y opacity.
-   - Arranca en opacity 0.4, no en 0: la tarjeta se lee desde el primer
-     frame y Chrome la cuenta para el LCP desde el principio.
+   - Nunca arranca en opacity 0: la tarjeta se lee desde el primer frame y
+     Chrome la cuenta para el LCP desde el principio.
    - fill-mode "backwards": aplica el estado inicial durante la espera y,
      al terminar, deja de pisar el transform (el hover de la tarjeta usa
      transform y tiene que seguir andando).
@@ -14,6 +14,28 @@
   from {
     opacity: 0.4;
     transform: translateY(8px);
+  }
+}
+
+/* Pantallas chicas: más marcado para que se note al usarlo normal. Las
+   tarjetas van en una columna y se ven 2-3 a la vez, así que escalonan solo
+   las primeras 4 (la cuarta termina a los 390 ms); de la quinta en adelante
+   (.fueraDePantalla) no animan. */
+@media (max-width: 768px) {
+  .entrada {
+    animation: entradaMovil 300ms cubic-bezier(0.16, 0.8, 0.3, 1) backwards;
+    animation-delay: calc(var(--entrada-i, 0) * 30ms);
+  }
+
+  .entrada.fueraDePantalla {
+    animation: none;
+  }
+}
+
+@keyframes entradaMovil {
+  from {
+    opacity: 0.2;
+    transform: translateY(24px) scale(0.97);
   }
 }
 

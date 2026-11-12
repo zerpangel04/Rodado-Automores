@@ -740,6 +740,24 @@
   }
 }
 
+/* Pantallas chicas: más recorrido para que se note. */
+@media (max-width: 768px) {
+  :global(html[data-panel-navegado]) .topbar h1 {
+    animation: tituloEntraMovil 250ms cubic-bezier(0.16, 0.8, 0.3, 1) both;
+  }
+}
+
+@keyframes tituloEntraMovil {
+  from {
+    opacity: 0.2;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :global(html[data-panel-navegado]) .topbar h1 {
     animation: none;

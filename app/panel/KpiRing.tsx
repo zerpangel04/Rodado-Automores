@@ -37,7 +37,9 @@ export function KpiRing({
             strokeDashoffset={targetOffset}
           />
         </svg>
-        <div className={`${styles.ringVal} mono`}>{clamped}%</div>
+        <div className={`${styles.ringVal} mono`}>
+          <Odometro value={`${clamped}%`} />
+        </div>
       </div>
       <div className={styles.kpiInfo}>
         <div className={styles.l}>{label}</div>
