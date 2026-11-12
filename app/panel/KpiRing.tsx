@@ -1,4 +1,5 @@
 import styles from "./panel.module.css";
+import { Odometro } from "./Odometro";
 
 const CIRCUMFERENCE = 126;
 
@@ -40,7 +41,9 @@ export function KpiRing({
       </div>
       <div className={styles.kpiInfo}>
         <div className={styles.l}>{label}</div>
-        <div className={`${styles.v} disp`}>{value}</div>
+        <div className={`${styles.v} disp`}>
+          <Odometro value={value} />
+        </div>
       </div>
     </div>
   );

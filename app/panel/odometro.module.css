@@ -1,0 +1,54 @@
+/* Odómetro: solo anima transform (GPU). El alto de cada fila es fijo
+   (--odo-alto) para que la columna recorte exacto un dígito. */
+.odometro {
+  --odo-alto: 1.1em;
+  position: relative;
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+}
+
+.textoReal {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.digitos {
+  display: inline-flex;
+  align-items: flex-start;
+  line-height: var(--odo-alto);
+  user-select: none;
+}
+
+.columna {
+  display: inline-block;
+  height: var(--odo-alto);
+  overflow: hidden;
+}
+
+.pila {
+  display: flex;
+  flex-direction: column;
+}
+
+.pila > span {
+  height: var(--odo-alto);
+}
+
+.simbolo {
+  white-space: pre;
+}
+
+/* La transición se habilita después de montar: el primer pintado no anima. */
+.listo .pila {
+  transition: transform 280ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listo .pila {
+    transition: none;
+  }
+}

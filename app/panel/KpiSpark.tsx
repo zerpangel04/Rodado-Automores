@@ -1,4 +1,5 @@
 import styles from "./panel.module.css";
+import { Odometro } from "./Odometro";
 
 export function KpiSpark({
   color,
@@ -27,7 +28,9 @@ export function KpiSpark({
         <span className={styles.kpiBarLabel}>{label}</span>
       </div>
       <div className={styles.kpiBarValueRow}>
-        <span className={`${styles.kpiBarValue} mono`}>{value}</span>
+        <span className={`${styles.kpiBarValue} mono`}>
+          <Odometro value={value} />
+        </span>
         {unit && <span className={styles.kpiBarUnit}>{unit}</span>}
         {trend && (
           <span
