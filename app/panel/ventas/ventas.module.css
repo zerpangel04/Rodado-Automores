@@ -40,7 +40,7 @@
   border-radius: 9px;
   color: #8d949e;
   white-space: nowrap;
-  transition: all 0.22s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .segmented button.active {

@@ -450,13 +450,12 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   justify-content: flex-start;
-  transition: all 0.22s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .switchTrack.switchOn {
   background: var(--accent-grad);
   border-color: transparent;
-  justify-content: flex-end;
 }
 
 .switchDisabled {
@@ -464,15 +463,25 @@
   cursor: default;
 }
 
+/* La bolita se mueve con transform (no con justify-content, que es layout).
+   Recorrido: 34px de ancho - 2px de borde - 4px de padding - 13px de bolita. */
 .switchKnob {
   width: 13px;
   height: 13px;
   border-radius: 50%;
   background: #767d86;
+  transition: transform 0.18s ease;
 }
 
 .switchOn .switchKnob {
   background: var(--accent-ink);
+  transform: translateX(15px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switchKnob {
+    transition: none;
+  }
 }
 
 .opcionLabel {
@@ -586,7 +595,7 @@
   border: 1px solid rgba(255, 255, 255, 0.09);
   padding: 8px;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .avisarBtnOn {

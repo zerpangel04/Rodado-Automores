@@ -37,7 +37,7 @@
   border-radius: 9px;
   color: #8d949e;
   white-space: nowrap;
-  transition: all 0.22s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .segmented button.active {
@@ -868,7 +868,7 @@
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   opacity: 0;
   pointer-events: none;
-  transition: all 0.25s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
   z-index: 200;
 }
 

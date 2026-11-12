@@ -1057,7 +1057,6 @@
   fill: none;
   stroke-width: 6;
   stroke-linecap: round;
-  transition: stroke-dashoffset 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .ringVal {

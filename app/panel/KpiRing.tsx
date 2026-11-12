@@ -1,10 +1,10 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import styles from "./panel.module.css";
 
 const CIRCUMFERENCE = 126;
 
+// Anillo de KPI. Se dibuja directo con el valor final (sin animar el
+// llenado): el dato tiene que verse apenas llega la página, y
+// stroke-dashoffset no es una propiedad que acelere la GPU.
 export function KpiRing({
   percent,
   color,
@@ -18,19 +18,8 @@ export function KpiRing({
   value: string;
   featured?: boolean;
 }) {
-  const circleRef = useRef<SVGCircleElement>(null);
   const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const targetOffset = CIRCUMFERENCE - (CIRCUMFERENCE * clamped) / 100;
-
-  useEffect(() => {
-    const el = circleRef.current;
-    if (!el) return;
-    el.style.strokeDashoffset = String(CIRCUMFERENCE);
-    const frame = requestAnimationFrame(() => {
-      el.style.strokeDashoffset = String(targetOffset);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [targetOffset]);
 
   return (
     <div className={`${styles.kpi} ${featured ? styles.kpiFeatured : ""}`}>
@@ -38,7 +27,6 @@ export function KpiRing({
         <svg width="46" height="46" viewBox="0 0 46 46">
           <circle className={styles.bg} cx="23" cy="23" r="20" />
           <circle
-            ref={circleRef}
             className={styles.fg}
             cx="23"
             cy="23"
