@@ -9,7 +9,10 @@ const CONOCIMIENTO_RODADO = `CÓMO FUNCIONA RODADO (conocimiento general, válid
 - Sucursales: cada agencia puede tener una o más; el stock y el equipo se pueden filtrar por sucursal.
 - Equipo: gestión de usuarios y roles (Dueño, Admin, Vendedor). Solo un Dueño puede invitar gente, y solo otro Dueño puede ascender a alguien a Dueño.
 - Integraciones: conexión con Mercado Libre (publica el stock, sincroniza precio y fotos) vía OAuth desde /panel/integraciones — se hace clic en "Conectar con Mercado Libre" y se inicia sesión con la cuenta de ML de la agencia. WhatsApp, Instagram y otras integraciones figuran como "en camino", todavía no están disponibles.
-- Planes (Básico, Profesional, Empresa): cada uno con un límite de sucursales, vehículos y usuarios, y features exclusivas (Reportes avanzados, Asistente de tasación con IA, Soporte prioritario). Se ven y comparan en /panel/plan.`;
+- Catálogo público: la página web de la agencia con su stock (no muestra vendidos). Se configura en /panel/catalogo (solo el Dueño), con dos pestañas. "General", en todos los planes: texto "Sobre nosotros" y año de inicio, horarios de cada sucursal, mostrar u ocultar el mapa con la ubicación de los locales, y el número de WhatsApp del botón flotante (si no se carga, usa el primer teléfono de las sucursales). "Personalización", solo en Profesional y Empresa: color de acento del catálogo y foto de portada (se recorta en formato horizontal).
+- Vehículos destacados: aparecen primero en el catálogo (en el orden por defecto) con una etiqueta "Destacado". Se marcan con la estrella de cada vehículo en /panel/stock; pueden hacerlo el Dueño y los Admin, no los Vendedores. Límite por plan: Básico 0, Profesional 3, Empresa 4. Los vendidos no cuentan y al registrar la venta se desmarcan solos.
+- Si una agencia baja de plan, lo que había configurado del catálogo (color, portada, destacados) queda guardado pero no se muestra; vuelve a aplicarse si sube de plan. Si quedan más destacados que el nuevo límite, se muestran los primeros que se marcaron.
+- Planes (Básico, Profesional, Empresa): cada uno con un límite de sucursales, vehículos y usuarios, y features exclusivas (Reportes avanzados, Asistente de tasación con IA, Catálogo personalizado, Vehículos destacados, Soporte prioritario). Se ven y comparan en /panel/plan.`;
 
 function fmtLimite(n: number | null): string {
   return n === null ? "sin límite" : String(n);
@@ -37,7 +40,7 @@ export async function armarContextoTenant(params: {
 }): Promise<{ contexto: string; tenantNombre: string }> {
   const { tenantId, nombreUsuario, rol } = params;
 
-  const [tenant, plan, sucursalesCount, vehiculosCount, usuariosCount, mlConexion] =
+  const [tenant, plan, sucursalesCount, vehiculosCount, usuariosCount, mlConexion, destacadosCount] =
     await Promise.all([
       prisma.tenant.findUniqueOrThrow({ where: { id: tenantId }, select: { nombre: true } }),
       getPlanTenant(tenantId),
@@ -45,6 +48,9 @@ export async function armarContextoTenant(params: {
       prisma.vehiculo.count({ where: { tenantId } }),
       prisma.usuario.count({ where: { tenantId } }),
       prisma.mercadoLibreConexion.findUnique({ where: { tenantId }, select: { id: true } }),
+      prisma.vehiculo.count({
+        where: { tenantId, destacadoEn: { not: null }, estado: { not: "VENDIDO" } },
+      }),
     ]);
 
   const contexto = `- Agencia: ${tenant.nombre}
@@ -55,6 +61,8 @@ export async function armarContextoTenant(params: {
   - Usuarios: ${usuariosCount} de ${fmtLimite(plan.limiteUsuarios)}
   - Reportes avanzados: ${fmtSiNo(plan.reportesAvanzados)}
   - Asistente de tasación con IA: ${fmtSiNo(plan.asistenteIA)}
+  - Catálogo personalizado (color y portada): ${fmtSiNo(plan.catalogoPersonalizado)}
+  - Vehículos destacados: ${destacadosCount} marcados, el plan permite ${plan.limiteDestacados}
   - Soporte prioritario: ${fmtSiNo(plan.soportePrioritario)}
 - Mercado Libre: ${mlConexion ? "conectado" : "no conectado"}`;
 

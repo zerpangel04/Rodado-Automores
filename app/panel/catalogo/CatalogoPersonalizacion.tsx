@@ -18,6 +18,9 @@ export type CatalogoPersonalizacionDTO = {
   habilitada: boolean;
   colorAcento: string | null;
   portadaUrl: string | null;
+  limiteDestacados: number;
+  // Marcados que no están vendidos, en toda la agencia.
+  destacadosMarcados: number;
 };
 
 export function CatalogoPersonalizacion({ inicial }: { inicial: CatalogoPersonalizacionDTO }) {
@@ -30,7 +33,8 @@ export function CatalogoPersonalizacion({ inicial }: { inicial: CatalogoPersonal
         <h2 className={styles.seccionTitulo}>Personalizá tu catálogo</h2>
         <p className={styles.seccionDetalle}>
           Con los planes Profesional y Empresa podés elegir el color de tu catálogo para que combine
-          con tu marca y sumar una foto de portada. Pronto también vas a poder destacar vehículos.
+          con tu marca, sumar una foto de portada y destacar vehículos para que aparezcan primeros
+          (3 en Profesional, 4 en Empresa).
         </p>
         {(inicial.colorAcento || inicial.portadaUrl) && (
           <p className={styles.seccionDetalle}>
@@ -47,6 +51,23 @@ export function CatalogoPersonalizacion({ inicial }: { inicial: CatalogoPersonal
     <>
       <FormularioColor inicial={inicial.colorAcento} />
       <CatalogoPortada inicial={inicial.portadaUrl} />
+      {inicial.limiteDestacados > 0 && (
+        <div className={styles.seccion}>
+          <div className={styles.seccionHead}>
+            <h2 className={styles.seccionTitulo}>Vehículos destacados</h2>
+            <p className={styles.seccionDetalle}>
+              Aparecen primeros en tu catálogo con una etiqueta &quot;Destacado&quot;. Marcalos con la
+              estrella de cada vehículo en Stock ({Math.min(inicial.destacadosMarcados, inicial.limiteDestacados)}/
+              {inicial.limiteDestacados}). Al registrar la venta se desmarcan solos.
+            </p>
+          </div>
+          <div className={styles.acciones}>
+            <Link href="/panel/stock" className={styles.btnGhost}>
+              Ir a Stock →
+            </Link>
+          </div>
+        </div>
+      )}
     </>
   );
 }

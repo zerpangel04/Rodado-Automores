@@ -116,6 +116,14 @@ export default async function PlanPage() {
                     Reportes avanzados
                   </li>
                   <li className={p.asistenteIA ? planStyles.on : planStyles.off}>Asistente de tasación IA</li>
+                  <li className={p.catalogoPersonalizado ? planStyles.on : planStyles.off}>
+                    Catálogo personalizado
+                  </li>
+                  <li className={p.limiteDestacados > 0 ? planStyles.on : planStyles.off}>
+                    {p.limiteDestacados > 0
+                      ? `${p.limiteDestacados} vehículos destacados`
+                      : "Sin destacados"}
+                  </li>
                   <li className={p.soportePrioritario ? planStyles.on : planStyles.off}>Soporte prioritario</li>
                 </ul>
                 {esActual ? (

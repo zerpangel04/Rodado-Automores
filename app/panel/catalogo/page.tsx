@@ -45,10 +45,15 @@ export default async function CatalogoPanelPage(props: {
       whatsapp: true,
       colorAcento: true,
       portadaUrl: true,
-      plan: { select: { catalogoPersonalizado: true } },
+      plan: { select: { catalogoPersonalizado: true, limiteDestacados: true } },
       sucursales: {
         select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
         orderBy: { createdAt: "asc" },
+      },
+      _count: {
+        select: {
+          vehiculos: { where: { destacadoEn: { not: null }, estado: { not: "VENDIDO" } } },
+        },
       },
     },
   });
@@ -77,6 +82,8 @@ export default async function CatalogoPanelPage(props: {
             habilitada: tenant?.plan.catalogoPersonalizado ?? false,
             colorAcento: tenant?.colorAcento ?? null,
             portadaUrl: tenant?.portadaUrl ?? null,
+            limiteDestacados: tenant?.plan.limiteDestacados ?? 0,
+            destacadosMarcados: tenant?._count.vehiculos ?? 0,
           }}
           pestaniaInicial={pestaniaDeQuery(pestania)}
         />

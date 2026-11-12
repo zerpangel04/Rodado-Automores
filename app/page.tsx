@@ -18,6 +18,8 @@ export default async function Home() {
     reportesAvanzados: p.reportesAvanzados,
     asistenteIA: p.asistenteIA,
     soportePrioritario: p.soportePrioritario,
+    catalogoPersonalizado: p.catalogoPersonalizado,
+    limiteDestacados: p.limiteDestacados,
   }));
 
   return <LandingView planes={planes} />;

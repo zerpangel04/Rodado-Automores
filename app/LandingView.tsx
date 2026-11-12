@@ -17,6 +17,8 @@ export type PlanPublico = {
   reportesAvanzados: boolean;
   asistenteIA: boolean;
   soportePrioritario: boolean;
+  catalogoPersonalizado: boolean;
+  limiteDestacados: number;
 };
 
 const NAV_ITEMS = [
@@ -62,7 +64,7 @@ const MODULOS = [
   { icon: "◎", title: "Equipo y roles", desc: "El dueño ve toda la operación; cada vendedor ve solo lo suyo.", meta: "Módulo" },
   { icon: "$", title: "Cotización del dólar", desc: "Oficial y blue actualizados en vivo dentro del panel, para cotizar sin salir del sistema.", meta: "Incluido" },
   { icon: "◇", title: "Tasación con IA", desc: "Precio de referencia sugerido según categoría, año y kilometraje. Es una estimación para orientarte, no un dato de mercado en vivo.", meta: "Módulo" },
-  { icon: "⇱", title: "Catálogo público", desc: "Tu propia URL con tu stock, tus filtros y tus fotos. Cada consulta entra como lead al CRM.", meta: "Incluido" },
+  { icon: "⇱", title: "Catálogo público", desc: "Tu propia URL con tu stock, tus filtros y tus fotos, con mapa de cada local y botón de WhatsApp. Cada consulta entra como lead al CRM. En Profesional y Empresa lo personalizás con tu color, foto de portada y autos destacados.", meta: "Incluido" },
 ] as const;
 
 const PASOS = [
@@ -173,6 +175,7 @@ const PLAN_COPY: Record<string, { desc: string; items: string[] }> = {
       "e-Stock con documentación y alertas de VTV",
       "e-CRM: pipeline kanban y vista de tabla",
       "Catálogo público con tu marca",
+      "Catálogo con mapa, horarios y botón de WhatsApp",
       "Ventas con comisión automática",
       "Cotización del dólar en vivo",
       "Publicación en Mercado Libre (OAuth)",
@@ -180,11 +183,21 @@ const PLAN_COPY: Record<string, { desc: string; items: string[] }> = {
   },
   profesional: {
     desc: "Para la que publica en varios canales y no quiere cargar el mismo auto tres veces.",
-    items: ["Todo lo del Básico", "Tasación con IA", "Reportes y analítica avanzados"],
+    items: [
+      "Todo lo del Básico",
+      "Tasación con IA",
+      "Reportes y analítica avanzados",
+      "Catálogo personalizado: color, foto de portada y 3 destacados",
+    ],
   },
   empresa: {
     desc: "Para grupos con varios locales y equipos de venta separados.",
-    items: ["Todo lo del Profesional", "Sucursales, usuarios y vehículos ilimitados", "Soporte prioritario"],
+    items: [
+      "Todo lo del Profesional",
+      "Sucursales, usuarios y vehículos ilimitados",
+      "4 vehículos destacados",
+      "Soporte prioritario",
+    ],
   },
 };
 
@@ -207,6 +220,8 @@ function matrizDesdePlanes(planes: PlanPublico[]): [string, string, string, stri
     ["Publicación en Mercado Libre", "✓", "✓", "✓"],
     ["Tasación con IA", v(basico.asistenteIA), v(profesional.asistenteIA), v(empresa.asistenteIA)],
     ["Reportes avanzados", v(basico.reportesAvanzados), v(profesional.reportesAvanzados), v(empresa.reportesAvanzados)],
+    ["Catálogo personalizado (color y portada)", v(basico.catalogoPersonalizado), v(profesional.catalogoPersonalizado), v(empresa.catalogoPersonalizado)],
+    ["Vehículos destacados", fmtDestacados(basico.limiteDestacados), fmtDestacados(profesional.limiteDestacados), fmtDestacados(empresa.limiteDestacados)],
     ["Sucursales", fmtLimite(basico.limiteSucursales), fmtLimite(profesional.limiteSucursales), fmtLimite(empresa.limiteSucursales)],
     ["Vehículos en stock", fmtLimite(basico.limiteVehiculos), fmtLimite(profesional.limiteVehiculos), fmtLimite(empresa.limiteVehiculos)],
     ["Usuarios", fmtLimite(basico.limiteUsuarios), fmtLimite(profesional.limiteUsuarios), fmtLimite(empresa.limiteUsuarios)],
@@ -216,6 +231,11 @@ function matrizDesdePlanes(planes: PlanPublico[]): [string, string, string, stri
 
 function fmtLimite(n: number | null) {
   return n === null ? "Ilimitadas" : String(n);
+}
+
+// 0 se muestra como "—" para que la tabla lo pinte igual que un "no".
+function fmtDestacados(n: number) {
+  return n > 0 ? String(n) : "—";
 }
 
 const SEGURIDAD = [
