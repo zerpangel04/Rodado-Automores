@@ -184,54 +184,67 @@ export const interesIntegracionInputSchema = z.object({
   tipoIntegracion: z.enum(integracionTipoValues),
 });
 
-export const catalogoGeneralSchema = z.object({
-  sobreNosotros: z
-    .string()
-    .trim()
-    .max(SOBRE_NOSOTROS_MAX, `Máximo ${SOBRE_NOSOTROS_MAX} caracteres`)
-    .nullable()
-    .transform((v) => v || null),
-  anioInicio: z
-    .number()
-    .int()
-    .min(ANIO_INICIO_MIN, `El año tiene que ser ${ANIO_INICIO_MIN} o posterior`)
-    .max(new Date().getFullYear(), "El año no puede ser futuro")
-    .nullable(),
-  mostrarMapa: z.boolean(),
-  whatsapp: z
-    .string()
-    .trim()
-    .max(WHATSAPP_MAX, "El WhatsApp es demasiado largo")
-    .nullable()
-    .transform((v) => v || null)
-    .refine((v) => v === null || normalizarWhatsappAR(v) !== null, {
-      message:
-        "El WhatsApp no parece un celular argentino. Escribilo con código de área, ej. 11 2345 6789",
-    }),
-  sucursales: z
-    .array(
-      z.object({
-        id: z.string().min(1),
-        horarios: z
-          .string()
-          .trim()
-          .max(HORARIOS_MAX, `Máximo ${HORARIOS_MAX} caracteres`)
-          .nullable()
-          .transform((v) => v || null),
-      })
-    )
-    .max(50),
-});
+// Los mensajes de tipo (`error`) cubren tanto un campo que falta como uno
+// con otro tipo: sin ellos zod responde en inglés ("Invalid input: expected
+// boolean, received undefined") y eso es lo que mostraba el panel.
+export const catalogoGeneralSchema = z.object(
+  {
+    sobreNosotros: z
+      .string({ error: "El texto de Sobre nosotros no es válido" })
+      .trim()
+      .max(SOBRE_NOSOTROS_MAX, `Máximo ${SOBRE_NOSOTROS_MAX} caracteres`)
+      .nullable()
+      .transform((v) => v || null),
+    anioInicio: z
+      .number({ error: "El año de inicio tiene que ser un número" })
+      .int("El año de inicio tiene que ser un número entero")
+      .min(ANIO_INICIO_MIN, `El año tiene que ser ${ANIO_INICIO_MIN} o posterior`)
+      .max(new Date().getFullYear(), "El año no puede ser futuro")
+      .nullable(),
+    mostrarMapa: z.boolean({ error: "Indicá si se muestra el mapa" }),
+    whatsapp: z
+      .string({ error: "El WhatsApp no es válido" })
+      .trim()
+      .max(WHATSAPP_MAX, "El WhatsApp es demasiado largo")
+      .nullable()
+      .transform((v) => v || null)
+      .refine((v) => v === null || normalizarWhatsappAR(v) !== null, {
+        message:
+          "El WhatsApp no parece un celular argentino. Escribilo con código de área, ej. 11 2345 6789",
+      }),
+    sucursales: z
+      .array(
+        z.object(
+          {
+            id: z.string({ error: "Falta el id de la sucursal" }).min(1, "Falta el id de la sucursal"),
+            horarios: z
+              .string({ error: "Los horarios tienen que ser texto" })
+              .trim()
+              .max(HORARIOS_MAX, `Máximo ${HORARIOS_MAX} caracteres`)
+              .nullable()
+              .transform((v) => v || null),
+          },
+          { error: "Los datos de la sucursal no son válidos" }
+        ),
+        { error: "Falta la lista de sucursales" }
+      )
+      .max(50, "Demasiadas sucursales"),
+  },
+  { error: "Faltan los datos del catálogo" }
+);
 
-export const catalogoPersonalizacionSchema = z.object({
-  // null = volver al ámbar original de Rodado.
-  colorAcento: z
-    .string()
-    .trim()
-    .nullable()
-    .transform((v) => (v ? normalizarHex(v) ?? "invalido" : null))
-    .refine((v) => v !== "invalido", { message: "El color tiene que ser un código como #F0A13C" })
-    .refine((v) => v === null || v === "invalido" || contrasteSuficiente(v), {
-      message: `Ese color se lee poco sobre el fondo oscuro del catálogo (contraste mínimo ${CONTRASTE_MINIMO}:1). Probá con uno más claro.`,
-    }),
-});
+export const catalogoPersonalizacionSchema = z.object(
+  {
+    // null = volver al ámbar original de Rodado.
+    colorAcento: z
+      .string({ error: "El color tiene que ser un código como #F0A13C" })
+      .trim()
+      .nullable()
+      .transform((v) => (v ? normalizarHex(v) ?? "invalido" : null))
+      .refine((v) => v !== "invalido", { message: "El color tiene que ser un código como #F0A13C" })
+      .refine((v) => v === null || v === "invalido" || contrasteSuficiente(v), {
+        message: `Ese color se lee poco sobre el fondo oscuro del catálogo (contraste mínimo ${CONTRASTE_MINIMO}:1). Probá con uno más claro.`,
+      }),
+  },
+  { error: "Faltan los datos de la personalización" }
+);

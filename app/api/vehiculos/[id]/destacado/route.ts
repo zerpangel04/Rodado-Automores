@@ -4,9 +4,10 @@ import { z } from "zod";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-const bodySchema = z.object({
-  destacado: z.boolean({ error: "Indicá si el vehículo va destacado o no" }),
-});
+const bodySchema = z.object(
+  { destacado: z.boolean({ error: "Indicá si el vehículo va destacado o no" }) },
+  { error: "Indicá si el vehículo va destacado o no" }
+);
 
 class ErrorDestacado extends Error {
   constructor(
