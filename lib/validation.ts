@@ -19,24 +19,34 @@ export const PORTADA_ASPECT = 3;
 
 export const estadoVehiculoValues = ["DISPONIBLE", "RESERVADO", "VENDIDO"] as const;
 
-export const vehiculoInputSchema = z.object({
+// Campos de un vehículo SIN valores por defecto. El alta les suma los
+// defaults (vehiculoInputSchema); la edición los usa tal cual, todos
+// opcionales (vehiculoUpdateSchema).
+//
+// Ojo: en zod 4 `.partial()` NO anula los `.default()`. Antes la edición era
+// `vehiculoInputSchema.partial()`, y un PATCH parcial como `{ estado }` (la
+// etiqueta Disponible/Reservado de Stock) completaba docTitulo/docCedula/
+// docDominio/docLibreDeuda con false, vtvVencimiento con null y, si no venía
+// estado, lo volvía a DISPONIBLE: borraba datos que el usuario no tocó.
+// Ver scripts/test-validacion.mjs.
+const camposVehiculo = {
   sucursalId: z.string().trim().min(1, "Elegí una sucursal"),
   marca: z.string().trim().min(1, "La marca es obligatoria").max(60),
   modelo: z.string().trim().min(1, "El modelo es obligatorio").max(80),
   anio: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1),
   km: z.coerce.number().int().min(0).max(2_000_000),
   precioUsd: z.coerce.number().min(0).max(100_000_000),
-  estado: z.enum(estadoVehiculoValues).default("DISPONIBLE"),
-  categoria: z.string().trim().max(40).optional().nullable(),
-  transmision: z.string().trim().max(40).optional().nullable(),
-  motor: z.string().trim().max(60).optional().nullable(),
-  docTitulo: z.coerce.boolean().default(false),
-  docCedula: z.coerce.boolean().default(false),
-  docDominio: z.coerce.boolean().default(false),
-  docLibreDeuda: z.coerce.boolean().default(false),
+  estado: z.enum(estadoVehiculoValues),
+  categoria: z.string().trim().max(40).nullable(),
+  transmision: z.string().trim().max(40).nullable(),
+  motor: z.string().trim().max(60).nullable(),
+  docTitulo: z.coerce.boolean(),
+  docCedula: z.coerce.boolean(),
+  docDominio: z.coerce.boolean(),
+  docLibreDeuda: z.coerce.boolean(),
+  // "" o null = sin VTV.
   vtvVencimiento: z
     .string()
-    .optional()
     .nullable()
     .transform((v) => (v ? new Date(v) : null)),
   // Opcional: si no se manda, Prisma usa su default (now()) al crear. Se
@@ -55,9 +65,29 @@ export const vehiculoInputSchema = z.object({
     .refine((d) => !d || d.getTime() <= Date.now() + 24 * 60 * 60 * 1000, {
       message: "La fecha de ingreso no puede ser futura",
     }),
+};
+
+// Alta (formulario nuevo e importación CSV): lo que no venga toma su default.
+export const vehiculoInputSchema = z.object({
+  ...camposVehiculo,
+  estado: camposVehiculo.estado.default("DISPONIBLE"),
+  categoria: camposVehiculo.categoria.optional(),
+  transmision: camposVehiculo.transmision.optional(),
+  motor: camposVehiculo.motor.optional(),
+  docTitulo: camposVehiculo.docTitulo.default(false),
+  docCedula: camposVehiculo.docCedula.default(false),
+  docDominio: camposVehiculo.docDominio.default(false),
+  docLibreDeuda: camposVehiculo.docLibreDeuda.default(false),
+  vtvVencimiento: z
+    .string()
+    .optional()
+    .nullable()
+    .transform((v) => (v ? new Date(v) : null)),
 });
 
-export const vehiculoUpdateSchema = vehiculoInputSchema.partial();
+// Edición (PATCH): todos opcionales y sin defaults. Un campo que no viene
+// en el body queda undefined y Prisma no lo toca.
+export const vehiculoUpdateSchema = z.object(camposVehiculo).partial();
 
 export const canalLeadValues = [
   "WHATSAPP",
