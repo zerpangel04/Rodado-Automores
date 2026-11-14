@@ -6,6 +6,7 @@ import { Download, Upload, CheckCircle2, XCircle, AlertTriangle, Loader2 } from 
 import styles from "./stock.module.css";
 import panelStyles from "../panel.module.css";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
+import { formatearPrecio, type Moneda } from "@/lib/moneda";
 
 type PreviewFila = {
   numeroFila: number;
@@ -13,6 +14,7 @@ type PreviewFila = {
   modelo: string;
   anio: string;
   precio: string;
+  moneda: Moneda | null;
   sucursalNombre: string | null;
   error: string | null;
   excedeLimite: boolean;
@@ -153,7 +155,8 @@ export function ImportarCsvModal({
 
             <p className={styles.importHelp}>
               Descargá la plantilla para ver las columnas exactas (marca, modelo, año, km, precio,
-              etc.), completala con tu stock y subila acá.
+              etc.), completala con tu stock y subila acá. En la columna <b>moneda</b> poné USD o ARS
+              según cómo cargues cada precio; si la dejás vacía, se toma en dólares.
             </p>
 
             <a href="/api/vehiculos/plantilla" className={styles.btnGhost} style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 18 }}>
@@ -213,7 +216,7 @@ export function ImportarCsvModal({
                     <th>Fila</th>
                     <th>Vehículo</th>
                     <th>Año</th>
-                    <th>Precio USD</th>
+                    <th>Precio</th>
                     <th>Sucursal</th>
                     <th>Estado</th>
                   </tr>
@@ -226,7 +229,11 @@ export function ImportarCsvModal({
                         {f.marca} {f.modelo}
                       </td>
                       <td>{f.anio}</td>
-                      <td>{f.precio}</td>
+                      <td>
+                        {f.moneda && f.precio !== "" && !isNaN(Number(f.precio))
+                          ? formatearPrecio(Number(f.precio), f.moneda)
+                          : f.precio}
+                      </td>
                       <td>{f.sucursalNombre ?? "—"}</td>
                       <td>
                         {f.error ? (

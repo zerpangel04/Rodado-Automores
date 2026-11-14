@@ -1,16 +1,20 @@
 import { vehiculoInputSchema } from "@/lib/validation";
 import { evaluarLimitePlan } from "@/lib/planes";
 import type { Plan } from "@prisma/client";
+import { monedaDesdeTexto, type Moneda } from "@/lib/moneda";
 
 // Columnas del CSV, en el orden en que se generan en la plantilla. La
 // columna "sucursal" solo aplica si el tenant tiene más de una — se
 // agrega dinámicamente en app/api/vehiculos/plantilla/route.ts.
+// "moneda" es opcional al importar (vacía o ausente = USD), y los CSV
+// viejos con la columna "precioUsd" se siguen aceptando.
 export const PLANTILLA_COLUMNAS = [
   "marca",
   "modelo",
   "anio",
   "km",
-  "precioUsd",
+  "precio",
+  "moneda",
   "transmision",
   "motor",
   "categoria",
@@ -23,7 +27,8 @@ const CAMPO_LABEL: Record<string, string> = {
   modelo: "Modelo",
   anio: "Año",
   km: "Km",
-  precio: "Precio (USD)",
+  precio: "Precio",
+  moneda: "Moneda",
   categoria: "Categoría",
   transmision: "Transmisión",
   motor: "Motor",
@@ -82,6 +87,8 @@ export type FilaImportacion = {
   modelo: string;
   anio: string;
   precio: string;
+  // Moneda ya interpretada (null si la celda no se reconoce).
+  moneda: Moneda | null;
   sucursalNombre: string | null;
   error: string | null;
   datos: {
@@ -91,6 +98,7 @@ export type FilaImportacion = {
     anio: number;
     km: number;
     precio: number;
+    moneda: Moneda;
     categoria: string | null;
     transmision: string | null;
     motor: string | null;
@@ -124,7 +132,9 @@ export function validarFilasImportacion(
   const iModelo = buscarColumna(encabezado, "modelo");
   const iAnio = buscarColumna(encabezado, "anio", "año");
   const iKm = buscarColumna(encabezado, "km");
-  const iPrecio = buscarColumna(encabezado, "preciousd", "precio");
+  // "precio" (plantilla actual) o "precioUsd" (plantillas anteriores).
+  const iPrecio = buscarColumna(encabezado, "precio", "preciousd");
+  const iMoneda = buscarColumna(encabezado, "moneda");
   const iTransmision = buscarColumna(encabezado, "transmision", "transmisión");
   const iMotor = buscarColumna(encabezado, "motor");
   const iCategoria = buscarColumna(encabezado, "categoria", "categoría");
@@ -135,7 +145,7 @@ export function validarFilasImportacion(
     return {
       filas: [],
       errorGeneral:
-        "Al archivo le faltan columnas obligatorias (marca, modelo, anio, km, precioUsd). Descargá la plantilla para ver el formato correcto.",
+        "Al archivo le faltan columnas obligatorias (marca, modelo, anio, km, precio). Descargá la plantilla para ver el formato correcto.",
     };
   }
 
@@ -153,20 +163,23 @@ export function validarFilasImportacion(
     const anio = get(iAnio);
     const km = get(iKm);
     const precio = get(iPrecio);
+    // Sin columna "moneda" o con la celda vacía = USD (como siempre).
+    const monedaTexto = get(iMoneda);
+    const moneda: Moneda | null = monedaTexto ? monedaDesdeTexto(monedaTexto) : "USD";
     const transmision = get(iTransmision);
     const motor = get(iMotor);
     const categoria = get(iCategoria);
     const fechaIngreso = get(iFecha);
     const sucursalNombreCrudo = get(iSucursal);
 
-    const base = { marca, modelo, anio, precio, sucursalNombre: sucursalNombreCrudo || null };
+    const base = { marca, modelo, anio, precio, moneda, sucursalNombre: sucursalNombreCrudo || null };
 
     const faltantes = [
       !marca && "marca",
       !modelo && "modelo",
       !anio && "anio",
       !km && "km",
-      !precio && "precioUsd",
+      !precio && "precio",
     ].filter(Boolean) as string[];
     if (faltantes.length > 0) {
       filas.push({
@@ -188,6 +201,15 @@ export function validarFilasImportacion(
     }
     if (isNaN(Number(precio))) {
       filas.push({ numeroFila: i, ...base, error: `El precio "${precio}" no es un número válido`, datos: null });
+      continue;
+    }
+    if (moneda === null) {
+      filas.push({
+        numeroFila: i,
+        ...base,
+        error: `La moneda "${monedaTexto}" no se reconoce: usá USD o ARS`,
+        datos: null,
+      });
       continue;
     }
 
@@ -214,6 +236,7 @@ export function validarFilasImportacion(
       anio,
       km,
       precio,
+      moneda,
       categoria: categoria || undefined,
       transmision: transmision || undefined,
       motor: motor || undefined,
@@ -243,6 +266,7 @@ export function validarFilasImportacion(
         anio: parsed.data.anio,
         km: parsed.data.km,
         precio: parsed.data.precio,
+        moneda: parsed.data.moneda,
         categoria: parsed.data.categoria ?? null,
         transmision: parsed.data.transmision ?? null,
         motor: parsed.data.motor ?? null,

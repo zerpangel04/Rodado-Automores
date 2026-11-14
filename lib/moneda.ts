@@ -18,6 +18,34 @@ export function esMoneda(v: unknown): v is Moneda {
   return v === "USD" || v === "ARS";
 }
 
+// Interpreta cómo escribe la gente la moneda en una planilla (columna
+// "moneda" del CSV). Sin distinguir mayúsculas, acentos, espacios ni puntos.
+// null = no se reconoce (quien llama decide: en el CSV es un error de fila).
+const ALIAS_MONEDA: Record<string, Moneda> = {
+  usd: "USD",
+  "u$s": "USD",
+  "us$": "USD",
+  "u$d": "USD",
+  "u$": "USD",
+  dolar: "USD",
+  dolares: "USD",
+  ars: "ARS",
+  $: "ARS",
+  ar$: "ARS",
+  $ars: "ARS",
+  peso: "ARS",
+  pesos: "ARS",
+};
+
+export function monedaDesdeTexto(texto: string): Moneda | null {
+  const clave = texto
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[\s.]/g, "");
+  return ALIAS_MONEDA[clave] ?? null;
+}
+
 export function otraMoneda(m: Moneda): Moneda {
   return m === "USD" ? "ARS" : "USD";
 }

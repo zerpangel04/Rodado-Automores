@@ -46,6 +46,18 @@ test("totales: se suman por separado y nunca se mezclan", () => {
   assert.equal(m.formatearTotales({ USD: 0, ARS: 0 }), "USD 0");
 });
 
+test("monedaDesdeTexto: variantes comunes de planilla", () => {
+  for (const t of ["USD", "usd", "U$S", "u$s", "US$", "U$D", "Dólares", "dolar", " u.s.d "]) {
+    assert.equal(m.monedaDesdeTexto(t), "USD", t);
+  }
+  for (const t of ["ARS", "ars", "$", "Pesos", "peso", "AR$", "$ARS", "$ ARS"]) {
+    assert.equal(m.monedaDesdeTexto(t), "ARS", t);
+  }
+  for (const t of ["EUR", "reales", "u", "dolares blue", ""]) {
+    assert.equal(m.monedaDesdeTexto(t), null, t);
+  }
+});
+
 test("esMoneda y otraMoneda", () => {
   assert.equal(m.esMoneda("USD"), true);
   assert.equal(m.esMoneda("ARS"), true);

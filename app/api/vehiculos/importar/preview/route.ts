@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
       modelo: f.modelo,
       anio: f.anio,
       precio: f.precio,
+      moneda: f.moneda,
       sucursalNombre: f.sucursalNombre,
       error: f.error,
       excedeLimite: f.datos !== null && !idsImportables.has(f.numeroFila),
