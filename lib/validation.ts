@@ -2,6 +2,7 @@ import { z } from "zod";
 import { SOBRE_NOSOTROS_MAX, HORARIOS_MAX, ANIO_INICIO_MIN } from "./catalogo";
 import { WHATSAPP_MAX, normalizarWhatsappAR } from "./whatsapp";
 import { CONTRASTE_MINIMO, contrasteSuficiente, normalizarHex } from "./colorAcento";
+import { MONEDAS } from "./moneda";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -35,7 +36,9 @@ const camposVehiculo = {
   modelo: z.string().trim().min(1, "El modelo es obligatorio").max(80),
   anio: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1),
   km: z.coerce.number().int().min(0).max(2_000_000),
-  precioUsd: z.coerce.number().min(0).max(100_000_000),
+  precio: z.coerce.number().min(0).max(100_000_000),
+  // Moneda del precio. En la edición, si no viene, no se toca (sin default).
+  moneda: z.enum(MONEDAS, { error: "La moneda tiene que ser USD o ARS" }),
   estado: z.enum(estadoVehiculoValues),
   categoria: z.string().trim().max(40).nullable(),
   transmision: z.string().trim().max(40).nullable(),
@@ -70,6 +73,7 @@ const camposVehiculo = {
 // Alta (formulario nuevo e importación CSV): lo que no venga toma su default.
 export const vehiculoInputSchema = z.object({
   ...camposVehiculo,
+  moneda: camposVehiculo.moneda.default("USD"),
   estado: camposVehiculo.estado.default("DISPONIBLE"),
   categoria: camposVehiculo.categoria.optional(),
   transmision: camposVehiculo.transmision.optional(),

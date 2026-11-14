@@ -66,7 +66,7 @@ export async function POST(_req: NextRequest, props: { params: Promise<{ id: str
     title,
     description: `${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio} — ${vehiculo.km.toLocaleString("es-AR")} km. Publicado desde Rodado.`,
     category_id: VEHICLE_CATEGORY_ID,
-    price: Number(vehiculo.precioUsd),
+    price: Number(vehiculo.precio),
     currency_id: "USD",
     available_quantity: 1,
     // Obligatorio para vehículos, ver nota en lib/mercadolibre.ts

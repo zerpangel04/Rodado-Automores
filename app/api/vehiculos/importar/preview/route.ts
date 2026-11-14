@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       marca: f.marca,
       modelo: f.modelo,
       anio: f.anio,
-      precioUsd: f.precioUsd,
+      precio: f.precio,
       sucursalNombre: f.sucursalNombre,
       error: f.error,
       excedeLimite: f.datos !== null && !idsImportables.has(f.numeroFila),

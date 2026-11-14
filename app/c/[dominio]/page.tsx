@@ -60,7 +60,7 @@ export default async function CatalogoPublico(
     modelo: v.modelo,
     anio: v.anio,
     km: v.km,
-    precioUsd: Number(v.precioUsd),
+    precio: Number(v.precio),
     estado: v.estado as "DISPONIBLE" | "RESERVADO",
     fotos: v.fotos,
     transmision: v.transmision,
@@ -71,7 +71,7 @@ export default async function CatalogoPublico(
 
   const vitrina = {
     unidades: items.length,
-    desde: items.length > 0 ? Math.min(...items.map((v) => v.precioUsd)) : 0,
+    desde: items.length > 0 ? Math.min(...items.map((v) => v.precio)) : 0,
     marcas: new Set(items.map((v) => v.marca)).size,
     menosKm: items.length > 0 ? Math.min(...items.map((v) => v.km)) : 0,
   };

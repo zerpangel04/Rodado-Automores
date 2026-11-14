@@ -13,7 +13,7 @@ export type VehiculoOption = {
   marca: string;
   modelo: string;
   categoria: string | null;
-  precioUsd: number;
+  precio: number;
   estado: "DISPONIBLE" | "RESERVADO" | "VENDIDO";
 };
 
@@ -95,7 +95,7 @@ export function LeadDetailModal({
   // Mismo criterio que en Stock: primero vehículos disponibles de la misma
   // categoría, después por precio más cercano al del auto vendido.
   function suggestedVehiculosFor(
-    target: { categoria?: string | null; precioUsd?: number } | null | undefined
+    target: { categoria?: string | null; precio?: number } | null | undefined
   ) {
     const disponibles = vehiculos.filter((v) => v.estado === "DISPONIBLE");
     if (!target) return disponibles;
@@ -103,7 +103,7 @@ export function LeadDetailModal({
       const aSame = a.categoria === target.categoria ? 0 : 1;
       const bSame = b.categoria === target.categoria ? 0 : 1;
       if (aSame !== bSame) return aSame - bSame;
-      return Math.abs(a.precioUsd - (target.precioUsd ?? 0)) - Math.abs(b.precioUsd - (target.precioUsd ?? 0));
+      return Math.abs(a.precio - (target.precio ?? 0)) - Math.abs(b.precio - (target.precio ?? 0));
     });
   }
 
@@ -128,7 +128,7 @@ export function LeadDetailModal({
       modelo: target.modelo,
       estado: target.estado,
       categoria: target.categoria,
-      precioUsd: target.precioUsd,
+      precio: target.precio,
     };
     setShowReassignInModal(false);
     onUpdated({ ...lead, vehiculo: nuevoVehiculo });
@@ -169,7 +169,7 @@ export function LeadDetailModal({
   const tel = telUrl(lead.contacto);
   const mail = mailUrl(lead.contacto);
   const precioArs =
-    cotizacion && lead.vehiculo?.precioUsd ? Math.round(lead.vehiculo.precioUsd * cotizacion) : null;
+    cotizacion && lead.vehiculo?.precio ? Math.round(lead.vehiculo.precio * cotizacion) : null;
 
   return (
     <div className={`${styles.drawerBg} ${styles.show}`} onClick={onClose}>
@@ -247,9 +247,9 @@ export function LeadDetailModal({
             {lead.vehiculo ? (
               <>
                 {lead.vehiculo.marca} {lead.vehiculo.modelo}
-                {typeof lead.vehiculo.precioUsd === "number" && (
+                {typeof lead.vehiculo.precio === "number" && (
                   <div className={styles.detailPrice}>
-                    USD {lead.vehiculo.precioUsd.toLocaleString("es-AR")}
+                    USD {lead.vehiculo.precio.toLocaleString("es-AR")}
                     {precioArs && (
                       <span className={styles.detailPriceArs}>
                         {" "}
@@ -284,7 +284,7 @@ export function LeadDetailModal({
                   </option>
                   {suggestedVehiculosFor(lead.vehiculo).map((v) => (
                     <option key={v.id} value={v.id}>
-                      {v.marca} {v.modelo} — USD {v.precioUsd.toLocaleString("es-AR")}
+                      {v.marca} {v.modelo} — USD {v.precio.toLocaleString("es-AR")}
                     </option>
                   ))}
                 </select>

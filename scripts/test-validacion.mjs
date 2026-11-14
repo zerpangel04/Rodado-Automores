@@ -56,7 +56,7 @@ test("Alta: lo que no viene toma su default", () => {
     modelo: "Corolla",
     anio: 2020,
     km: 10000,
-    precioUsd: 20000,
+    precio: 20000,
   });
   assert.equal(r.estado, "DISPONIBLE");
   assert.equal(r.docTitulo, false);
@@ -64,6 +64,28 @@ test("Alta: lo que no viene toma su default", () => {
   assert.equal(r.docDominio, false);
   assert.equal(r.docLibreDeuda, false);
   assert.equal(r.vtvVencimiento, null);
+});
+
+test("Moneda: el alta sin moneda queda en USD", () => {
+  const r = vehiculoInputSchema.parse({ sucursalId: "s1", marca: "Fiat", modelo: "Uno", anio: 2010, km: 1, precio: 9500000 });
+  assert.equal(r.moneda, "USD");
+  assert.equal(r.precio, 9500000);
+});
+
+test("Moneda: el alta acepta ARS y rechaza otras monedas", () => {
+  const base = { sucursalId: "s1", marca: "Fiat", modelo: "Uno", anio: 2010, km: 1, precio: 9500000 };
+  assert.equal(vehiculoInputSchema.parse({ ...base, moneda: "ARS" }).moneda, "ARS");
+  assert.equal(vehiculoInputSchema.safeParse({ ...base, moneda: "EUR" }).success, false);
+});
+
+test("Moneda: un PATCH sin moneda no la toca (sin default en la edición)", () => {
+  assert.deepEqual(vehiculoUpdateSchema.parse({ km: 1000 }), { km: 1000 });
+  assert.equal("moneda" in vehiculoUpdateSchema.parse({ estado: "RESERVADO" }), false);
+});
+
+test("Moneda: un PATCH puede cambiar solo la moneda", () => {
+  assert.deepEqual(vehiculoUpdateSchema.parse({ moneda: "ARS" }), { moneda: "ARS" });
+  assert.equal(vehiculoUpdateSchema.safeParse({ moneda: "pesos" }).success, false);
 });
 
 test("Alta: sigue exigiendo los campos obligatorios", () => {

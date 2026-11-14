@@ -59,7 +59,7 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
     modelo: v.modelo,
     anio: v.anio,
     km: v.km,
-    precioUsd: Number(v.precioUsd),
+    precio: Number(v.precio),
     estado: v.estado,
     categoria: v.categoria,
     transmision: v.transmision,
@@ -79,7 +79,7 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
 
   const inventarioUsd = vehiculos
     .filter((v) => v.estado !== "VENDIDO")
-    .reduce((sum, v) => sum + Number(v.precioUsd), 0);
+    .reduce((sum, v) => sum + Number(v.precio), 0);
 
   const leadsActivosItems: LeadActivoDTO[] = leadsActivos
     .filter((l): l is typeof l & { vehiculoId: string } => l.vehiculoId !== null)

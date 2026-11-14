@@ -82,6 +82,9 @@ model Tenant {
   // Color de acento del catálogo (#RRGGBB). Solo se aplica si el plan tiene
   // catalogoPersonalizado; si bajan de plan queda guardado pero no se usa.
   colorAcento   String? @db.VarChar(7)
+  // Cotización con la que el catálogo muestra el equivalente ("≈") entre
+  // pesos y dólares. Preferencia de cada agencia, en todos los planes.
+  cotizacionPreferida TipoCotizacion @default(OFICIAL)
   // Foto de portada del catálogo (bucket agencia-portadas). Mismo gating
   // que colorAcento.
   portadaUrl    String?
@@ -292,7 +295,10 @@ model Vehiculo {
   modelo       String
   anio         Int
   km           Int
-  precioUsd    Decimal
+  // Monto en la moneda indicada (USD o ARS). La columna se sigue llamando
+  // "precioUsd" en la base (histórico); en el código es `precio`.
+  precio       Decimal        @map("precioUsd")
+  moneda       Moneda         @default(USD)
   estado       EstadoVehiculo @default(DISPONIBLE)
   categoria    String?
   transmision  String?
@@ -393,4 +399,14 @@ model ActividadLog {
   @@index([tenantId, createdAt])
   @@index([tenantId, vendedorId, createdAt])
   @@index([tenantId, leido])
+}
+
+enum Moneda {
+  USD
+  ARS
+}
+
+enum TipoCotizacion {
+  OFICIAL
+  BLUE
 }

@@ -35,7 +35,7 @@ export type LeadDTO = {
     modelo: string;
     estado?: EstadoVehiculo;
     categoria?: string | null;
-    precioUsd?: number;
+    precio?: number;
   } | null;
   vendedor: { id: string; nombre: string } | null;
   createdAt?: string;
@@ -46,7 +46,7 @@ export type VehiculoOption = {
   marca: string;
   modelo: string;
   categoria: string | null;
-  precioUsd: number;
+  precio: number;
   estado: EstadoVehiculo;
 };
 export type UsuarioOption = { id: string; nombre: string };
@@ -519,7 +519,7 @@ export function KanbanView({
             {stages.map((stage) => {
               const stageItems = filteredItems.filter((l) => l.etapa === stage.key);
               const valorEnJuego = stageItems.reduce(
-                (sum, l) => sum + (l.vehiculo?.precioUsd ?? 0),
+                (sum, l) => sum + (l.vehiculo?.precio ?? 0),
                 0
               );
               const isCollapsed = !!collapsed[stage.key];
@@ -632,9 +632,9 @@ export function KanbanView({
                             {lead.vehiculo ? (
                               <>
                                 {lead.vehiculo.marca} {lead.vehiculo.modelo}
-                                {typeof lead.vehiculo.precioUsd === "number" && (
+                                {typeof lead.vehiculo.precio === "number" && (
                                   <span className={styles.carPrice}>
-                                    USD {lead.vehiculo.precioUsd.toLocaleString("es-AR")}
+                                    USD {lead.vehiculo.precio.toLocaleString("es-AR")}
                                   </span>
                                 )}
                               </>

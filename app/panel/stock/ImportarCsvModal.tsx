@@ -12,7 +12,7 @@ type PreviewFila = {
   marca: string;
   modelo: string;
   anio: string;
-  precioUsd: string;
+  precio: string;
   sucursalNombre: string | null;
   error: string | null;
   excedeLimite: boolean;
@@ -226,7 +226,7 @@ export function ImportarCsvModal({
                         {f.marca} {f.modelo}
                       </td>
                       <td>{f.anio}</td>
-                      <td>{f.precioUsd}</td>
+                      <td>{f.precio}</td>
                       <td>{f.sucursalNombre ?? "—"}</td>
                       <td>
                         {f.error ? (

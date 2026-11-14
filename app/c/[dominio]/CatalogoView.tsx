@@ -16,7 +16,7 @@ export type VehiculoCatalogoDTO = {
   modelo: string;
   anio: number;
   km: number;
-  precioUsd: number;
+  precio: number;
   estado: EstadoVehiculo;
   fotos: string[];
   transmision: string | null;
@@ -37,8 +37,8 @@ const ordenes = [
   { key: "km", label: "menos kilómetros" },
 ] as const;
 
-function cuotaEstimada(precioUsd: number) {
-  return Math.round(precioUsd * 0.0208);
+function cuotaEstimada(precio: number) {
+  return Math.round(precio * 0.0208);
 }
 
 export function CatalogoView({
@@ -71,7 +71,7 @@ export function CatalogoView({
     });
     const ordenKey = ordenes[ordenIdx].key;
     if (ordenKey === "precio") {
-      lista = lista.slice().sort((a, b) => a.precioUsd - b.precioUsd);
+      lista = lista.slice().sort((a, b) => a.precio - b.precio);
     } else if (ordenKey === "km") {
       lista = lista.slice().sort((a, b) => a.km - b.km);
     }
@@ -192,13 +192,13 @@ export function CatalogoView({
 
                 <div className={styles.cardPriceRow}>
                   <div>
-                    <div className={styles.cardPrice}>USD {v.precioUsd.toLocaleString("es-AR")}</div>
+                    <div className={styles.cardPrice}>USD {v.precio.toLocaleString("es-AR")}</div>
                     {cotizacion && (
                       <div
                         className={styles.cardPriceArs}
                         title={`Equivalente aproximado con el dólar oficial del ${cotizacion.fecha}`}
                       >
-                        ≈ ${Math.round(v.precioUsd * cotizacion.venta).toLocaleString("es-AR")}
+                        ≈ ${Math.round(v.precio * cotizacion.venta).toLocaleString("es-AR")}
                         <span className={styles.cardPriceArsFecha}>dólar oficial {cotizacion.fecha}</span>
                       </div>
                     )}
@@ -206,7 +206,7 @@ export function CatalogoView({
                   <div className={styles.cardCuota}>
                     <div className={styles.cardCuotaLabel}>Cuotas desde</div>
                     <div className={styles.cardCuotaValue}>
-                      USD {cuotaEstimada(v.precioUsd).toLocaleString("es-AR")}/mes
+                      USD {cuotaEstimada(v.precio).toLocaleString("es-AR")}/mes
                     </div>
                   </div>
                 </div>

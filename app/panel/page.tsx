@@ -115,7 +115,7 @@ export default async function PanelHome() {
       where: { ...leadFilter, etapa: "NUEVO" },
       include: {
         vehiculo: {
-          select: { marca: true, modelo: true, estado: true, categoria: true, precioUsd: true },
+          select: { marca: true, modelo: true, estado: true, categoria: true, precio: true },
         },
         vendedor: { select: { id: true, nombre: true } },
       },
@@ -132,7 +132,7 @@ export default async function PanelHome() {
       : Promise.resolve([]),
     prisma.vehiculo.findMany({
       where: { tenantId, estado: { not: "VENDIDO" } },
-      select: { id: true, marca: true, modelo: true, categoria: true, precioUsd: true, estado: true },
+      select: { id: true, marca: true, modelo: true, categoria: true, precio: true, estado: true },
       orderBy: { fechaIngreso: "desc" },
     }),
     canAsignar
@@ -191,7 +191,7 @@ export default async function PanelHome() {
               modelo: l.vehiculo.modelo,
               estado: l.vehiculo.estado,
               categoria: l.vehiculo.categoria,
-              precioUsd: Number(l.vehiculo.precioUsd),
+              precio: Number(l.vehiculo.precio),
             }
           : null,
         vendedor: l.vendedor,
@@ -217,7 +217,7 @@ export default async function PanelHome() {
     marca: v.marca,
     modelo: v.modelo,
     categoria: v.categoria,
-    precioUsd: Number(v.precioUsd),
+    precio: Number(v.precio),
     estado: v.estado,
   }));
 

@@ -52,7 +52,7 @@ type VehiculoStock = {
   modelo: string;
   anio: number;
   km: number;
-  precioUsd: number;
+  precio: number;
   estado: string;
   transmision: string | null;
   motor: string | null;
@@ -67,7 +67,7 @@ function formatearStock(vehiculos: VehiculoStock[]): string {
       const estado = v.estado === "RESERVADO" ? "reservado (todavía no vendido)" : "disponible";
       const detalles = [
         `${v.km.toLocaleString("es-AR")} km`,
-        `USD ${v.precioUsd.toLocaleString("es-AR")}`,
+        `USD ${v.precio.toLocaleString("es-AR")}`,
         estado,
         v.transmision ? `transmisión ${v.transmision}` : null,
         v.motor ? `motor ${v.motor}` : null,
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ dominio:
       modelo: true,
       anio: true,
       km: true,
-      precioUsd: true,
+      precio: true,
       estado: true,
       transmision: true,
       motor: true,
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ dominio:
   });
 
   const stockTexto = formatearStock(
-    vehiculosDb.map((v) => ({ ...v, precioUsd: Number(v.precioUsd) }))
+    vehiculosDb.map((v) => ({ ...v, precio: Number(v.precio) }))
   );
   const system = buildSystemPrompt(tenant.nombre, stockTexto);
 

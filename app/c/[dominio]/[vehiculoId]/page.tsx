@@ -21,8 +21,8 @@ const estadoLabel: Record<string, string> = {
   VENDIDO: "Vendido",
 };
 
-function cuotaEstimada(precioUsd: number) {
-  return Math.round(precioUsd * 0.0208);
+function cuotaEstimada(precio: number) {
+  return Math.round(precio * 0.0208);
 }
 
 function mapsUrl(direccion: string) {
@@ -56,7 +56,7 @@ export default async function VehiculoDetalle(
 
   const vendido = vehiculo.estado === "VENDIDO";
   const mostrarSucursal = tenant.sucursales.length > 1;
-  const precioUsd = Number(vehiculo.precioUsd);
+  const precio = Number(vehiculo.precio);
 
   const docs = [
     { label: "Título del automotor", ok: vehiculo.docTitulo },
@@ -180,17 +180,17 @@ export default async function VehiculoDetalle(
           <div>
             <div className={styles.sideCard}>
               <div className={styles.sidePrice}>
-                <span>USD {precioUsd.toLocaleString("es-AR")}</span>
+                <span>USD {precio.toLocaleString("es-AR")}</span>
                 {cotizacion && (
                   <small>
-                    ≈ ${Math.round(precioUsd * cotizacion.venta).toLocaleString("es-AR")} · dólar oficial del{" "}
+                    ≈ ${Math.round(precio * cotizacion.venta).toLocaleString("es-AR")} · dólar oficial del{" "}
                     {fechaCotizacionCorta(cotizacion.fecha)}
                   </small>
                 )}
               </div>
               {!vendido && (
                 <div className={styles.sideCuota}>
-                  Cuotas desde USD {cuotaEstimada(precioUsd).toLocaleString("es-AR")}/mes · aceptamos tu
+                  Cuotas desde USD {cuotaEstimada(precio).toLocaleString("es-AR")}/mes · aceptamos tu
                   usado en parte de pago
                 </div>
               )}

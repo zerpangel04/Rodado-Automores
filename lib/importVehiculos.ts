@@ -23,7 +23,7 @@ const CAMPO_LABEL: Record<string, string> = {
   modelo: "Modelo",
   anio: "Año",
   km: "Km",
-  precioUsd: "Precio (USD)",
+  precio: "Precio (USD)",
   categoria: "Categoría",
   transmision: "Transmisión",
   motor: "Motor",
@@ -81,7 +81,7 @@ export type FilaImportacion = {
   marca: string;
   modelo: string;
   anio: string;
-  precioUsd: string;
+  precio: string;
   sucursalNombre: string | null;
   error: string | null;
   datos: {
@@ -90,7 +90,7 @@ export type FilaImportacion = {
     modelo: string;
     anio: number;
     km: number;
-    precioUsd: number;
+    precio: number;
     categoria: string | null;
     transmision: string | null;
     motor: string | null;
@@ -152,21 +152,21 @@ export function validarFilasImportacion(
     const modelo = get(iModelo);
     const anio = get(iAnio);
     const km = get(iKm);
-    const precioUsd = get(iPrecio);
+    const precio = get(iPrecio);
     const transmision = get(iTransmision);
     const motor = get(iMotor);
     const categoria = get(iCategoria);
     const fechaIngreso = get(iFecha);
     const sucursalNombreCrudo = get(iSucursal);
 
-    const base = { marca, modelo, anio, precioUsd, sucursalNombre: sucursalNombreCrudo || null };
+    const base = { marca, modelo, anio, precio, sucursalNombre: sucursalNombreCrudo || null };
 
     const faltantes = [
       !marca && "marca",
       !modelo && "modelo",
       !anio && "anio",
       !km && "km",
-      !precioUsd && "precioUsd",
+      !precio && "precioUsd",
     ].filter(Boolean) as string[];
     if (faltantes.length > 0) {
       filas.push({
@@ -186,8 +186,8 @@ export function validarFilasImportacion(
       filas.push({ numeroFila: i, ...base, error: `El km "${km}" no es un número válido`, datos: null });
       continue;
     }
-    if (isNaN(Number(precioUsd))) {
-      filas.push({ numeroFila: i, ...base, error: `El precio "${precioUsd}" no es un número válido`, datos: null });
+    if (isNaN(Number(precio))) {
+      filas.push({ numeroFila: i, ...base, error: `El precio "${precio}" no es un número válido`, datos: null });
       continue;
     }
 
@@ -213,7 +213,7 @@ export function validarFilasImportacion(
       modelo,
       anio,
       km,
-      precioUsd,
+      precio,
       categoria: categoria || undefined,
       transmision: transmision || undefined,
       motor: motor || undefined,
@@ -242,7 +242,7 @@ export function validarFilasImportacion(
         modelo: parsed.data.modelo,
         anio: parsed.data.anio,
         km: parsed.data.km,
-        precioUsd: parsed.data.precioUsd,
+        precio: parsed.data.precio,
         categoria: parsed.data.categoria ?? null,
         transmision: parsed.data.transmision ?? null,
         motor: parsed.data.motor ?? null,

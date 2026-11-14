@@ -202,8 +202,8 @@ export async function syncVehiculoAMercadoLibre(
   const payload: Record<string, unknown> = {};
   const cambios: string[] = [];
 
-  if (conexion.syncPrecios && Number(antes.precioUsd) !== Number(despues.precioUsd)) {
-    payload.price = Number(despues.precioUsd);
+  if (conexion.syncPrecios && Number(antes.precio) !== Number(despues.precio)) {
+    payload.price = Number(despues.precio);
     cambios.push("precio");
   }
   if (conexion.syncPrecios && antes.estado !== despues.estado && despues.estado !== "VENDIDO") {

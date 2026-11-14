@@ -42,7 +42,7 @@ export type VehiculoDTO = {
   modelo: string;
   anio: number;
   km: number;
-  precioUsd: number;
+  precio: number;
   estado: EstadoVehiculo;
   categoria: string | null;
   transmision: string | null;
@@ -88,7 +88,7 @@ type FormState = {
   modelo: string;
   anio: string;
   km: string;
-  precioUsd: string;
+  precio: string;
   categoria: string;
   transmision: string;
   motor: string;
@@ -106,7 +106,7 @@ const emptyForm: FormState = {
   modelo: "",
   anio: "",
   km: "",
-  precioUsd: "",
+  precio: "",
   categoria: "Sedán",
   transmision: "",
   motor: "",
@@ -281,7 +281,7 @@ export function StockView({
         const aSame = a.categoria === target.categoria ? 0 : 1;
         const bSame = b.categoria === target.categoria ? 0 : 1;
         if (aSame !== bSame) return aSame - bSame;
-        return Math.abs(a.precioUsd - target.precioUsd) - Math.abs(b.precioUsd - target.precioUsd);
+        return Math.abs(a.precio - target.precio) - Math.abs(b.precio - target.precio);
       });
   }
 
@@ -426,7 +426,7 @@ export function StockView({
   const visible = useMemo(() => {
     const base = filter === "todos" ? items : items.filter((i) => i.estado === filter);
     return base.slice().sort((a, b) => {
-      if (orden === "precio") return b.precioUsd - a.precioUsd;
+      if (orden === "precio") return b.precio - a.precio;
       if (orden === "dias") return diasEnStock(b) - diasEnStock(a);
       return new Date(b.fechaIngreso).getTime() - new Date(a.fechaIngreso).getTime();
     });
@@ -520,7 +520,7 @@ export function StockView({
 
   function useIaPrice() {
     if (iaResult === null) return;
-    setForm((f) => ({ ...f, precioUsd: String(iaResult) }));
+    setForm((f) => ({ ...f, precio: String(iaResult) }));
   }
 
   function openEdit(v: VehiculoDTO) {
@@ -531,7 +531,7 @@ export function StockView({
       modelo: v.modelo,
       anio: String(v.anio),
       km: String(v.km),
-      precioUsd: String(v.precioUsd),
+      precio: String(v.precio),
       categoria: v.categoria ?? "Sedán",
       transmision: v.transmision ?? "",
       motor: v.motor ?? "",
@@ -572,7 +572,7 @@ export function StockView({
       modelo: form.modelo.trim(),
       anio: Number(form.anio) || new Date().getFullYear(),
       km: Number(form.km) || 0,
-      precioUsd: Number(form.precioUsd) || 0,
+      precio: Number(form.precio) || 0,
       categoria: form.categoria,
       transmision: form.transmision.trim() || null,
       motor: form.motor.trim() || null,
@@ -786,7 +786,7 @@ export function StockView({
     setSaleForm({
       vendedorId: canRevertirVenta ? "" : userId,
       compradorNombre: "",
-      precioFinal: String(v.precioUsd),
+      precioFinal: String(v.precio),
       comision: "",
     });
     setSaleError(null);
@@ -1030,7 +1030,7 @@ export function StockView({
                         {stateLabel[v.estado]}
                       </span>
                     </td>
-                    <td className="mono">USD {v.precioUsd.toLocaleString("es-AR")}</td>
+                    <td className="mono">USD {v.precio.toLocaleString("es-AR")}</td>
                     <td>
                       <span className={`${styles.docs} ${styles[docTierClass[ds.tier]]}`}>
                         {ds.label}
@@ -1133,7 +1133,7 @@ export function StockView({
                   </div>
                   <div className={styles.foot}>
                     <div className={`${styles.price} disp`}>
-                      USD {v.precioUsd.toLocaleString("es-AR")}
+                      USD {v.precio.toLocaleString("es-AR")}
                     </div>
                     {!vendido && (
                       <button
@@ -1474,8 +1474,8 @@ export function StockView({
                 <label>Precio (USD)</label>
                 <input
                   type="number"
-                  value={form.precioUsd}
-                  onChange={(e) => setForm({ ...form, precioUsd: e.target.value })}
+                  value={form.precio}
+                  onChange={(e) => setForm({ ...form, precio: e.target.value })}
                   placeholder="24500"
                 />
               </div>
@@ -1748,7 +1748,7 @@ export function StockView({
                         </option>
                         {suggestedVehiculos(saleTarget).map((v) => (
                           <option key={v.id} value={v.id}>
-                            {v.marca} {v.modelo} — USD {v.precioUsd.toLocaleString("es-AR")}
+                            {v.marca} {v.modelo} — USD {v.precio.toLocaleString("es-AR")}
                           </option>
                         ))}
                       </select>
