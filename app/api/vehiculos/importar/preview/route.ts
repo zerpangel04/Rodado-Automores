@@ -44,6 +44,9 @@ export async function POST(req: NextRequest) {
       modelo: f.modelo,
       anio: f.anio,
       precio: f.precio,
+      // Precio ya interpretado (null si la fila tiene error): el cliente
+      // no debe re-parsear el texto, porque Number("18.500") da 18,5.
+      precioNumero: f.datos?.precio ?? null,
       moneda: f.moneda,
       sucursalNombre: f.sucursalNombre,
       error: f.error,

@@ -14,6 +14,7 @@ type PreviewFila = {
   modelo: string;
   anio: string;
   precio: string;
+  precioNumero: number | null;
   moneda: Moneda | null;
   sucursalNombre: string | null;
   error: string | null;
@@ -230,8 +231,8 @@ export function ImportarCsvModal({
                       </td>
                       <td>{f.anio}</td>
                       <td>
-                        {f.moneda && f.precio !== "" && !isNaN(Number(f.precio))
-                          ? formatearPrecio(Number(f.precio), f.moneda)
+                        {f.moneda && f.precioNumero !== null
+                          ? formatearPrecio(f.precioNumero, f.moneda)
                           : f.precio}
                       </td>
                       <td>{f.sucursalNombre ?? "—"}</td>

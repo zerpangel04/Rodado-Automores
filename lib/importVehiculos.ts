@@ -81,6 +81,27 @@ export function parseCsv(texto: string): string[][] {
   return filas.filter((f) => f.some((c) => c.trim() !== ""));
 }
 
+// Interpreta un número escrito en formato argentino: punto para los miles
+// y coma para los decimales. Devuelve null si el texto no encaja sin
+// ambigüedad en ese formato — quien llama tiene que rechazar la fila,
+// nunca adivinar. Formatos aceptados:
+//   "18500"            → 18500     (sin separadores)
+//   "18.500"           → 18500     (punto de miles, grupos de 3)
+//   "9.500.000"        → 9500000
+//   "18.500,50"        → 18500.5   (coma decimal, hasta 2 decimales)
+//   "18500,5"          → 18500.5
+// Rechazados (null): "18.5", "18.50" (punto que no agrupa de a 3: ¿miles
+// o decimal?), "18,500" (¿coma de miles en formato inglés o 18,5?),
+// "18,500.00", "1.85.000", "18.500,123", signos, letras, espacios.
+export function parsearNumeroAr(texto: string, { decimales = true } = {}): number | null {
+  const t = texto.trim();
+  const entero = /^(\d+|\d{1,3}(\.\d{3})+)$/;
+  const conDecimales = /^(\d+|\d{1,3}(\.\d{3})+),\d{1,2}$/;
+  if (entero.test(t)) return Number(t.replace(/\./g, ""));
+  if (decimales && conDecimales.test(t)) return Number(t.replace(/\./g, "").replace(",", "."));
+  return null;
+}
+
 export type FilaImportacion = {
   numeroFila: number; // 1-indexado sobre las filas de datos (sin contar el encabezado)
   marca: string;
@@ -195,12 +216,28 @@ export function validarFilasImportacion(
       filas.push({ numeroFila: i, ...base, error: `El año "${anio}" no es un número válido`, datos: null });
       continue;
     }
-    if (isNaN(Number(km))) {
-      filas.push({ numeroFila: i, ...base, error: `El km "${km}" no es un número válido`, datos: null });
+    // km y precio pueden venir con punto de miles ("45.000", "18.500"):
+    // Number() los leería como 45 y 18,5, así que se interpretan en
+    // formato argentino y, si no hay forma segura de leerlos, la fila
+    // se rechaza en vez de importarse con un valor equivocado.
+    const kmNumero = parsearNumeroAr(km, { decimales: false });
+    if (kmNumero === null) {
+      filas.push({
+        numeroFila: i,
+        ...base,
+        error: `El km "${km}" no se puede interpretar: escribilo sin decimales, con o sin punto de miles (ej. 45000 o 45.000)`,
+        datos: null,
+      });
       continue;
     }
-    if (isNaN(Number(precio))) {
-      filas.push({ numeroFila: i, ...base, error: `El precio "${precio}" no es un número válido`, datos: null });
+    const precioNumero = parsearNumeroAr(precio);
+    if (precioNumero === null) {
+      filas.push({
+        numeroFila: i,
+        ...base,
+        error: `El precio "${precio}" no se puede interpretar con seguridad: usá punto para los miles y coma para los decimales (ej. 18500, 18.500 o 18.500,50)`,
+        datos: null,
+      });
       continue;
     }
     if (moneda === null) {
@@ -234,8 +271,8 @@ export function validarFilasImportacion(
       marca,
       modelo,
       anio,
-      km,
-      precio,
+      km: kmNumero,
+      precio: precioNumero,
       moneda,
       categoria: categoria || undefined,
       transmision: transmision || undefined,
