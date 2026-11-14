@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
 import { getPlanTenant } from "@/lib/planes";
+import { fechaCotizacionCorta, getCotizacion } from "@/lib/cotizacion";
+import { formatearTotales, sumarPorMoneda } from "@/lib/moneda";
 import { StockView, type VehiculoDTO, type LeadActivoDTO } from "./StockView";
 import styles from "../panel.module.css";
 
@@ -12,7 +14,7 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
 
   const sucursalActual = await getSucursalActual(tenantId);
 
-  const [vehiculos, usuarios, sucursales, leadsActivos, plan, marcados] = await Promise.all([
+  const [vehiculos, usuarios, sucursales, leadsActivos, plan, marcados, tenant] = await Promise.all([
     prisma.vehiculo.findMany({
       where: {
         tenantId,
@@ -50,7 +52,12 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
       orderBy: { destacadoEn: "asc" },
       select: { id: true },
     }),
+    prisma.tenant.findUnique({ where: { id: tenantId }, select: { cotizacionPreferida: true } }),
   ]);
+
+  // Cotización que eligió la agencia: en Stock se usa solo para ordenar por
+  // precio mezclando monedas y para el "≈" del formulario (nunca para totales).
+  const cotizacion = await getCotizacion(tenant?.cotizacionPreferida ?? "OFICIAL");
 
   const items: VehiculoDTO[] = vehiculos.map((v) => ({
     id: v.id,
@@ -60,6 +67,7 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
     anio: v.anio,
     km: v.km,
     precio: Number(v.precio),
+    moneda: v.moneda,
     estado: v.estado,
     categoria: v.categoria,
     transmision: v.transmision,
@@ -77,9 +85,12 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
     fechaIngreso: v.fechaIngreso.toISOString(),
   }));
 
-  const inventarioUsd = vehiculos
-    .filter((v) => v.estado !== "VENDIDO")
-    .reduce((sum, v) => sum + Number(v.precio), 0);
+  // Dos totales separados por moneda, nunca un único número convertido.
+  const inventario = formatearTotales(
+    sumarPorMoneda(
+      vehiculos.filter((v) => v.estado !== "VENDIDO").map((v) => ({ monto: Number(v.precio), moneda: v.moneda }))
+    )
+  );
 
   const leadsActivosItems: LeadActivoDTO[] = leadsActivos
     .filter((l): l is typeof l & { vehiculoId: string } => l.vehiculoId !== null)
@@ -103,8 +114,8 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
               : sucursales.length > 1
               ? ` · ${sucursales.length} sucursales`
               : ""}
-            {" · inventario USD "}
-            {inventarioUsd.toLocaleString("es-AR")}
+            {" · inventario "}
+            {inventario}
           </div>
         </div>
       </div>
@@ -119,6 +130,11 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
           canRevertirVenta={rol !== "VENDEDOR"}
           leadsActivos={leadsActivosItems}
           asistenteIA={plan.asistenteIA}
+          cotizacion={
+            cotizacion
+              ? { venta: cotizacion.venta, tipo: cotizacion.tipo, fecha: fechaCotizacionCorta(cotizacion.fecha) }
+              : null
+          }
           destacadosIniciales={marcados.map((v) => v.id)}
           limiteDestacados={plan.limiteDestacados}
           puedeDestacar={rol !== "VENDEDOR"}

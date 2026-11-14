@@ -24,6 +24,14 @@ import styles from "./stock.module.css";
 import panelStyles from "../panel.module.css";
 import { docStatus, diasHastaVtv } from "@/lib/docs";
 import { estimarPrecio } from "@/lib/tasacion";
+import {
+  aUsdParaComparar,
+  convertir,
+  equivalente,
+  formatearPrecio,
+  PRECIO_MAXIMO,
+  type Moneda,
+} from "@/lib/moneda";
 import { KpiBar } from "../KpiBar";
 import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/validation";
 import { getCroppedImageFile } from "@/lib/cropImage";
@@ -43,6 +51,7 @@ export type VehiculoDTO = {
   anio: number;
   km: number;
   precio: number;
+  moneda: Moneda;
   estado: EstadoVehiculo;
   categoria: string | null;
   transmision: string | null;
@@ -89,6 +98,7 @@ type FormState = {
   anio: string;
   km: string;
   precio: string;
+  moneda: Moneda;
   categoria: string;
   transmision: string;
   motor: string;
@@ -107,6 +117,7 @@ const emptyForm: FormState = {
   anio: "",
   km: "",
   precio: "",
+  moneda: "USD",
   categoria: "Sedán",
   transmision: "",
   motor: "",
@@ -189,6 +200,7 @@ export function StockView({
   destacadosIniciales,
   limiteDestacados,
   puedeDestacar,
+  cotizacion,
   abrirNuevo = false,
 }: {
   initialItems: VehiculoDTO[];
@@ -204,6 +216,9 @@ export function StockView({
   destacadosIniciales: string[];
   limiteDestacados: number;
   puedeDestacar: boolean;
+  // Cotización que eligió la agencia (fecha ya formateada). Se usa solo para
+  // ordenar por precio mezclando monedas y para el "≈" del formulario.
+  cotizacion: { venta: number; tipo: "OFICIAL" | "BLUE"; fecha: string } | null;
   abrirNuevo?: boolean;
 }) {
   const router = useRouter();
@@ -281,7 +296,13 @@ export function StockView({
         const aSame = a.categoria === target.categoria ? 0 : 1;
         const bSame = b.categoria === target.categoria ? 0 : 1;
         if (aSame !== bSame) return aSame - bSame;
-        return Math.abs(a.precio - target.precio) - Math.abs(b.precio - target.precio);
+        // Precio comparado en USD (mezcla monedas); sin cotización, los que
+        // no se pueden comparar van al final.
+        const ref = aUsdParaComparar(target.precio, target.moneda, cotizacion?.venta);
+        const pa = aUsdParaComparar(a.precio, a.moneda, cotizacion?.venta);
+        const pb = aUsdParaComparar(b.precio, b.moneda, cotizacion?.venta);
+        if (ref === null || pa === null || pb === null) return (pa === null ? 1 : 0) - (pb === null ? 1 : 0);
+        return Math.abs(pa - ref) - Math.abs(pb - ref);
       });
   }
 
@@ -426,11 +447,18 @@ export function StockView({
   const visible = useMemo(() => {
     const base = filter === "todos" ? items : items.filter((i) => i.estado === filter);
     return base.slice().sort((a, b) => {
-      if (orden === "precio") return b.precio - a.precio;
+      if (orden === "precio") {
+        // Mayor precio primero, comparando en USD. Sin cotización, un precio
+        // en pesos no se puede comparar con uno en dólares: van al final.
+        const pa = aUsdParaComparar(a.precio, a.moneda, cotizacion?.venta);
+        const pb = aUsdParaComparar(b.precio, b.moneda, cotizacion?.venta);
+        if (pa === null || pb === null) return (pa === null ? 1 : 0) - (pb === null ? 1 : 0);
+        return pb - pa;
+      }
       if (orden === "dias") return diasEnStock(b) - diasEnStock(a);
       return new Date(b.fechaIngreso).getTime() - new Date(a.fechaIngreso).getTime();
     });
-  }, [items, filter, orden]);
+  }, [items, filter, orden, cotizacion]);
 
   const kpis = useMemo(() => {
     const activos = items.filter((v) => v.estado !== "VENDIDO");
@@ -518,9 +546,21 @@ export function StockView({
     setIaLoading(false);
   }
 
+  // La tasación (Arg Autos o la estimación) siempre viene en USD. Si el
+  // vehículo se carga en pesos, se usa convertida con la cotización de la
+  // agencia, redondeada a miles.
+  const iaEnMonedaDelForm: number | null =
+    iaResult === null
+      ? null
+      : form.moneda === "USD"
+      ? iaResult
+      : cotizacion
+      ? Math.round(convertir(iaResult, "USD", "ARS", cotizacion.venta) / 1000) * 1000
+      : null;
+
   function useIaPrice() {
-    if (iaResult === null) return;
-    setForm((f) => ({ ...f, precio: String(iaResult) }));
+    if (iaEnMonedaDelForm === null) return;
+    setForm((f) => ({ ...f, precio: String(iaEnMonedaDelForm) }));
   }
 
   function openEdit(v: VehiculoDTO) {
@@ -532,6 +572,7 @@ export function StockView({
       anio: String(v.anio),
       km: String(v.km),
       precio: String(v.precio),
+      moneda: v.moneda,
       categoria: v.categoria ?? "Sedán",
       transmision: v.transmision ?? "",
       motor: v.motor ?? "",
@@ -573,6 +614,7 @@ export function StockView({
       anio: Number(form.anio) || new Date().getFullYear(),
       km: Number(form.km) || 0,
       precio: Number(form.precio) || 0,
+      moneda: form.moneda,
       categoria: form.categoria,
       transmision: form.transmision.trim() || null,
       motor: form.motor.trim() || null,
@@ -1030,7 +1072,7 @@ export function StockView({
                         {stateLabel[v.estado]}
                       </span>
                     </td>
-                    <td className="mono">USD {v.precio.toLocaleString("es-AR")}</td>
+                    <td className="mono">{formatearPrecio(v.precio, v.moneda)}</td>
                     <td>
                       <span className={`${styles.docs} ${styles[docTierClass[ds.tier]]}`}>
                         {ds.label}
@@ -1133,7 +1175,7 @@ export function StockView({
                   </div>
                   <div className={styles.foot}>
                     <div className={`${styles.price} disp`}>
-                      USD {v.precio.toLocaleString("es-AR")}
+                      {formatearPrecio(v.precio, v.moneda)}
                     </div>
                     {!vendido && (
                       <button
@@ -1426,7 +1468,11 @@ export function StockView({
                   <div
                     className={`${styles.iaResult} ${iaFuente === "real" ? styles.iaResultReal : ""}`}
                   >
-                    {iaResult !== null ? `USD ${iaResult.toLocaleString("es-AR")}` : "—"}
+                    {iaResult === null
+                      ? "—"
+                      : form.moneda === "ARS" && iaEnMonedaDelForm !== null
+                      ? formatearPrecio(iaEnMonedaDelForm, "ARS")
+                      : formatearPrecio(iaResult, "USD")}
                   </div>
                   <div className={styles.iaNote}>
                     {iaLoading ? (
@@ -1458,8 +1504,23 @@ export function StockView({
                             en Arg Autos API, o el servicio no respondió.
                           </>
                         )}
+                        {form.moneda === "ARS" && (
+                          <>
+                            <br />
+                            {iaEnMonedaDelForm !== null && cotizacion
+                              ? `La referencia es en dólares; en pesos, con el ${
+                                  cotizacion.tipo === "BLUE" ? "dólar blue" : "dólar oficial"
+                                } del ${cotizacion.fecha}, redondeada a miles.`
+                              : "La referencia es en dólares y no hay cotización disponible para pasarla a pesos."}
+                          </>
+                        )}
                         <br />
-                        <button type="button" className={styles.iaUseBtn} onClick={useIaPrice}>
+                        <button
+                          type="button"
+                          className={styles.iaUseBtn}
+                          onClick={useIaPrice}
+                          disabled={iaEnMonedaDelForm === null}
+                        >
                           Usar este precio →
                         </button>
                       </>
@@ -1471,13 +1532,44 @@ export function StockView({
               )}
 
               <div className={styles.field} style={{ marginTop: editingId ? 16 : 0 }}>
-                <label>Precio (USD)</label>
-                <input
-                  type="number"
-                  value={form.precio}
-                  onChange={(e) => setForm({ ...form, precio: e.target.value })}
-                  placeholder="24500"
-                />
+                <label htmlFor="precioVehiculo">Precio</label>
+                <div className={styles.precioFila}>
+                  <div className={styles.monedaSwitch} role="radiogroup" aria-label="Moneda del precio">
+                    {(["USD", "ARS"] as const).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        role="radio"
+                        aria-checked={form.moneda === m}
+                        className={form.moneda === m ? styles.monedaActiva : ""}
+                        onClick={() => setForm({ ...form, moneda: m })}
+                      >
+                        {m === "USD" ? "USD" : "$ ARS"}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    id="precioVehiculo"
+                    type="number"
+                    min={0}
+                    max={PRECIO_MAXIMO[form.moneda]}
+                    value={form.precio}
+                    onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                    placeholder={form.moneda === "USD" ? "24500" : "9500000"}
+                  />
+                </div>
+                {(() => {
+                  // Equivalente aproximado en la otra moneda, con la
+                  // cotización que eligió la agencia (solo informativo).
+                  const monto = Number(form.precio);
+                  const eq = monto > 0 ? equivalente(monto, form.moneda, cotizacion?.venta) : null;
+                  return eq && cotizacion ? (
+                    <div className={styles.precioEquivalente}>
+                      ≈ {formatearPrecio(eq.monto, eq.moneda)} · {cotizacion.tipo === "BLUE" ? "dólar blue" : "dólar oficial"}{" "}
+                      {cotizacion.fecha}
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </>
           )}
@@ -1748,7 +1840,7 @@ export function StockView({
                         </option>
                         {suggestedVehiculos(saleTarget).map((v) => (
                           <option key={v.id} value={v.id}>
-                            {v.marca} {v.modelo} — USD {v.precio.toLocaleString("es-AR")}
+                            {v.marca} {v.modelo} — {formatearPrecio(v.precio, v.moneda)}
                           </option>
                         ))}
                       </select>

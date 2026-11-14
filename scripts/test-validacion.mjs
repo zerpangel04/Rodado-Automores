@@ -88,6 +88,18 @@ test("Moneda: un PATCH puede cambiar solo la moneda", () => {
   assert.equal(vehiculoUpdateSchema.safeParse({ moneda: "pesos" }).success, false);
 });
 
+test("Tope de precio según la moneda (USD 100 M, ARS 500 M)", () => {
+  const base = { sucursalId: "s1", marca: "Fiat", modelo: "Uno", anio: 2010, km: 1 };
+  assert.equal(vehiculoInputSchema.safeParse({ ...base, precio: 100_000_000, moneda: "USD" }).success, true);
+  const usd = vehiculoInputSchema.safeParse({ ...base, precio: 150_000_000, moneda: "USD" });
+  assert.equal(usd.success, false);
+  assert.match(usd.error.issues[0].message, /USD 100\.000\.000/);
+  assert.equal(vehiculoInputSchema.safeParse({ ...base, precio: 150_000_000, moneda: "ARS" }).success, true);
+  const ars = vehiculoInputSchema.safeParse({ ...base, precio: 600_000_000, moneda: "ARS" });
+  assert.equal(ars.success, false);
+  assert.match(ars.error.issues[0].message, /cero de más/);
+});
+
 test("Alta: sigue exigiendo los campos obligatorios", () => {
   assert.equal(vehiculoInputSchema.safeParse({ marca: "Toyota" }).success, false);
 });

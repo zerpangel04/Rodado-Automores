@@ -5,6 +5,7 @@ import { vehiculoUpdateSchema } from "@/lib/validation";
 import { findOwnedVehiculo } from "@/lib/vehiculos";
 import { registrarActividad } from "@/lib/actividad";
 import { syncVehiculoAMercadoLibre } from "@/lib/mercadolibre";
+import { mensajeTopePrecio, precioDentroDelTope } from "@/lib/moneda";
 
 export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -23,9 +24,19 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
   const parsed = vehiculoUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Datos inválidos", detalles: parsed.error.flatten() },
+      { error: parsed.error.issues[0]?.message ?? "Datos inválidos", detalles: parsed.error.flatten() },
       { status: 400 }
     );
+  }
+
+  // Tope de precio según la moneda. Si el PATCH trae solo el precio o solo
+  // la moneda, se completa con lo que ya tiene guardado el vehículo.
+  if (parsed.data.precio !== undefined || parsed.data.moneda !== undefined) {
+    const moneda = parsed.data.moneda ?? existente.moneda;
+    const precio = parsed.data.precio ?? Number(existente.precio);
+    if (!precioDentroDelTope(precio, moneda)) {
+      return NextResponse.json({ error: mensajeTopePrecio(moneda) }, { status: 400 });
+    }
   }
 
   if (parsed.data.estado === "VENDIDO" && existente.estado !== "VENDIDO") {

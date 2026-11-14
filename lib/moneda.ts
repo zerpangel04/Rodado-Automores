@@ -22,6 +22,23 @@ export function otraMoneda(m: Moneda): Moneda {
   return m === "USD" ? "ARS" : "USD";
 }
 
+// Tope de precio por moneda. Es un techo de "error de tipeo" (un cero de
+// más), no de precio real: en USD se mantiene el que ya había; en ARS es
+// generoso a propósito porque cualquier techo en pesos queda viejo con la
+// inflación. Si algún día queda corto, se sube.
+export const PRECIO_MAXIMO: Record<Moneda, number> = {
+  USD: 100_000_000,
+  ARS: 500_000_000,
+};
+
+export function precioDentroDelTope(precio: number, moneda: Moneda): boolean {
+  return precio <= PRECIO_MAXIMO[moneda];
+}
+
+export function mensajeTopePrecio(moneda: Moneda): string {
+  return `El precio no puede superar ${formatearPrecio(PRECIO_MAXIMO[moneda], moneda)}. Revisá que no tenga un cero de más.`;
+}
+
 // "USD 28.000" / "$9.500.000" (sin decimales, separador de miles es-AR).
 export function formatearPrecio(monto: number, moneda: Moneda): string {
   const n = Math.round(monto).toLocaleString("es-AR");

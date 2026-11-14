@@ -2,7 +2,7 @@ import { z } from "zod";
 import { SOBRE_NOSOTROS_MAX, HORARIOS_MAX, ANIO_INICIO_MIN } from "./catalogo";
 import { WHATSAPP_MAX, normalizarWhatsappAR } from "./whatsapp";
 import { CONTRASTE_MINIMO, contrasteSuficiente, normalizarHex } from "./colorAcento";
-import { MONEDAS } from "./moneda";
+import { MONEDAS, PRECIO_MAXIMO, mensajeTopePrecio } from "./moneda";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -36,7 +36,11 @@ const camposVehiculo = {
   modelo: z.string().trim().min(1, "El modelo es obligatorio").max(80),
   anio: z.coerce.number().int().min(1950).max(new Date().getFullYear() + 1),
   km: z.coerce.number().int().min(0).max(2_000_000),
-  precio: z.coerce.number().min(0).max(100_000_000),
+  // Tope general = el más alto (ARS); el de cada moneda se valida aparte.
+  precio: z.coerce
+    .number({ error: "El precio tiene que ser un número" })
+    .min(0, "El precio no puede ser negativo")
+    .max(PRECIO_MAXIMO.ARS, "El precio es demasiado alto. Revisá que no tenga un cero de más."),
   // Moneda del precio. En la edición, si no viene, no se toca (sin default).
   moneda: z.enum(MONEDAS, { error: "La moneda tiene que ser USD o ARS" }),
   estado: z.enum(estadoVehiculoValues),
@@ -87,10 +91,17 @@ export const vehiculoInputSchema = z.object({
     .optional()
     .nullable()
     .transform((v) => (v ? new Date(v) : null)),
+}).superRefine((v, ctx) => {
+  // El tope depende de la moneda (ver PRECIO_MAXIMO).
+  if (v.precio > PRECIO_MAXIMO[v.moneda]) {
+    ctx.addIssue({ code: "custom", path: ["precio"], message: mensajeTopePrecio(v.moneda) });
+  }
 });
 
 // Edición (PATCH): todos opcionales y sin defaults. Un campo que no viene
-// en el body queda undefined y Prisma no lo toca.
+// en el body queda undefined y Prisma no lo toca. El tope por moneda se
+// valida en la API, con la moneda/precio ya guardados si el PATCH trae solo
+// uno de los dos (precioDentroDelTope).
 export const vehiculoUpdateSchema = z.object(camposVehiculo).partial();
 
 export const canalLeadValues = [

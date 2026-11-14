@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const parsed = vehiculoInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Datos inválidos", detalles: parsed.error.flatten() },
+      { error: parsed.error.issues[0]?.message ?? "Datos inválidos", detalles: parsed.error.flatten() },
       { status: 400 }
     );
   }
