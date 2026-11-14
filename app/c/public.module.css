@@ -722,6 +722,15 @@
   margin-top: 3px;
 }
 
+/* Fecha y hora de la cotización usada para el "≈ $" (aclara que es
+   aproximado). */
+.cardPriceArsFecha {
+  display: block;
+  font-size: 10px;
+  opacity: 0.8;
+  margin-top: 1px;
+}
+
 .cardCuota {
   margin-left: auto;
   flex: none;

@@ -44,9 +44,13 @@ function cuotaEstimada(precioUsd: number) {
 export function CatalogoView({
   items,
   dominio,
+  cotizacion,
 }: {
   items: VehiculoCatalogoDTO[];
   dominio: string;
+  // Dólar oficial (venta) y la fecha/hora de esa cotización, ya formateada.
+  // null = no hay cotización disponible: no se muestra el equivalente en pesos.
+  cotizacion: { venta: number; fecha: string } | null;
 }) {
   const [marca, setMarca] = useState("");
   const [ordenIdx, setOrdenIdx] = useState(0);
@@ -189,9 +193,15 @@ export function CatalogoView({
                 <div className={styles.cardPriceRow}>
                   <div>
                     <div className={styles.cardPrice}>USD {v.precioUsd.toLocaleString("es-AR")}</div>
-                    <div className={styles.cardPriceArs}>
-                      ≈ ${Math.round(v.precioUsd * 1535).toLocaleString("es-AR")}
-                    </div>
+                    {cotizacion && (
+                      <div
+                        className={styles.cardPriceArs}
+                        title={`Equivalente aproximado con el dólar oficial del ${cotizacion.fecha}`}
+                      >
+                        ≈ ${Math.round(v.precioUsd * cotizacion.venta).toLocaleString("es-AR")}
+                        <span className={styles.cardPriceArsFecha}>dólar oficial {cotizacion.fecha}</span>
+                      </div>
+                    )}
                   </div>
                   <div className={styles.cardCuota}>
                     <div className={styles.cardCuotaLabel}>Cuotas desde</div>

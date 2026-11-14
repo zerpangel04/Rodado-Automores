@@ -12,6 +12,7 @@ import { estiloAcento } from "../estiloAcento";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import { textoAniosEnMercado } from "@/lib/catalogo";
 import { idsDestacadosVigentes } from "@/lib/destacados";
+import { fechaCotizacionCorta, getCotizacionOficial } from "@/lib/cotizacion";
 import styles from "../public.module.css";
 
 export default async function CatalogoPublico(
@@ -21,6 +22,8 @@ export default async function CatalogoPublico(
 ) {
   const params = await props.params;
   const { dominio } = params;
+  // Arranca en paralelo con la consulta de la agencia (no suma demora).
+  const cotizacionPendiente = getCotizacionOficial();
 
   const tenant = await prisma.tenant.findUnique({
     where: { dominio },
@@ -84,6 +87,8 @@ export default async function CatalogoPublico(
   const whatsappHref = numeroWhatsapp
     ? urlWhatsapp(numeroWhatsapp, `Hola, vi el catálogo de ${tenant.nombre} y quería hacer una consulta.`)
     : null;
+
+  const cotizacion = await cotizacionPendiente;
 
   const acento = acentoVigente(tenant.colorAcento, tenant.plan);
   // Si bajan de plan, la portada queda guardada pero no se muestra.
@@ -161,7 +166,13 @@ export default async function CatalogoPublico(
             </div>
           </div>
 
-          <CatalogoView items={items} dominio={dominio} />
+          <CatalogoView
+            items={items}
+            dominio={dominio}
+            cotizacion={
+              cotizacion ? { venta: cotizacion.venta, fecha: fechaCotizacionCorta(cotizacion.fecha) } : null
+            }
+          />
         </div>
       </section>
 

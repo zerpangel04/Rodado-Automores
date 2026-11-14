@@ -12,6 +12,7 @@ import { urlWhatsapp, whatsappDelCatalogo } from "@/lib/whatsapp";
 import { getBaseUrl } from "@/lib/url";
 import { acentoVigente } from "@/lib/colorAcento";
 import { estiloAcento } from "../../estiloAcento";
+import { fechaCotizacionCorta, getCotizacionOficial } from "@/lib/cotizacion";
 import styles from "../../public.module.css";
 
 const estadoLabel: Record<string, string> = {
@@ -36,7 +37,7 @@ export default async function VehiculoDetalle(
   const params = await props.params;
   const { dominio, vehiculoId } = params;
 
-  const [tenant, vehiculo] = await Promise.all([
+  const [tenant, vehiculo, cotizacion] = await Promise.all([
     prisma.tenant.findUnique({
       where: { dominio },
       include: {
@@ -48,6 +49,7 @@ export default async function VehiculoDetalle(
       where: { id: vehiculoId },
       include: { sucursal: { select: { nombre: true, direccion: true } } },
     }),
+    getCotizacionOficial(),
   ]);
   if (!tenant) notFound();
   if (!vehiculo || vehiculo.tenantId !== tenant.id) notFound();
@@ -179,7 +181,12 @@ export default async function VehiculoDetalle(
             <div className={styles.sideCard}>
               <div className={styles.sidePrice}>
                 <span>USD {precioUsd.toLocaleString("es-AR")}</span>
-                <small>≈ ${Math.round(precioUsd * 1535).toLocaleString("es-AR")}</small>
+                {cotizacion && (
+                  <small>
+                    ≈ ${Math.round(precioUsd * cotizacion.venta).toLocaleString("es-AR")} · dólar oficial del{" "}
+                    {fechaCotizacionCorta(cotizacion.fecha)}
+                  </small>
+                )}
               </div>
               {!vendido && (
                 <div className={styles.sideCuota}>
