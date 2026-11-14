@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getBaseUrl } from "@/lib/url";
+import { getCotizacion } from "@/lib/cotizacion";
 import styles from "../panel.module.css";
 import { CatalogoPanelView, type Pestania } from "./CatalogoPanelView";
 
@@ -35,28 +36,34 @@ export default async function CatalogoPanelPage(props: {
     );
   }
 
-  const tenant = await prisma.tenant.findUnique({
-    where: { id: tenantId },
-    select: {
-      dominio: true,
-      sobreNosotros: true,
-      anioInicio: true,
-      mostrarMapa: true,
-      whatsapp: true,
-      colorAcento: true,
-      portadaUrl: true,
-      plan: { select: { catalogoPersonalizado: true, limiteDestacados: true } },
-      sucursales: {
-        select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
-        orderBy: { createdAt: "asc" },
-      },
-      _count: {
-        select: {
-          vehiculos: { where: { destacadoEn: { not: null }, estado: { not: "VENDIDO" } } },
+  const [tenant, oficial, blue] = await Promise.all([
+    prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: {
+        dominio: true,
+        cotizacionPreferida: true,
+        sobreNosotros: true,
+        anioInicio: true,
+        mostrarMapa: true,
+        whatsapp: true,
+        colorAcento: true,
+        portadaUrl: true,
+        plan: { select: { catalogoPersonalizado: true, limiteDestacados: true } },
+        sucursales: {
+          select: { id: true, nombre: true, direccion: true, telefono: true, horarios: true },
+          orderBy: { createdAt: "asc" },
+        },
+        _count: {
+          select: {
+            vehiculos: { where: { destacadoEn: { not: null }, estado: { not: "VENDIDO" } } },
+          },
         },
       },
-    },
-  });
+    }),
+    // Valores de hoy, para mostrarlos junto a cada opción del selector.
+    getCotizacion("OFICIAL"),
+    getCotizacion("BLUE"),
+  ]);
   const baseUrl = getBaseUrl(await headers());
   const catalogUrl = tenant?.dominio ? `${baseUrl}/c/${tenant.dominio}` : null;
 
@@ -77,6 +84,8 @@ export default async function CatalogoPanelPage(props: {
             mostrarMapa: tenant?.mostrarMapa ?? true,
             whatsapp: tenant?.whatsapp ?? null,
             sucursales: tenant?.sucursales ?? [],
+            cotizacionPreferida: tenant?.cotizacionPreferida ?? "OFICIAL",
+            cotizacionesHoy: { OFICIAL: oficial?.venta ?? null, BLUE: blue?.venta ?? null },
           }}
           personalizacion={{
             habilitada: tenant?.plan.catalogoPersonalizado ?? false,

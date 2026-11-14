@@ -119,3 +119,39 @@ export function formatearTotales(t: TotalesPorMoneda, siVacio: Moneda = "USD"): 
   const partes = MONEDAS.filter((m) => t[m] !== 0).map((m) => formatearPrecio(t[m], m));
   return partes.length ? partes.join(" + ") : formatearPrecio(0, siVacio);
 }
+
+type ConPrecio = { precio: number; moneda: Moneda };
+
+// Comparador de menor a mayor precio, mezclando monedas vía USD. Sin
+// cotización, un precio en pesos no se puede comparar con uno en dólares:
+// esos van al final (y entre ellos, por su monto en pesos).
+export function compararPrecioAsc(a: ConPrecio, b: ConPrecio, cotizacion: number | null | undefined): number {
+  const pa = aUsdParaComparar(a.precio, a.moneda, cotizacion);
+  const pb = aUsdParaComparar(b.precio, b.moneda, cotizacion);
+  if (pa === null && pb === null) return a.precio - b.precio;
+  if (pa === null) return 1;
+  if (pb === null) return -1;
+  return pa - pb;
+}
+
+// El más barato (para el "Desde" de la vitrina), con el mismo criterio que
+// compararPrecioAsc. null si la lista está vacía.
+export function masBarato<T extends ConPrecio>(items: readonly T[], cotizacion: number | null | undefined): T | null {
+  let mejor: T | null = null;
+  for (const v of items) if (mejor === null || compararPrecioAsc(v, mejor, cotizacion) < 0) mejor = v;
+  return mejor;
+}
+
+// Monto abreviado para espacios chicos: "18,5k", "9,5M".
+export function formatearCompacto(monto: number): string {
+  const [div, sufijo] = monto >= 1_000_000 ? [1_000_000, "M"] : [1000, "k"];
+  return `${(monto / div).toFixed(1).replace(".", ",")}${sufijo}`;
+}
+
+// Cómo nombrar las monedas de una lista de precios en un texto ("precios
+// en dólares", "en pesos", "en dólares y en pesos").
+export function textoMonedas(monedas: Iterable<Moneda>): string {
+  const s = new Set(monedas);
+  if (s.has("USD") && s.has("ARS")) return "en dólares y en pesos";
+  return s.has("ARS") ? "en pesos" : "en dólares";
+}

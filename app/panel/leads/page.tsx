@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
+import { cotizacionVista } from "@/lib/cotizacion";
+import { getCotizacionDeAgencia } from "@/lib/cotizacionAgencia";
 import { KanbanView, type LeadDTO } from "./KanbanView";
 import styles from "../panel.module.css";
 
@@ -10,7 +12,7 @@ export default async function LeadsPage() {
 
   const sucursalActual = await getSucursalActual(tenantId);
 
-  const [leads, vehiculos, usuarios] = await Promise.all([
+  const [leads, vehiculos, usuarios, cotizacion] = await Promise.all([
     prisma.lead.findMany({
       where: {
         tenantId,
@@ -26,6 +28,7 @@ export default async function LeadsPage() {
             estado: true,
             categoria: true,
             precio: true,
+            moneda: true,
           },
         },
         vendedor: { select: { id: true, nombre: true } },
@@ -38,7 +41,7 @@ export default async function LeadsPage() {
         estado: { not: "VENDIDO" },
         ...(sucursalActual ? { sucursalId: sucursalActual.id } : {}),
       },
-      select: { id: true, marca: true, modelo: true, categoria: true, precio: true, estado: true },
+      select: { id: true, marca: true, modelo: true, categoria: true, precio: true, moneda: true, estado: true },
       orderBy: { fechaIngreso: "desc" },
     }),
     rol === "VENDEDOR"
@@ -48,6 +51,7 @@ export default async function LeadsPage() {
           select: { id: true, nombre: true },
           orderBy: { nombre: "asc" },
         }),
+    getCotizacionDeAgencia(tenantId),
   ]);
 
   const items: LeadDTO[] = leads.map((l) => ({
@@ -65,6 +69,7 @@ export default async function LeadsPage() {
           estado: l.vehiculo.estado,
           categoria: l.vehiculo.categoria,
           precio: Number(l.vehiculo.precio),
+          moneda: l.vehiculo.moneda,
         }
       : null,
     vendedor: l.vendedor,
@@ -77,6 +82,7 @@ export default async function LeadsPage() {
     modelo: v.modelo,
     categoria: v.categoria,
     precio: Number(v.precio),
+    moneda: v.moneda,
     estado: v.estado,
   }));
 
@@ -98,6 +104,7 @@ export default async function LeadsPage() {
           usuarios={usuarios}
           canAsignar={rol !== "VENDEDOR"}
           userId={userId}
+          cotizacion={cotizacionVista(cotizacion)}
         />
       </div>
     </>

@@ -76,3 +76,12 @@ export function fechaCotizacionCorta(iso: string): string {
     .format(d)
     .replace(",", "");
 }
+
+// Lo que necesita una pantalla para mostrar el "≈": el valor, el nombre
+// ("dólar oficial" / "dólar blue") y la fecha corta. Serializable, para
+// pasarla de un Server Component a uno de cliente.
+export type CotizacionVista = { venta: number; nombre: string; fecha: string };
+
+export function cotizacionVista(c: Cotizacion | null): CotizacionVista | null {
+  return c ? { venta: c.venta, nombre: nombreCotizacion(c.tipo), fecha: fechaCotizacionCorta(c.fecha) } : null;
+}

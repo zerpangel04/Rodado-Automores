@@ -19,7 +19,7 @@ register(
   import.meta.url
 );
 
-const { vehiculoInputSchema, vehiculoUpdateSchema } = await import("../lib/validation.ts");
+const { vehiculoInputSchema, vehiculoUpdateSchema, catalogoGeneralSchema } = await import("../lib/validation.ts");
 
 test("PATCH parcial { estado } solo cambia el estado (no borra documentos ni VTV)", () => {
   const r = vehiculoUpdateSchema.parse({ estado: "RESERVADO" });
@@ -102,4 +102,19 @@ test("Tope de precio según la moneda (USD 100 M, ARS 500 M)", () => {
 
 test("Alta: sigue exigiendo los campos obligatorios", () => {
   assert.equal(vehiculoInputSchema.safeParse({ marca: "Toyota" }).success, false);
+});
+
+const generalBase = { sobreNosotros: null, anioInicio: null, mostrarMapa: true, whatsapp: null, sucursales: [] };
+
+test("Catálogo general: la cotización preferida es opcional (si no viene, no se toca)", () => {
+  const r = catalogoGeneralSchema.safeParse(generalBase);
+  assert.ok(r.success);
+  assert.equal(r.data.cotizacionPreferida, undefined);
+});
+
+test("Catálogo general: acepta OFICIAL o BLUE y rechaza otra cosa con mensaje en castellano", () => {
+  assert.equal(catalogoGeneralSchema.parse({ ...generalBase, cotizacionPreferida: "BLUE" }).cotizacionPreferida, "BLUE");
+  const r = catalogoGeneralSchema.safeParse({ ...generalBase, cotizacionPreferida: "MEP" });
+  assert.ok(!r.success);
+  assert.equal(r.error.issues[0].message, "Elegí dólar oficial o dólar blue");
 });

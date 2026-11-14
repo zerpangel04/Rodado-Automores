@@ -5,6 +5,7 @@ import styles from "./panel.module.css";
 import { LeadDetailModal, type VehiculoOption } from "./leads/LeadDetailModal";
 import { AssignVendedorModal, type UsuarioOption } from "./leads/AssignVendedorModal";
 import type { LeadDTO } from "./leads/KanbanView";
+import type { CotizacionVista } from "@/lib/cotizacion";
 
 export type Pendiente =
   | { id: string; kind: "vtv"; label: string; meta: string; urgente: boolean }
@@ -23,11 +24,13 @@ export function PendientesCard({
   vehiculos,
   usuarios,
   canAsignar,
+  cotizacion,
 }: {
   pendientes: Pendiente[];
   vehiculos: VehiculoOption[];
   usuarios: UsuarioOption[];
   canAsignar: boolean;
+  cotizacion: CotizacionVista | null;
 }) {
   const [items, setItems] = useState(initialPendientes);
   const [contactarLead, setContactarLead] = useState<LeadDTO | null>(null);
@@ -99,6 +102,7 @@ export function PendientesCard({
           vehiculos={vehiculos}
           usuarios={usuarios}
           canAsignar={canAsignar}
+          cotizacion={cotizacion}
           onClose={() => setContactarLead(null)}
           onUpdated={handleContactarUpdated}
         />

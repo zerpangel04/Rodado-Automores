@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { X, Phone, Mail } from "lucide-react";
 import styles from "./kanban.module.css";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import type { LeadDTO, Etapa } from "./KanbanView";
 import { ChannelBadge } from "./ChannelBadge";
 import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
+import { aUsdParaComparar, equivalente, formatearPrecio, type Moneda } from "@/lib/moneda";
+import type { CotizacionVista } from "@/lib/cotizacion";
 
 export type VehiculoOption = {
   id: string;
@@ -14,6 +16,7 @@ export type VehiculoOption = {
   modelo: string;
   categoria: string | null;
   precio: number;
+  moneda: Moneda;
   estado: "DISPONIBLE" | "RESERVADO" | "VENDIDO";
 };
 
@@ -62,6 +65,7 @@ export function LeadDetailModal({
   vehiculos,
   usuarios,
   canAsignar,
+  cotizacion,
   onClose,
   onUpdated,
 }: {
@@ -69,41 +73,38 @@ export function LeadDetailModal({
   vehiculos: VehiculoOption[];
   usuarios: UsuarioOption[];
   canAsignar: boolean;
+  // La que eligió la agencia (viene del server). null = sin "≈".
+  cotizacion: CotizacionVista | null;
   onClose: () => void;
   onUpdated: (lead: LeadDTO) => void;
 }) {
   const [showReassignInModal, setShowReassignInModal] = useState(false);
   const [savingEtapa, setSavingEtapa] = useState(false);
   const [savingVendedor, setSavingVendedor] = useState(false);
-  const [cotizacion, setCotizacion] = useState<number | null>(null);
 
   useBodyScrollLock(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch("https://dolarapi.com/v1/dolares/oficial")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled && d?.venta) setCotizacion(Number(d.venta));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   // Mismo criterio que en Stock: primero vehículos disponibles de la misma
-  // categoría, después por precio más cercano al del auto vendido.
+  // categoría, después por precio más cercano al del auto vendido
+  // (comparando en USD; sin cotización, los que no se pueden comparar van
+  // al final).
   function suggestedVehiculosFor(
-    target: { categoria?: string | null; precio?: number } | null | undefined
+    target: { categoria?: string | null; precio?: number; moneda?: Moneda } | null | undefined
   ) {
     const disponibles = vehiculos.filter((v) => v.estado === "DISPONIBLE");
     if (!target) return disponibles;
+    const ref =
+      typeof target.precio === "number"
+        ? aUsdParaComparar(target.precio, target.moneda ?? "USD", cotizacion?.venta)
+        : null;
     return disponibles.slice().sort((a, b) => {
       const aSame = a.categoria === target.categoria ? 0 : 1;
       const bSame = b.categoria === target.categoria ? 0 : 1;
       if (aSame !== bSame) return aSame - bSame;
-      return Math.abs(a.precio - (target.precio ?? 0)) - Math.abs(b.precio - (target.precio ?? 0));
+      const pa = aUsdParaComparar(a.precio, a.moneda, cotizacion?.venta);
+      const pb = aUsdParaComparar(b.precio, b.moneda, cotizacion?.venta);
+      if (ref === null || pa === null || pb === null) return (pa === null ? 1 : 0) - (pb === null ? 1 : 0);
+      return Math.abs(pa - ref) - Math.abs(pb - ref);
     });
   }
 
@@ -129,6 +130,7 @@ export function LeadDetailModal({
       estado: target.estado,
       categoria: target.categoria,
       precio: target.precio,
+      moneda: target.moneda,
     };
     setShowReassignInModal(false);
     onUpdated({ ...lead, vehiculo: nuevoVehiculo });
@@ -168,8 +170,11 @@ export function LeadDetailModal({
   const wa = whatsappUrl(lead.contacto);
   const tel = telUrl(lead.contacto);
   const mail = mailUrl(lead.contacto);
-  const precioArs =
-    cotizacion && lead.vehiculo?.precio ? Math.round(lead.vehiculo.precio * cotizacion) : null;
+  const monedaVehiculo = lead.vehiculo?.moneda ?? "USD";
+  const precioEquivalente =
+    typeof lead.vehiculo?.precio === "number"
+      ? equivalente(lead.vehiculo.precio, monedaVehiculo, cotizacion?.venta)
+      : null;
 
   return (
     <div className={`${styles.drawerBg} ${styles.show}`} onClick={onClose}>
@@ -249,11 +254,14 @@ export function LeadDetailModal({
                 {lead.vehiculo.marca} {lead.vehiculo.modelo}
                 {typeof lead.vehiculo.precio === "number" && (
                   <div className={styles.detailPrice}>
-                    USD {lead.vehiculo.precio.toLocaleString("es-AR")}
-                    {precioArs && (
-                      <span className={styles.detailPriceArs}>
+                    {formatearPrecio(lead.vehiculo.precio, monedaVehiculo)}
+                    {precioEquivalente && cotizacion && (
+                      <span
+                        className={styles.detailPriceArs}
+                        title={`Equivalente aproximado con el ${cotizacion.nombre} del ${cotizacion.fecha}`}
+                      >
                         {" "}
-                        ≈ ${precioArs.toLocaleString("es-AR")}
+                        ≈ {formatearPrecio(precioEquivalente.monto, precioEquivalente.moneda)}
                       </span>
                     )}
                   </div>
@@ -284,7 +292,7 @@ export function LeadDetailModal({
                   </option>
                   {suggestedVehiculosFor(lead.vehiculo).map((v) => (
                     <option key={v.id} value={v.id}>
-                      {v.marca} {v.modelo} — USD {v.precio.toLocaleString("es-AR")}
+                      {v.marca} {v.modelo} — {formatearPrecio(v.precio, v.moneda)}
                     </option>
                   ))}
                 </select>

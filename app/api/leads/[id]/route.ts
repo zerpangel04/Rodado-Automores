@@ -62,7 +62,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     data,
     include: {
       vehiculo: {
-        select: { id: true, marca: true, modelo: true, estado: true, categoria: true, precio: true },
+        select: { id: true, marca: true, modelo: true, estado: true, categoria: true, precio: true, moneda: true },
       },
       vendedor: { select: { id: true, nombre: true } },
     },

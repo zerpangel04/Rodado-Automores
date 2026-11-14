@@ -16,6 +16,8 @@ import { LeadDetailModal } from "./LeadDetailModal";
 import { ChannelBadge } from "./ChannelBadge";
 import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
 import { entradaEscalonada } from "../entrada";
+import { formatearPrecio, formatearTotales, sumarPorMoneda, type Moneda } from "@/lib/moneda";
+import type { CotizacionVista } from "@/lib/cotizacion";
 
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
@@ -36,6 +38,7 @@ export type LeadDTO = {
     estado?: EstadoVehiculo;
     categoria?: string | null;
     precio?: number;
+    moneda?: Moneda;
   } | null;
   vendedor: { id: string; nombre: string } | null;
   createdAt?: string;
@@ -47,6 +50,7 @@ export type VehiculoOption = {
   modelo: string;
   categoria: string | null;
   precio: number;
+  moneda: Moneda;
   estado: EstadoVehiculo;
 };
 export type UsuarioOption = { id: string; nombre: string };
@@ -118,12 +122,15 @@ export function KanbanView({
   usuarios,
   canAsignar,
   userId,
+  cotizacion,
 }: {
   initialItems: LeadDTO[];
   vehiculos: VehiculoOption[];
   usuarios: UsuarioOption[];
   canAsignar: boolean;
   userId: string;
+  // La que eligió la agencia, para el "≈" de la ficha del lead.
+  cotizacion: CotizacionVista | null;
 }) {
   const [items, setItems] = useState<LeadDTO[]>(initialItems);
   useEffect(() => {
@@ -518,10 +525,16 @@ export function KanbanView({
           <div className={styles.kanban}>
             {stages.map((stage) => {
               const stageItems = filteredItems.filter((l) => l.etapa === stage.key);
-              const valorEnJuego = stageItems.reduce(
-                (sum, l) => sum + (l.vehiculo?.precio ?? 0),
-                0
+              // Cada moneda por separado ("USD 45.000 + $9.500.000"), nunca
+              // sumando dólares con pesos.
+              const valorEnJuego = sumarPorMoneda(
+                stageItems.flatMap((l) =>
+                  typeof l.vehiculo?.precio === "number"
+                    ? [{ monto: l.vehiculo.precio, moneda: l.vehiculo.moneda ?? "USD" }]
+                    : []
+                )
               );
+              const hayValorEnJuego = valorEnJuego.USD > 0 || valorEnJuego.ARS > 0;
               const isCollapsed = !!collapsed[stage.key];
               return (
                 <div
@@ -552,10 +565,8 @@ export function KanbanView({
                       <h4>{stage.label}</h4>
                     )}
                     <span className={styles.kcolCount}>{stageItems.length}</span>
-                    {!isCollapsed && valorEnJuego > 0 && (
-                      <span className={`${styles.kcolValor} mono`}>
-                        USD {valorEnJuego.toLocaleString("es-AR")}
-                      </span>
+                    {!isCollapsed && hayValorEnJuego && (
+                      <span className={`${styles.kcolValor} mono`}>{formatearTotales(valorEnJuego)}</span>
                     )}
                     <ChevronDown
                       size={13}
@@ -634,7 +645,7 @@ export function KanbanView({
                                 {lead.vehiculo.marca} {lead.vehiculo.modelo}
                                 {typeof lead.vehiculo.precio === "number" && (
                                   <span className={styles.carPrice}>
-                                    USD {lead.vehiculo.precio.toLocaleString("es-AR")}
+                                    {formatearPrecio(lead.vehiculo.precio, lead.vehiculo.moneda ?? "USD")}
                                   </span>
                                 )}
                               </>
@@ -799,6 +810,7 @@ export function KanbanView({
           vehiculos={vehiculos}
           usuarios={usuarios}
           canAsignar={canAsignar}
+          cotizacion={cotizacion}
           onClose={closeLeadDetail}
           onUpdated={handleLeadUpdated}
         />

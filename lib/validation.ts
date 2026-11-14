@@ -274,6 +274,11 @@ export const catalogoGeneralSchema = z.object(
         { error: "Falta la lista de sucursales" }
       )
       .max(50, "Demasiadas sucursales"),
+    // Cotización para los "≈" del catálogo y del panel. Opcional: si no
+    // viene, no se toca (un cliente viejo no la pisa con un default).
+    cotizacionPreferida: z
+      .enum(["OFICIAL", "BLUE"], { error: "Elegí dólar oficial o dólar blue" })
+      .optional(),
   },
   { error: "Faltan los datos del catálogo" }
 );

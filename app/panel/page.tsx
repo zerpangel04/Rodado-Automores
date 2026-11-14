@@ -11,6 +11,8 @@ import { actividadIcon, actividadColor, formatRelativo } from "./actividadDispla
 import { PendientesCard, type Pendiente } from "./PendientesCard";
 import { OnboardingChecklist, type OnboardingPaso } from "./OnboardingChecklist";
 import { CatalogLinkCard } from "./CatalogLinkCard";
+import { cotizacionVista } from "@/lib/cotizacion";
+import { getCotizacionDeAgencia } from "@/lib/cotizacionAgencia";
 
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
@@ -85,6 +87,7 @@ export default async function PanelHome() {
     usuariosTotalCount,
     vehiculosPublicadosMlCount,
     mlConexionesCount,
+    cotizacion,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -115,7 +118,7 @@ export default async function PanelHome() {
       where: { ...leadFilter, etapa: "NUEVO" },
       include: {
         vehiculo: {
-          select: { marca: true, modelo: true, estado: true, categoria: true, precio: true },
+          select: { marca: true, modelo: true, estado: true, categoria: true, precio: true, moneda: true },
         },
         vendedor: { select: { id: true, nombre: true } },
       },
@@ -132,7 +135,7 @@ export default async function PanelHome() {
       : Promise.resolve([]),
     prisma.vehiculo.findMany({
       where: { tenantId, estado: { not: "VENDIDO" } },
-      select: { id: true, marca: true, modelo: true, categoria: true, precio: true, estado: true },
+      select: { id: true, marca: true, modelo: true, categoria: true, precio: true, moneda: true, estado: true },
       orderBy: { fechaIngreso: "desc" },
     }),
     canAsignar
@@ -147,6 +150,8 @@ export default async function PanelHome() {
     prisma.usuario.count({ where: { tenantId } }),
     prisma.vehiculo.count({ where: { tenantId, mlItemId: { not: null } } }),
     prisma.mercadoLibreConexion.count({ where: { tenantId } }),
+    // Para el "≈" de la ficha del lead que se abre desde Pendientes.
+    getCotizacionDeAgencia(tenantId),
   ]);
 
   const alertasVtv = vehiculosConVtv
@@ -192,6 +197,7 @@ export default async function PanelHome() {
               estado: l.vehiculo.estado,
               categoria: l.vehiculo.categoria,
               precio: Number(l.vehiculo.precio),
+              moneda: l.vehiculo.moneda,
             }
           : null,
         vendedor: l.vendedor,
@@ -218,6 +224,7 @@ export default async function PanelHome() {
     modelo: v.modelo,
     categoria: v.categoria,
     precio: Number(v.precio),
+    moneda: v.moneda,
     estado: v.estado,
   }));
 
@@ -319,6 +326,7 @@ export default async function PanelHome() {
             vehiculos={vehiculoOptions}
             usuarios={usuarios}
             canAsignar={canAsignar}
+            cotizacion={cotizacionVista(cotizacion)}
           />
 
           <div className={styles.card}>

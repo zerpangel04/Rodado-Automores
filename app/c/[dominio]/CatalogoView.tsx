@@ -6,6 +6,8 @@ import Image from "next/image";
 import { Search, Star } from "lucide-react";
 import { CarSVG } from "../CarSVG";
 import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
+import { compararPrecioAsc, equivalente, formatearPrecio, textoMonedas, type Moneda } from "@/lib/moneda";
+import type { CotizacionVista } from "@/lib/cotizacion";
 import styles from "../public.module.css";
 
 export type EstadoVehiculo = "DISPONIBLE" | "RESERVADO";
@@ -17,6 +19,7 @@ export type VehiculoCatalogoDTO = {
   anio: number;
   km: number;
   precio: number;
+  moneda: Moneda;
   estado: EstadoVehiculo;
   fotos: string[];
   transmision: string | null;
@@ -48,9 +51,9 @@ export function CatalogoView({
 }: {
   items: VehiculoCatalogoDTO[];
   dominio: string;
-  // Dólar oficial (venta) y la fecha/hora de esa cotización, ya formateada.
-  // null = no hay cotización disponible: no se muestra el equivalente en pesos.
-  cotizacion: { venta: number; fecha: string } | null;
+  // La que eligió la agencia. null = no hay cotización disponible: no se
+  // muestra el equivalente.
+  cotizacion: CotizacionVista | null;
 }) {
   const [marca, setMarca] = useState("");
   const [ordenIdx, setOrdenIdx] = useState(0);
@@ -71,7 +74,9 @@ export function CatalogoView({
     });
     const ordenKey = ordenes[ordenIdx].key;
     if (ordenKey === "precio") {
-      lista = lista.slice().sort((a, b) => a.precio - b.precio);
+      // Comparando en USD (puede haber precios en pesos); sin cotización,
+      // los precios en pesos van al final.
+      lista = lista.slice().sort((a, b) => compararPrecioAsc(a, b, cotizacion?.venta));
     } else if (ordenKey === "km") {
       lista = lista.slice().sort((a, b) => a.km - b.km);
     }
@@ -80,12 +85,12 @@ export function CatalogoView({
     // filter() preserva ese orden — no hace falta (ni conviene) re-ordenar
     // acá. Los órdenes por precio o km no les dan prioridad a los destacados.
     return lista;
-  }, [items, marca, busqueda, ordenIdx]);
+  }, [items, marca, busqueda, ordenIdx, cotizacion]);
 
   const tituloLista = marca ? `${marca} disponibles` : "Vehículos disponibles";
   const subtituloLista = `${filtrados.length} ${
     filtrados.length === 1 ? "unidad" : "unidades"
-  } · precios en dólares, actualizados hoy`;
+  } · precios ${textoMonedas(filtrados.map((v) => v.moneda))}, actualizados hoy`;
 
   return (
     <>
@@ -192,21 +197,29 @@ export function CatalogoView({
 
                 <div className={styles.cardPriceRow}>
                   <div>
-                    <div className={styles.cardPrice}>USD {v.precio.toLocaleString("es-AR")}</div>
-                    {cotizacion && (
-                      <div
-                        className={styles.cardPriceArs}
-                        title={`Equivalente aproximado con el dólar oficial del ${cotizacion.fecha}`}
-                      >
-                        ≈ ${Math.round(v.precio * cotizacion.venta).toLocaleString("es-AR")}
-                        <span className={styles.cardPriceArsFecha}>dólar oficial {cotizacion.fecha}</span>
-                      </div>
-                    )}
+                    <div className={styles.cardPrice}>{formatearPrecio(v.precio, v.moneda)}</div>
+                    {(() => {
+                      const eq = equivalente(v.precio, v.moneda, cotizacion?.venta);
+                      return (
+                        eq &&
+                        cotizacion && (
+                          <div
+                            className={styles.cardPriceArs}
+                            title={`Equivalente aproximado con el ${cotizacion.nombre} del ${cotizacion.fecha}`}
+                          >
+                            ≈ {formatearPrecio(eq.monto, eq.moneda)}
+                            <span className={styles.cardPriceArsFecha}>
+                              {cotizacion.nombre} {cotizacion.fecha}
+                            </span>
+                          </div>
+                        )
+                      );
+                    })()}
                   </div>
                   <div className={styles.cardCuota}>
                     <div className={styles.cardCuotaLabel}>Cuotas desde</div>
                     <div className={styles.cardCuotaValue}>
-                      USD {cuotaEstimada(v.precio).toLocaleString("es-AR")}/mes
+                      {formatearPrecio(cuotaEstimada(v.precio), v.moneda)}/mes
                     </div>
                   </div>
                 </div>

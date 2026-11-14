@@ -11,6 +11,8 @@ import {
   textoAniosEnMercado,
 } from "@/lib/catalogo";
 import { normalizarWhatsappAR, whatsappDelCatalogo } from "@/lib/whatsapp";
+import { nombreCotizacion, type TipoCotizacion } from "@/lib/cotizacion";
+import { formatearPrecio } from "@/lib/moneda";
 import styles from "./catalogo.module.css";
 
 export type CatalogoGeneralDTO = {
@@ -25,6 +27,9 @@ export type CatalogoGeneralDTO = {
     telefono: string | null;
     horarios: string | null;
   }[];
+  cotizacionPreferida: TipoCotizacion;
+  // Valor de venta de hoy de cada una (null si no se pudo consultar).
+  cotizacionesHoy: Record<TipoCotizacion, number | null>;
 };
 
 type FormState = {
@@ -33,6 +38,7 @@ type FormState = {
   mostrarMapa: boolean;
   whatsapp: string;
   horarios: Record<string, string>;
+  cotizacionPreferida: TipoCotizacion;
 };
 
 function aForm(d: CatalogoGeneralDTO): FormState {
@@ -42,8 +48,14 @@ function aForm(d: CatalogoGeneralDTO): FormState {
     mostrarMapa: d.mostrarMapa,
     whatsapp: d.whatsapp ?? "",
     horarios: Object.fromEntries(d.sucursales.map((s) => [s.id, s.horarios ?? ""])),
+    cotizacionPreferida: d.cotizacionPreferida,
   };
 }
+
+const OPCIONES_COTIZACION: { tipo: TipoCotizacion; detalle: string }[] = [
+  { tipo: "OFICIAL", detalle: "La referencia de los bancos." },
+  { tipo: "BLUE", detalle: "La que muchas veces se toma de referencia en la compraventa de usados." },
+];
 
 export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }) {
   const router = useRouter();
@@ -88,6 +100,7 @@ export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }
           anioInicio: anioNum,
           mostrarMapa: form.mostrarMapa,
           whatsapp: form.whatsapp.trim() || null,
+          cotizacionPreferida: form.cotizacionPreferida,
           sucursales: inicial.sucursales.map((s) => ({
             id: s.id,
             horarios: form.horarios[s.id]?.trim() || null,
@@ -234,6 +247,37 @@ export function CatalogoGeneralForm({ inicial }: { inicial: CatalogoGeneralDTO }
           </span>
         </span>
       </label>
+
+      <div className={styles.field} role="radiogroup" aria-labelledby="cotizacionLabel">
+        <span id="cotizacionLabel" className={styles.fieldLabel}>
+          Cotización del dólar para los equivalentes
+        </span>
+        <p className={styles.fieldAyuda}>
+          Junto a cada precio se muestra un “≈” en la otra moneda. Se usa en tu catálogo, la ficha de
+          cada vehículo y el panel. Los precios cargados no cambian.
+        </p>
+        {OPCIONES_COTIZACION.map(({ tipo, detalle }) => {
+          const hoy = inicial.cotizacionesHoy[tipo];
+          return (
+            <label key={tipo} className={styles.check}>
+              <input
+                type="radio"
+                name="cotizacionPreferida"
+                value={tipo}
+                checked={form.cotizacionPreferida === tipo}
+                onChange={() => setForm({ ...form, cotizacionPreferida: tipo })}
+              />
+              <span>
+                <span className={styles.checkTitulo}>
+                  {nombreCotizacion(tipo).replace(/^d/, "D")}
+                  {hoy !== null && <span className={styles.mono}> · hoy {formatearPrecio(hoy, "ARS")}</span>}
+                </span>
+                <span className={styles.checkDetalle}>{detalle}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
 
       <div className={styles.acciones}>
         <button

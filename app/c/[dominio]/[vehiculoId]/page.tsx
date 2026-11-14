@@ -12,7 +12,8 @@ import { urlWhatsapp, whatsappDelCatalogo } from "@/lib/whatsapp";
 import { getBaseUrl } from "@/lib/url";
 import { acentoVigente } from "@/lib/colorAcento";
 import { estiloAcento } from "../../estiloAcento";
-import { fechaCotizacionCorta, getCotizacionOficial } from "@/lib/cotizacion";
+import { fechaCotizacionCorta, getCotizacion, nombreCotizacion } from "@/lib/cotizacion";
+import { equivalente, formatearPrecio } from "@/lib/moneda";
 import styles from "../../public.module.css";
 
 const estadoLabel: Record<string, string> = {
@@ -37,7 +38,9 @@ export default async function VehiculoDetalle(
   const params = await props.params;
   const { dominio, vehiculoId } = params;
 
-  const [tenant, vehiculo, cotizacion] = await Promise.all([
+  // Las dos cotizaciones en paralelo (caché de Next); se usa la que eligió
+  // la agencia, que se conoce recién con el tenant.
+  const [tenant, vehiculo, oficial, blue] = await Promise.all([
     prisma.tenant.findUnique({
       where: { dominio },
       include: {
@@ -49,7 +52,8 @@ export default async function VehiculoDetalle(
       where: { id: vehiculoId },
       include: { sucursal: { select: { nombre: true, direccion: true } } },
     }),
-    getCotizacionOficial(),
+    getCotizacion("OFICIAL"),
+    getCotizacion("BLUE"),
   ]);
   if (!tenant) notFound();
   if (!vehiculo || vehiculo.tenantId !== tenant.id) notFound();
@@ -57,6 +61,9 @@ export default async function VehiculoDetalle(
   const vendido = vehiculo.estado === "VENDIDO";
   const mostrarSucursal = tenant.sucursales.length > 1;
   const precio = Number(vehiculo.precio);
+  const { moneda } = vehiculo;
+  const cotizacion = tenant.cotizacionPreferida === "BLUE" ? blue : oficial;
+  const precioEquivalente = equivalente(precio, moneda, cotizacion?.venta);
 
   const docs = [
     { label: "Título del automotor", ok: vehiculo.docTitulo },
@@ -180,17 +187,17 @@ export default async function VehiculoDetalle(
           <div>
             <div className={styles.sideCard}>
               <div className={styles.sidePrice}>
-                <span>USD {precio.toLocaleString("es-AR")}</span>
-                {cotizacion && (
+                <span>{formatearPrecio(precio, moneda)}</span>
+                {precioEquivalente && cotizacion && (
                   <small>
-                    ≈ ${Math.round(precio * cotizacion.venta).toLocaleString("es-AR")} · dólar oficial del{" "}
-                    {fechaCotizacionCorta(cotizacion.fecha)}
+                    ≈ {formatearPrecio(precioEquivalente.monto, precioEquivalente.moneda)} ·{" "}
+                    {nombreCotizacion(cotizacion.tipo)} del {fechaCotizacionCorta(cotizacion.fecha)}
                   </small>
                 )}
               </div>
               {!vendido && (
                 <div className={styles.sideCuota}>
-                  Cuotas desde USD {cuotaEstimada(precio).toLocaleString("es-AR")}/mes · aceptamos tu
+                  Cuotas desde {formatearPrecio(cuotaEstimada(precio), moneda)}/mes · aceptamos tu
                   usado en parte de pago
                 </div>
               )}

@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     },
     include: {
       vehiculo: {
-        select: { id: true, marca: true, modelo: true, estado: true, categoria: true, precio: true },
+        select: { id: true, marca: true, modelo: true, estado: true, categoria: true, precio: true, moneda: true },
       },
       vendedor: { select: { id: true, nombre: true } },
     },

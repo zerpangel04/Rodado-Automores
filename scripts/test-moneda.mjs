@@ -101,3 +101,52 @@ test("cotización: nombre y fecha en hora de Argentina", () => {
   assert.equal(c.nombreCotizacion("BLUE"), "dólar blue");
   assert.equal(c.fechaCotizacionCorta("2026-11-13T18:00:00.000Z"), "13/11 15:00");
 });
+
+test("cotizacionVista: valor, nombre y fecha corta; null sin cotización", () => {
+  assert.deepEqual(c.cotizacionVista({ tipo: "BLUE", venta: 1450, fecha: "2026-11-13T18:00:00.000Z" }), {
+    venta: 1450,
+    nombre: "dólar blue",
+    fecha: "13/11 15:00",
+  });
+  assert.equal(c.cotizacionVista(null), null);
+});
+
+// ---------------- orden, "Desde" y textos del catálogo ----------------
+
+const autos = [
+  { id: "corolla", precio: 18500, moneda: "USD" },
+  { id: "uno", precio: 9_500_000, moneda: "ARS" }, // ≈ USD 6.333 con 1500
+  { id: "amarok", precio: 27900, moneda: "USD" },
+  { id: "cronos", precio: 30_000_000, moneda: "ARS" }, // ≈ USD 20.000 con 1500
+];
+const orden = (lista, cot) => lista.slice().sort((a, b) => m.compararPrecioAsc(a, b, cot)).map((v) => v.id);
+
+test("compararPrecioAsc: mezcla monedas comparando en USD", () => {
+  assert.deepEqual(orden(autos, 1500), ["uno", "corolla", "cronos", "amarok"]);
+  // Con otra cotización cambia el lugar de los autos en pesos.
+  assert.deepEqual(orden(autos, 1000), ["uno", "corolla", "amarok", "cronos"]);
+});
+
+test("compararPrecioAsc: sin cotización, los precios en pesos van al final (ordenados entre sí)", () => {
+  assert.deepEqual(orden(autos, null), ["corolla", "amarok", "uno", "cronos"]);
+});
+
+test("masBarato: el más barato en USD, o null si no hay autos", () => {
+  assert.equal(m.masBarato(autos, 1500).id, "uno");
+  assert.equal(m.masBarato(autos, null).id, "corolla"); // sin cotización no se compara un precio en pesos
+  assert.equal(m.masBarato(autos.filter((v) => v.moneda === "ARS"), null).id, "uno");
+  assert.equal(m.masBarato([], 1500), null);
+});
+
+test("formatearCompacto: miles con k y millones con M", () => {
+  assert.equal(m.formatearCompacto(18500), "18,5k");
+  assert.equal(m.formatearCompacto(9_500_000), "9,5M");
+  assert.equal(m.formatearCompacto(0), "0,0k");
+});
+
+test("textoMonedas: dólares, pesos o ambas", () => {
+  assert.equal(m.textoMonedas(["USD", "USD"]), "en dólares");
+  assert.equal(m.textoMonedas(["ARS"]), "en pesos");
+  assert.equal(m.textoMonedas(["USD", "ARS"]), "en dólares y en pesos");
+  assert.equal(m.textoMonedas([]), "en dólares");
+});

@@ -12,7 +12,8 @@ import { estiloAcento } from "../estiloAcento";
 import { CatalogoView, type VehiculoCatalogoDTO } from "./CatalogoView";
 import { textoAniosEnMercado } from "@/lib/catalogo";
 import { idsDestacadosVigentes } from "@/lib/destacados";
-import { fechaCotizacionCorta, getCotizacionOficial } from "@/lib/cotizacion";
+import { cotizacionVista, getCotizacion } from "@/lib/cotizacion";
+import { formatearCompacto, masBarato, textoMonedas } from "@/lib/moneda";
 import styles from "../public.module.css";
 
 export default async function CatalogoPublico(
@@ -22,8 +23,10 @@ export default async function CatalogoPublico(
 ) {
   const params = await props.params;
   const { dominio } = params;
-  // Arranca en paralelo con la consulta de la agencia (no suma demora).
-  const cotizacionPendiente = getCotizacionOficial();
+  // Las dos cotizaciones arrancan en paralelo con la consulta de la agencia
+  // (no suman demora) y después se usa la que eligió la agencia. Están en
+  // la caché de datos de Next, así que pedir las dos no cuesta más.
+  const cotizacionesPendientes = { OFICIAL: getCotizacion("OFICIAL"), BLUE: getCotizacion("BLUE") };
 
   const tenant = await prisma.tenant.findUnique({
     where: { dominio },
@@ -61,6 +64,7 @@ export default async function CatalogoPublico(
     anio: v.anio,
     km: v.km,
     precio: Number(v.precio),
+    moneda: v.moneda,
     estado: v.estado as "DISPONIBLE" | "RESERVADO",
     fotos: v.fotos,
     transmision: v.transmision,
@@ -69,12 +73,17 @@ export default async function CatalogoPublico(
     destacado: destacados.has(v.id),
   }));
 
+  const cotizacion = await cotizacionesPendientes[tenant.cotizacionPreferida];
+
+  // "Desde": el más barato comparando en USD, mostrado en su propia moneda.
+  const desde = masBarato(items, cotizacion?.venta);
   const vitrina = {
     unidades: items.length,
-    desde: items.length > 0 ? Math.min(...items.map((v) => v.precio)) : 0,
+    desde,
     marcas: new Set(items.map((v) => v.marca)).size,
     menosKm: items.length > 0 ? Math.min(...items.map((v) => v.km)) : 0,
   };
+  const monedasTexto = textoMonedas(items.map((v) => v.moneda));
 
   const aniosEnMercado = textoAniosEnMercado(tenant.anioInicio);
   const mostrarSobreNosotros = Boolean(tenant.sobreNosotros || aniosEnMercado);
@@ -87,8 +96,6 @@ export default async function CatalogoPublico(
   const whatsappHref = numeroWhatsapp
     ? urlWhatsapp(numeroWhatsapp, `Hola, vi el catálogo de ${tenant.nombre} y quería hacer una consulta.`)
     : null;
-
-  const cotizacion = await cotizacionPendiente;
 
   const acento = acentoVigente(tenant.colorAcento, tenant.plan);
   // Si bajan de plan, la portada queda guardada pero no se muestra.
@@ -145,9 +152,11 @@ export default async function CatalogoPublico(
                 <div className={styles.vitrinaItem}>
                   <div className={styles.vitrinaItemLabel}>DESDE</div>
                   <div className={styles.vitrinaItemValue}>
-                    {(vitrina.desde / 1000).toFixed(1).replace(".", ",")}k
+                    {formatearCompacto(vitrina.desde?.precio ?? 0)}
                   </div>
-                  <div className={styles.vitrinaItemUnit}>USD</div>
+                  <div className={styles.vitrinaItemUnit}>
+                    {vitrina.desde?.moneda === "ARS" ? "pesos" : "USD"}
+                  </div>
                 </div>
                 <div className={styles.vitrinaItem}>
                   <div className={styles.vitrinaItemLabel}>MARCAS</div>
@@ -169,9 +178,7 @@ export default async function CatalogoPublico(
           <CatalogoView
             items={items}
             dominio={dominio}
-            cotizacion={
-              cotizacion ? { venta: cotizacion.venta, fecha: fechaCotizacionCorta(cotizacion.fecha) } : null
-            }
+            cotizacion={cotizacionVista(cotizacion)}
           />
         </div>
       </section>
@@ -222,7 +229,7 @@ export default async function CatalogoPublico(
         </div>
         <div className={styles.wrap}>
           <div className={styles.footerBottom}>
-            <span>Los precios están expresados en dólares y se actualizan a diario.</span>
+            <span>Los precios están expresados {monedasTexto}. Se actualizan a diario.</span>
             <span className={styles.footerPowered}>
               Catálogo con tecnología <strong>Rodado</strong>
             </span>

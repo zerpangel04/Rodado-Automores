@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { catalogoGeneralSchema } from "@/lib/validation";
 
 // Guarda la pestaña "General" de /panel/catalogo: sobre nosotros, año de
-// inicio, si se muestra el mapa, el WhatsApp y los horarios de cada
-// sucursal, todo en una sola transacción.
+// inicio, si se muestra el mapa, el WhatsApp, la cotización del dólar para
+// los equivalentes y los horarios de cada sucursal, todo en una sola
+// transacción.
 export async function PATCH(req: NextRequest) {
   const session = await currentSession();
   if (!session) {
@@ -26,7 +27,7 @@ export async function PATCH(req: NextRequest) {
       { status: 400 }
     );
   }
-  const { sobreNosotros, anioInicio, mostrarMapa, whatsapp, sucursales } = parsed.data;
+  const { sobreNosotros, anioInicio, mostrarMapa, whatsapp, sucursales, cotizacionPreferida } = parsed.data;
 
   // Solo se pueden tocar sucursales del propio tenant.
   const ids = sucursales.map((s) => s.id);
@@ -41,12 +42,19 @@ export async function PATCH(req: NextRequest) {
     }
     return tx.tenant.update({
       where: { id: tenantId },
-      data: { sobreNosotros, anioInicio, mostrarMapa, whatsapp },
+      data: {
+        sobreNosotros,
+        anioInicio,
+        mostrarMapa,
+        whatsapp,
+        ...(cotizacionPreferida ? { cotizacionPreferida } : {}),
+      },
       select: { dominio: true },
     });
   });
 
-  if (tenant.dominio) revalidatePath(`/c/${tenant.dominio}`);
+  // "layout" también refresca las fichas de cada vehículo (usan la cotización).
+  if (tenant.dominio) revalidatePath(`/c/${tenant.dominio}`, "layout");
 
   return NextResponse.json({ ok: true });
 }
