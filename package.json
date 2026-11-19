@@ -11,7 +11,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "test": "node --test scripts/test-validacion.mjs scripts/test-moneda.mjs scripts/test-importacion.mjs"
+    "test": "node --test scripts/test-validacion.mjs scripts/test-moneda.mjs scripts/test-importacion.mjs scripts/test-chat-catalogo.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.120.0",

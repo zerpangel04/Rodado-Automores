@@ -1,6 +1,7 @@
 import type { Vehiculo } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { registrarActividad } from "@/lib/actividad";
+import { precioParaMercadoLibre } from "@/lib/moneda";
 
 // El redirect_uri de Mercado Libre tiene que ser un string estático que
 // coincida carácter por carácter con el registrado en el dashboard de la
@@ -202,8 +203,14 @@ export async function syncVehiculoAMercadoLibre(
   const payload: Record<string, unknown> = {};
   const cambios: string[] = [];
 
-  if (conexion.syncPrecios && Number(antes.precio) !== Number(despues.precio)) {
-    payload.price = Number(despues.precio);
+  // Precio y moneda viajan siempre juntos: si solo se cambió la moneda (por
+  // ejemplo, de USD 17.800 a $28.000.000), mandar solo el número dejaría la
+  // publicación con el precio nuevo en la moneda vieja.
+  if (
+    conexion.syncPrecios &&
+    (Number(antes.precio) !== Number(despues.precio) || antes.moneda !== despues.moneda)
+  ) {
+    Object.assign(payload, precioParaMercadoLibre(Number(despues.precio), despues.moneda));
     cambios.push("precio");
   }
   if (conexion.syncPrecios && antes.estado !== despues.estado && despues.estado !== "VENDIDO") {

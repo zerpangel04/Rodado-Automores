@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { chatInputSchema } from "@/lib/validation";
 import { crearLeadPublico, LeadPublicoError } from "@/lib/leads";
 import { checkRateLimit, recordRateLimitHit, getClientIp } from "@/lib/rateLimit";
+import { getCotizacion } from "@/lib/cotizacion";
+import { formatearStock, textoCotizacionChat } from "@/lib/chatCatalogo";
 
 // Generoso a propósito: es una conversación de ida y vuelta, no un
 // formulario de un solo envío. El objetivo es cortar abuso/costo
@@ -46,44 +48,13 @@ const REGISTRAR_LEAD_TOOL: Anthropic.Tool = {
   },
 };
 
-type VehiculoStock = {
-  id: string;
-  marca: string;
-  modelo: string;
-  anio: number;
-  km: number;
-  precio: number;
-  estado: string;
-  transmision: string | null;
-  motor: string | null;
-};
-
-function formatearStock(vehiculos: VehiculoStock[]): string {
-  if (vehiculos.length === 0) {
-    return "(no hay vehículos en stock en este momento)";
-  }
-  return vehiculos
-    .map((v, i) => {
-      const estado = v.estado === "RESERVADO" ? "reservado (todavía no vendido)" : "disponible";
-      const detalles = [
-        `${v.km.toLocaleString("es-AR")} km`,
-        `USD ${v.precio.toLocaleString("es-AR")}`,
-        estado,
-        v.transmision ? `transmisión ${v.transmision}` : null,
-        v.motor ? `motor ${v.motor}` : null,
-      ]
-        .filter(Boolean)
-        .join(" — ");
-      return `${i + 1}. ${v.marca} ${v.modelo} ${v.anio} — ${detalles} — id:${v.id}`;
-    })
-    .join("\n");
-}
-
-function buildSystemPrompt(agencia: string, stockTexto: string): string {
+function buildSystemPrompt(agencia: string, stockTexto: string, cotizacionTexto: string): string {
   return `Sos Rodi, el asistente virtual del catálogo online de ${agencia}, una concesionaria de autos usados en Argentina. Atendés en el momento a visitantes que están mirando el catálogo en la web. Si te preguntan cómo te llamás o quién sos, respondé que sos Rodi, el asistente virtual de ${agencia}.
 
 STOCK ACTUAL DE ${agencia.toUpperCase()} (única fuente de verdad, se consulta en vivo a la base de datos antes de cada respuesta):
 ${stockTexto}
+
+PRECIOS Y MONEDA: cada precio está en la moneda en que lo publicó la agencia ("USD" = dólares, "$" = pesos argentinos). Informalo siempre en esa moneda, sin cambiarla. ${cotizacionTexto} Si el visitante pide el precio en la otra moneda, usá solo ese "≈" tal cual figura y aclará que es aproximado y que el precio publicado es el de la lista; nunca hagas una conversión propia.
 
 REGLAS QUE NUNCA PODÉS ROMPER:
 1. Solo hablás de los vehículos listados arriba. Nunca inventes ni supongas marcas, modelos, años, kilometrajes, precios, transmisión o motor que no estén en esa lista. Si no tenés el dato o el stock no incluye lo que piden, decilo con honestidad en vez de completarlo ("no tengo esa unidad en stock ahora mismo" / "ese dato no lo tengo cargado").
@@ -129,26 +100,33 @@ export async function POST(req: NextRequest, props: { params: Promise<{ dominio:
     return NextResponse.json({ reply: MENSAJE_NO_DISPONIBLE, disponible: false });
   }
 
-  const vehiculosDb = await prisma.vehiculo.findMany({
-    where: { tenantId: tenant.id, estado: { not: "VENDIDO" } },
-    orderBy: { fechaIngreso: "desc" },
-    select: {
-      id: true,
-      marca: true,
-      modelo: true,
-      anio: true,
-      km: true,
-      precio: true,
-      estado: true,
-      transmision: true,
-      motor: true,
-    },
-  });
+  // La cotización que eligió la agencia (la misma del "≈" del catálogo),
+  // en paralelo con el stock. Si no responde, el chat sigue sin "≈".
+  const [vehiculosDb, cotizacion] = await Promise.all([
+    prisma.vehiculo.findMany({
+      where: { tenantId: tenant.id, estado: { not: "VENDIDO" } },
+      orderBy: { fechaIngreso: "desc" },
+      select: {
+        id: true,
+        marca: true,
+        modelo: true,
+        anio: true,
+        km: true,
+        precio: true,
+        moneda: true,
+        estado: true,
+        transmision: true,
+        motor: true,
+      },
+    }),
+    getCotizacion(tenant.cotizacionPreferida),
+  ]);
 
   const stockTexto = formatearStock(
-    vehiculosDb.map((v) => ({ ...v, precio: Number(v.precio) }))
+    vehiculosDb.map((v) => ({ ...v, precio: Number(v.precio) })),
+    cotizacion
   );
-  const system = buildSystemPrompt(tenant.nombre, stockTexto);
+  const system = buildSystemPrompt(tenant.nombre, stockTexto, textoCotizacionChat(cotizacion));
 
   const anthropicMessages: Anthropic.MessageParam[] = messages.map((m) => ({
     role: m.role,

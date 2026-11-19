@@ -218,3 +218,9 @@ test("venta: sin cotización nunca convierte", () => {
 test("venta: elegir la misma moneda no cambia nada", () => {
   assert.equal(cambio("17800", "USD", "USD"), "17800");
 });
+
+test("Mercado Libre: publica en la moneda del auto, sin convertir", () => {
+  assert.deepEqual(m.precioParaMercadoLibre(17800, "USD"), { price: 17800, currency_id: "USD" });
+  assert.deepEqual(m.precioParaMercadoLibre(9500000, "ARS"), { price: 9500000, currency_id: "ARS" });
+});
+

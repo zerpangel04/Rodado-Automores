@@ -8,6 +8,7 @@ import {
   getMercadoLibreAddress,
   VEHICLE_CATEGORY_ID,
 } from "@/lib/mercadolibre";
+import { precioParaMercadoLibre } from "@/lib/moneda";
 
 export async function POST(_req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -66,8 +67,8 @@ export async function POST(_req: NextRequest, props: { params: Promise<{ id: str
     title,
     description: `${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio} — ${vehiculo.km.toLocaleString("es-AR")} km. Publicado desde Rodado.`,
     category_id: VEHICLE_CATEGORY_ID,
-    price: Number(vehiculo.precio),
-    currency_id: "USD",
+    // En la moneda del vehículo (USD o pesos), sin convertir.
+    ...precioParaMercadoLibre(Number(vehiculo.precio), vehiculo.moneda),
     available_quantity: 1,
     // Obligatorio para vehículos, ver nota en lib/mercadolibre.ts
     buying_mode: "classified",

@@ -227,3 +227,10 @@ export function montoCortoPorMoneda(
   if (t.USD === 0) return { valor: arsCorto, nota: `pesos ${periodo}` };
   return { valor: `${usdCorto} + ${arsCorto}`, nota: periodo };
 }
+
+// Precio y moneda tal como los pide la API de Mercado Libre Argentina, que
+// acepta clasificados de autos en dólares ("USD") o en pesos ("ARS"): se
+// publica en la moneda del vehículo, nunca convertido.
+export function precioParaMercadoLibre(precio: number, moneda: Moneda): { price: number; currency_id: Moneda } {
+  return { price: precio, currency_id: moneda };
+}
