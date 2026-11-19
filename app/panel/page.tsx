@@ -11,8 +11,7 @@ import { actividadIcon, actividadColor, formatRelativo } from "./actividadDispla
 import { PendientesCard, type Pendiente } from "./PendientesCard";
 import { OnboardingChecklist, type OnboardingPaso } from "./OnboardingChecklist";
 import { CatalogLinkCard } from "./CatalogLinkCard";
-import { cotizacionVista } from "@/lib/cotizacion";
-import { getCotizacionDeAgencia } from "@/lib/cotizacionAgencia";
+import { DIAS_DORMIDO_DEFAULT, corteDormidos } from "@/lib/leadsDormidos";
 
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
@@ -78,16 +77,14 @@ export default async function PanelHome() {
     leadsRecientes,
     vehiculosConVtv,
     actividadReciente,
-    leadsNuevos,
     leadsSinAsignar,
-    vehiculosDisponibles,
     usuarios,
     tenant,
     vehiculosTotalCount,
     usuariosTotalCount,
     vehiculosPublicadosMlCount,
     mlConexionesCount,
-    cotizacion,
+    dormidos,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -114,17 +111,6 @@ export default async function PanelHome() {
       orderBy: { createdAt: "desc" },
       take: 12,
     }),
-    prisma.lead.findMany({
-      where: { ...leadFilter, etapa: "NUEVO" },
-      include: {
-        vehiculo: {
-          select: { marca: true, modelo: true, estado: true, categoria: true, precio: true, moneda: true },
-        },
-        vendedor: { select: { id: true, nombre: true } },
-      },
-      orderBy: { createdAt: "asc" },
-      take: 5,
-    }),
     canAsignar
       ? prisma.lead.findMany({
           where: { tenantId, vendedorId: null, etapa: { not: "CERRADO" } },
@@ -133,11 +119,6 @@ export default async function PanelHome() {
           take: 5,
         })
       : Promise.resolve([]),
-    prisma.vehiculo.findMany({
-      where: { tenantId, estado: { not: "VENDIDO" } },
-      select: { id: true, marca: true, modelo: true, categoria: true, precio: true, moneda: true, estado: true },
-      orderBy: { fechaIngreso: "desc" },
-    }),
     canAsignar
       ? prisma.usuario.findMany({
           where: { tenantId },
@@ -150,8 +131,16 @@ export default async function PanelHome() {
     prisma.usuario.count({ where: { tenantId } }),
     prisma.vehiculo.count({ where: { tenantId, mlItemId: { not: null } } }),
     prisma.mercadoLibreConexion.count({ where: { tenantId } }),
-    // Para el "≈" de la ficha del lead que se abre desde Pendientes.
-    getCotizacionDeAgencia(tenantId),
+    // Leads dormidos (mismo criterio que Leads, con el umbral de la agencia).
+    // Un count indexado por (tenantId, ultimaActividadEn), sin job aparte.
+    (async () => {
+      const t = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { diasLeadDormido: true } });
+      const dias = t?.diasLeadDormido ?? DIAS_DORMIDO_DEFAULT;
+      const count = await prisma.lead.count({
+        where: { ...leadFilter, etapa: { not: "CERRADO" }, ultimaActividadEn: { lte: corteDormidos(dias) } },
+      });
+      return { dias, count };
+    })(),
   ]);
 
   const alertasVtv = vehiculosConVtv
@@ -165,6 +154,18 @@ export default async function PanelHome() {
   const pctDocsPorVencer = pct(alertasVtv.length, stockActivo);
 
   const pendientes: Pendiente[] = [
+    ...(dormidos.count > 0
+      ? [
+          {
+            id: "leads-dormidos",
+            kind: "dormidos" as const,
+            label: `Retomar ${dormidos.count} lead${dormidos.count === 1 ? "" : "s"} dormido${dormidos.count === 1 ? "" : "s"}`,
+            meta: `Sin movimiento hace ${dormidos.dias} días o más`,
+            urgente: true,
+            href: "/panel/leads?dormidos=1",
+          },
+        ]
+      : []),
     ...alertasVtv.map((v) => {
       const vencida = (v.dias as number) < 0;
       return {
@@ -177,33 +178,6 @@ export default async function PanelHome() {
         urgente: vencida,
       };
     }),
-    ...leadsNuevos.map((l) => ({
-      id: `lead-nuevo-${l.id}`,
-      kind: "contactar" as const,
-      label: `Contactar a ${l.nombreCliente}`,
-      meta: `Lead sin contactar · ${formatRelativo(l.createdAt)}`,
-      urgente: false,
-      lead: {
-        id: l.id,
-        nombreCliente: l.nombreCliente,
-        contacto: l.contacto,
-        mensaje: l.mensaje,
-        canal: l.canal,
-        etapa: l.etapa,
-        vehiculo: l.vehiculo
-          ? {
-              marca: l.vehiculo.marca,
-              modelo: l.vehiculo.modelo,
-              estado: l.vehiculo.estado,
-              categoria: l.vehiculo.categoria,
-              precio: Number(l.vehiculo.precio),
-              moneda: l.vehiculo.moneda,
-            }
-          : null,
-        vendedor: l.vendedor,
-        createdAt: l.createdAt.toISOString(),
-      },
-    })),
     ...leadsSinAsignar.map((l) => ({
       id: `sin-asignar-${l.id}`,
       kind: "asignar" as const,
@@ -217,16 +191,6 @@ export default async function PanelHome() {
       },
     })),
   ];
-
-  const vehiculoOptions = vehiculosDisponibles.map((v) => ({
-    id: v.id,
-    marca: v.marca,
-    modelo: v.modelo,
-    categoria: v.categoria,
-    precio: Number(v.precio),
-    moneda: v.moneda,
-    estado: v.estado,
-  }));
 
   const primerNombre = (name ?? "").trim().split(" ")[0] || "";
 
@@ -323,10 +287,7 @@ export default async function PanelHome() {
         <div className={styles.dashRow}>
           <PendientesCard
             pendientes={pendientes}
-            vehiculos={vehiculoOptions}
             usuarios={usuarios}
-            canAsignar={canAsignar}
-            cotizacion={cotizacionVista(cotizacion)}
           />
 
           <div className={styles.card}>

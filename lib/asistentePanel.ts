@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getPlanTenant } from "@/lib/planes";
+import { corteDormidos } from "@/lib/leadsDormidos";
 
 const CONOCIMIENTO_RODADO = `CÓMO FUNCIONA RODADO (conocimiento general, válido para cualquier agencia):
 - Stock: carga y gestión de vehículos (fotos, ficha técnica, documentación, VTV). Desde ahí también se puede importar stock masivo por CSV y usar la Tasación con IA (si el plan lo incluye) para sugerir un precio de referencia.
@@ -16,6 +17,9 @@ const CONOCIMIENTO_RODADO = `CÓMO FUNCIONA RODADO (conocimiento general, válid
 - Cotización para los "≈": la agencia elige dólar oficial o dólar blue en /panel/catalogo → General (solo el Dueño); se usa en el catálogo, la ficha del vehículo, el panel y el asistente del catálogo. Es solo una referencia: el precio publicado es el que vale.
 - Ventas en dos monedas: cada venta se registra en su propia moneda (arranca en la del vehículo y se puede cambiar en el modal de venta; precio final y comisión van en la misma) y guarda la cotización del momento. Los totales se muestran separados por moneda (por ejemplo "USD 45.000 + $12.000.000"), nunca sumados en un solo número; los gráficos, porcentajes, ticket promedio y rankings convierten a USD con la cotización guardada en cada venta, no con la de hoy.
 - Mercado Libre publica cada vehículo en su moneda, y el asistente del catálogo informa cada precio en la moneda en que está publicado.
+- Leads dormidos: un lead abierto (cualquier etapa menos Cerrado) que lleva X días o más sin movimiento se marca como "dormido" para que el vendedor lo retome. Cuenta como movimiento: que el lead entre, que cambie de etapa, que se le asigne o cambie el vendedor, o que alguien registre un contacto. Editar el nombre, el teléfono o el auto de interés NO cuenta. El Dueño o un Admin eligen los días ("Dormido a los": 3, 5, 7, 10, 14, 21 o 30; por defecto 7) arriba en /panel/leads. Se ven con la etiqueta "Dormido · N d" en las tarjetas, en la columna "Último movimiento" de la vista de tabla, en un aviso arriba de Leads (con "Ver" para filtrarlos) y como "Retomar N leads dormidos" en Pendientes del Panel general. Rodado no les escribe solo a los clientes ni los mueve de etapa: solo avisa.
+- Registrar un contacto: en la ficha del lead (sección Recorrido) está el botón "Registré un contacto", con una nota opcional de hasta 200 caracteres, para cuando hablaste con el cliente sin que cambie de etapa. Reinicia el contador de días y queda en el Recorrido; no aparece en la campanita de notificaciones.
+- "Marcar todos como revisados" (en el aviso de leads dormidos, solo Dueño o Admin): reinicia el contador de días de todos los leads abiertos de la agencia, de todas las sucursales. No cambia etapas ni vendedores. Sirve, por ejemplo, cuando la agencia ya atendió esos leads por fuera del sistema.
 - Planes (Básico, Profesional, Empresa): cada uno con un límite de sucursales, vehículos y usuarios, y features exclusivas (Reportes avanzados, Asistente de tasación con IA, Catálogo personalizado, Vehículos destacados, Soporte prioritario). Se ven y comparan en /panel/plan.`;
 
 function fmtLimite(n: number | null): string {
@@ -48,7 +52,7 @@ export async function armarContextoTenant(params: {
     await Promise.all([
       prisma.tenant.findUniqueOrThrow({
         where: { id: tenantId },
-        select: { nombre: true, cotizacionPreferida: true },
+        select: { nombre: true, cotizacionPreferida: true, diasLeadDormido: true },
       }),
       getPlanTenant(tenantId),
       prisma.sucursal.count({ where: { tenantId } }),
@@ -67,6 +71,15 @@ export async function armarContextoTenant(params: {
 
   const enStock = (m: "USD" | "ARS") => porMoneda.find((g) => g.moneda === m)?._count._all ?? 0;
 
+  // Depende del umbral de la agencia, así que va después de leer el tenant.
+  const leadsDormidos = await prisma.lead.count({
+    where: {
+      tenantId,
+      etapa: { not: "CERRADO" },
+      ultimaActividadEn: { lte: corteDormidos(tenant.diasLeadDormido) },
+    },
+  });
+
   const contexto = `- Agencia: ${tenant.nombre}
 - Usuario actual: ${nombreUsuario} (rol: ${ROL_LABEL[rol] ?? rol})
 - Plan actual: ${plan.nombre} (USD ${Number(plan.precioUsd)}/mes)
@@ -80,7 +93,8 @@ export async function armarContextoTenant(params: {
   - Soporte prioritario: ${fmtSiNo(plan.soportePrioritario)}
 - Mercado Libre: ${mlConexion ? "conectado" : "no conectado"}
 - Vehículos en stock (sin vendidos) por moneda: ${enStock("USD")} en dólares, ${enStock("ARS")} en pesos
-- Cotización elegida para los "≈": ${tenant.cotizacionPreferida === "BLUE" ? "dólar blue" : "dólar oficial"}`;
+- Cotización elegida para los "≈": ${tenant.cotizacionPreferida === "BLUE" ? "dólar blue" : "dólar oficial"}
+- Leads dormidos: se marcan a los ${tenant.diasLeadDormido} días sin movimiento; ahora hay ${leadsDormidos} en toda la agencia`;
 
   return { contexto, tenantNombre: tenant.nombre };
 }

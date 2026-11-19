@@ -3,6 +3,7 @@ import { SOBRE_NOSOTROS_MAX, HORARIOS_MAX, ANIO_INICIO_MIN } from "./catalogo";
 import { WHATSAPP_MAX, normalizarWhatsappAR } from "./whatsapp";
 import { CONTRASTE_MINIMO, contrasteSuficiente, normalizarHex } from "./colorAcento";
 import { MONEDAS, PRECIO_MAXIMO, mensajeTopePrecio, type Moneda } from "./moneda";
+import { DIAS_DORMIDO_OPCIONES, esDiasDormidoValido } from "./leadsDormidos";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -162,6 +163,23 @@ export const leadUpdateSchema = z.object({
   etapa: z.enum(etapaLeadValues).optional(),
   vehiculoId: z.string().trim().optional().nullable(),
   vendedorId: z.string().trim().optional().nullable(),
+});
+
+// "Registré un contacto" en la ficha del lead: la nota es opcional.
+export const NOTA_CONTACTO_MAX = 200;
+export const contactoLeadSchema = z.object({
+  nota: z
+    .string()
+    .trim()
+    .max(NOTA_CONTACTO_MAX, `La nota puede tener hasta ${NOTA_CONTACTO_MAX} caracteres`)
+    .optional(),
+});
+
+// Días sin movimiento para considerar un lead "dormido" (por agencia).
+export const seguimientoLeadsSchema = z.object({
+  diasLeadDormido: z.number().refine(esDiasDormidoValido, {
+    message: `Elegí uno de estos valores: ${DIAS_DORMIDO_OPCIONES.join(", ")} días`,
+  }),
 });
 
 // La moneda es la de la venta (precio final y comisión van en la misma). Si

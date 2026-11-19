@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   AlertTriangle,
   Plus,
+  Moon,
 } from "lucide-react";
 import styles from "./kanban.module.css";
 import panelStyles from "../panel.module.css";
@@ -18,6 +19,12 @@ import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
 import { entradaEscalonada } from "../entrada";
 import { formatearPrecio, formatearTotales, sumarPorMoneda, type Moneda } from "@/lib/moneda";
 import type { CotizacionVista } from "@/lib/cotizacion";
+import {
+  DIAS_DORMIDO_OPCIONES,
+  diasSinMovimiento,
+  esDormido,
+  textoDiasSinMovimiento,
+} from "@/lib/leadsDormidos";
 
 export type Canal = "WHATSAPP" | "MERCADO_LIBRE" | "INSTAGRAM" | "WEB" | "WEB_IA";
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
@@ -42,7 +49,13 @@ export type LeadDTO = {
   } | null;
   vendedor: { id: string; nombre: string } | null;
   createdAt?: string;
+  // Último movimiento real (ver lib/leadsDormidos). Si falta, se usa createdAt.
+  ultimaActividadEn?: string;
 };
+
+function ultimoMovimiento(l: LeadDTO): string {
+  return l.ultimaActividadEn ?? l.createdAt ?? new Date().toISOString();
+}
 
 export type VehiculoOption = {
   id: string;
@@ -83,15 +96,6 @@ function initials(name: string) {
     .join("");
 }
 
-// Solo se marca urgencia mientras el lead sigue "Nuevo" — una vez
-// contactado, la antigüedad deja de ser una señal de alarma.
-function urgenciaColor(etapa: Etapa, dias: number): "red" | "amber" | "gray" {
-  if (etapa !== "NUEVO") return "gray";
-  if (dias >= 15) return "red";
-  if (dias >= 7) return "amber";
-  return "gray";
-}
-
 function whatsappUrl(contacto: string | null) {
   if (!contacto) return null;
   const digits = contacto.replace(/[^\d]/g, "");
@@ -123,6 +127,7 @@ export function KanbanView({
   canAsignar,
   userId,
   cotizacion,
+  diasDormido: diasDormidoInicial,
 }: {
   initialItems: LeadDTO[];
   vehiculos: VehiculoOption[];
@@ -131,6 +136,8 @@ export function KanbanView({
   userId: string;
   // La que eligió la agencia, para el "≈" de la ficha del lead.
   cotizacion: CotizacionVista | null;
+  // Días sin movimiento para marcar un lead como dormido (Tenant.diasLeadDormido).
+  diasDormido: number;
 }) {
   const [items, setItems] = useState<LeadDTO[]>(initialItems);
   useEffect(() => {
@@ -149,11 +156,25 @@ export function KanbanView({
   const [filterQuick, setFilterQuick] = useState<"todos" | "sin_contactar" | "sin_vendedor">(
     "todos"
   );
-  const [soloUrgentes, setSoloUrgentes] = useState(false);
+  const [soloDormidos, setSoloDormidos] = useState(false);
+  const [diasDormido, setDiasDormido] = useState(diasDormidoInicial);
+  const [guardandoDias, setGuardandoDias] = useState(false);
+  // "Marcar todos como revisados": pide confirmación en el mismo banner.
+  const [confirmarRevision, setConfirmarRevision] = useState(false);
+  const [revisando, setRevisando] = useState(false);
+  const [avisoDormidos, setAvisoDormidos] = useState<string | null>(null);
   const [vista, setVista] = useState<"kanban" | "tabla">("kanban");
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Partial<Record<Etapa, boolean>>>(DEFAULT_COLLAPSED);
+
+  // Desde Pendientes ("Retomar N leads dormidos") se llega con ?dormidos=1.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("dormidos") === "1") {
+      setSoloDormidos(true);
+      setVista("kanban");
+    }
+  }, []);
 
   useEffect(() => {
     try {
@@ -179,10 +200,65 @@ export function KanbanView({
   const diasDesde = (iso?: string) =>
     iso ? Math.floor((Date.now() - new Date(iso).getTime()) / 86400000) : 0;
 
-  const staleLeads = useMemo(
-    () => items.filter((l) => l.etapa === "NUEVO" && diasDesde(l.createdAt) >= 7),
-    [items]
+  // Abiertos sin movimiento hace `diasDormido` días o más (cualquier etapa
+  // menos Cerrado). Reemplaza al viejo "Nuevo hace +7 días desde que se creó".
+  const dormidoIds = useMemo(
+    () =>
+      new Set(
+        items
+          .filter((l) => esDormido({ etapa: l.etapa, ultimaActividadEn: ultimoMovimiento(l) }, diasDormido))
+          .map((l) => l.id)
+      ),
+    [items, diasDormido]
   );
+
+  async function cambiarDiasDormido(dias: number) {
+    const anterior = diasDormido;
+    setDiasDormido(dias);
+    setGuardandoDias(true);
+    setAvisoDormidos(null);
+    try {
+      const res = await fetch("/api/tenant/seguimiento", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ diasLeadDormido: dias }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setDiasDormido(anterior);
+        setAvisoDormidos(data?.error ?? "No se pudo guardar el aviso de seguimiento");
+      }
+    } catch {
+      setDiasDormido(anterior);
+      setAvisoDormidos("Error de conexión, intentá de nuevo");
+    } finally {
+      setGuardandoDias(false);
+    }
+  }
+
+  async function marcarTodosRevisados() {
+    setRevisando(true);
+    setAvisoDormidos(null);
+    try {
+      const res = await fetch("/api/leads/revisar", { method: "POST" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setAvisoDormidos(data?.error ?? "No se pudieron marcar como revisados");
+        return;
+      }
+      const ahora = new Date().toISOString();
+      setItems((prev) => prev.map((l) => (l.etapa === "CERRADO" ? l : { ...l, ultimaActividadEn: ahora })));
+      setSoloDormidos(false);
+      setAvisoDormidos(
+        `${data.revisados} lead${data.revisados === 1 ? "" : "s"} abierto${data.revisados === 1 ? "" : "s"} marcado${data.revisados === 1 ? "" : "s"} como revisado${data.revisados === 1 ? "" : "s"}. El contador arranca de nuevo desde hoy.`
+      );
+    } catch {
+      setAvisoDormidos("Error de conexión, intentá de nuevo");
+    } finally {
+      setRevisando(false);
+      setConfirmarRevision(false);
+    }
+  }
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -192,18 +268,18 @@ export function KanbanView({
       if (filterVehiculoId && l.vehiculo?.id !== filterVehiculoId) return false;
       if (filterQuick === "sin_contactar" && l.etapa !== "NUEVO") return false;
       if (filterQuick === "sin_vendedor" && l.vendedor) return false;
-      if (soloUrgentes && !(l.etapa === "NUEVO" && diasDesde(l.createdAt) >= 7)) return false;
+      if (soloDormidos && !dormidoIds.has(l.id)) return false;
       if (q && !l.nombreCliente.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [items, filterVendedorId, filterCanal, filterVehiculoId, filterQuick, soloUrgentes, searchQuery]);
+  }, [items, filterVendedorId, filterCanal, filterVehiculoId, filterQuick, soloDormidos, dormidoIds, searchQuery]);
 
   const filtrosActivos = !!(
     filterVendedorId ||
     filterCanal ||
     filterVehiculoId ||
     filterQuick !== "todos" ||
-    soloUrgentes ||
+    soloDormidos ||
     searchQuery
   );
 
@@ -212,7 +288,7 @@ export function KanbanView({
     setFilterCanal("");
     setFilterVehiculoId("");
     setFilterQuick("todos");
-    setSoloUrgentes(false);
+    setSoloDormidos(false);
     setSearchQuery("");
   }
 
@@ -342,29 +418,85 @@ export function KanbanView({
   return (
     <>
       <div className={styles.topActions}>
+        {canAsignar && (
+          <label className={styles.seguimientoCtl} title="Días sin movimiento para marcar un lead como dormido">
+            <Moon size={13} />
+            Dormido a los
+            <span className={styles.dropdownWrap}>
+              <select
+                className={styles.filterSelect}
+                value={diasDormido}
+                disabled={guardandoDias}
+                onChange={(e) => cambiarDiasDormido(Number(e.target.value))}
+                aria-label="Días sin movimiento para marcar un lead como dormido"
+              >
+                {DIAS_DORMIDO_OPCIONES.map((d) => (
+                  <option key={d} value={d}>
+                    {d} días
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={12} />
+            </span>
+          </label>
+        )}
         <button className={styles.btnPrimary} onClick={openCreate}>
           <Plus size={14} />
           Nuevo lead
         </button>
       </div>
 
-      {staleLeads.length > 0 && (
+      {avisoDormidos && (
+        <div className={styles.infoBanner} role="status">
+          <span>{avisoDormidos}</span>
+          <button type="button" className={styles.infoBannerClose} onClick={() => setAvisoDormidos(null)} aria-label="Cerrar aviso">
+            ×
+          </button>
+        </div>
+      )}
+
+      {dormidoIds.size > 0 && (
         <div className={styles.alertBanner}>
           <AlertTriangle size={15} />
-          <span>
-            {staleLeads.length} lead{staleLeads.length === 1 ? "" : "s"} sin contactar hace más de
-            una semana
-          </span>
-          <button
-            type="button"
-            className={styles.alertBtn}
-            onClick={() => {
-              setSoloUrgentes(true);
-              setVista("kanban");
-            }}
-          >
-            Ver
-          </button>
+          {confirmarRevision ? (
+            <span>
+              ¿Marcar como revisados los leads abiertos de toda la agencia? Su contador de días
+              arranca de nuevo desde hoy; no cambia etapas ni vendedores.
+            </span>
+          ) : (
+            <span>
+              {dormidoIds.size} lead{dormidoIds.size === 1 ? "" : "s"} sin movimiento hace{" "}
+              {diasDormido} días o más
+            </span>
+          )}
+          {confirmarRevision ? (
+            <>
+              <button type="button" className={styles.btnGhost} disabled={revisando} onClick={() => setConfirmarRevision(false)}>
+                Cancelar
+              </button>
+              <button type="button" className={styles.alertBtn} disabled={revisando} onClick={marcarTodosRevisados}>
+                {revisando ? "Marcando…" : "Sí, marcar como revisados"}
+              </button>
+            </>
+          ) : (
+            <>
+              {canAsignar && (
+                <button type="button" className={styles.btnGhost} onClick={() => setConfirmarRevision(true)}>
+                  Marcar todos como revisados
+                </button>
+              )}
+              <button
+                type="button"
+                className={styles.alertBtn}
+                onClick={() => {
+                  setSoloDormidos(true);
+                  setVista("kanban");
+                }}
+              >
+                Ver
+              </button>
+            </>
+          )}
         </div>
       )}
 
@@ -485,12 +617,14 @@ export function KanbanView({
                 <th>Etapa</th>
                 <th>Vendedor</th>
                 <th>Antigüedad</th>
+                <th>Último movimiento</th>
               </tr>
             </thead>
             <tbody>
               {filteredItems.map((lead) => {
                 const dias = diasDesde(lead.createdAt);
-                const urg = urgenciaColor(lead.etapa, dias);
+                const sinMov = diasSinMovimiento(ultimoMovimiento(lead));
+                const dormido = dormidoIds.has(lead.id);
                 return (
                   <tr key={lead.id} onClick={() => openLeadDetail(lead)} style={{ cursor: "pointer" }}>
                     <td>{lead.nombreCliente}</td>
@@ -508,9 +642,21 @@ export function KanbanView({
                     </td>
                     <td className={panelStyles.tableSub}>{lead.vendedor?.nombre ?? "Sin asignar"}</td>
                     <td>
-                      <span className={`${styles.antiguedad} ${styles[urg]}`}>
+                      <span className={`${styles.antiguedad} ${styles.gray}`}>
                         hace {dias} día{dias === 1 ? "" : "s"}
                       </span>
+                    </td>
+                    <td>
+                      {dormido ? (
+                        <span className={styles.dormidoBadge} title="Sin movimiento desde hace un tiempo: conviene retomarlo">
+                          <Moon size={11} />
+                          Dormido · {sinMov} d
+                        </span>
+                      ) : (
+                        <span className={panelStyles.tableSub}>
+                          {lead.etapa === "CERRADO" ? "—" : textoDiasSinMovimiento(sinMov)}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -584,12 +730,13 @@ export function KanbanView({
                       const idx = stages.findIndex((s) => s.key === lead.etapa);
                       const next = stages[idx + 1];
                       const dias = diasDesde(lead.createdAt);
-                      const urg = urgenciaColor(lead.etapa, dias);
+                      const dormido = dormidoIds.has(lead.id);
+                      const sinMov = diasSinMovimiento(ultimoMovimiento(lead));
                       const wa = whatsappUrl(lead.contacto);
                       const entrada = entradaEscalonada(i);
                       return (
                         <div
-                          className={`${styles.kcard} ${urg === "red" ? styles.kcardUrgent : ""} ${entrada.className}`}
+                          className={`${styles.kcard} ${dormido ? styles.kcardDormido : ""} ${entrada.className}`}
                           style={entrada.style}
                           key={lead.id}
                           role="button"
@@ -666,9 +813,19 @@ export function KanbanView({
 
                           <div className={styles.metaRow}>
                             <ChannelBadge canal={lead.canal} />
-                            <span className={`${styles.antiguedad} ${styles[urg]}`}>
-                              hace {dias} día{dias === 1 ? "" : "s"}
-                            </span>
+                            {dormido ? (
+                              <span
+                                className={styles.dormidoBadge}
+                                title={`Sin movimiento hace ${sinMov} días (creado hace ${dias})`}
+                              >
+                                <Moon size={11} />
+                                Dormido · {sinMov} d
+                              </span>
+                            ) : (
+                              <span className={`${styles.antiguedad} ${styles.gray}`} title="Antigüedad del lead">
+                                hace {dias} día{dias === 1 ? "" : "s"}
+                              </span>
+                            )}
                             {lead.vehiculo?.estado === "VENDIDO" && lead.etapa !== "CERRADO" && (
                               <span
                                 className={styles.soldWarning}
@@ -811,6 +968,7 @@ export function KanbanView({
           usuarios={usuarios}
           canAsignar={canAsignar}
           cotizacion={cotizacion}
+          diasDormido={diasDormido}
           onClose={closeLeadDetail}
           onUpdated={handleLeadUpdated}
         />

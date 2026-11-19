@@ -1172,3 +1172,147 @@
     padding: 10px;
   }
 }
+
+/* ── Clientes dormidos ─────────────────────────────────────────────── */
+
+.topActions {
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.seguimientoCtl {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.seguimientoCtl svg {
+  flex: none;
+}
+
+.infoBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, var(--line));
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.infoBanner span {
+  flex: 1;
+}
+
+.infoBannerClose {
+  flex: none;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink-soft);
+  padding: 2px 6px;
+}
+
+.alertBanner {
+  flex-wrap: wrap;
+}
+
+.kcardDormido {
+  border-color: color-mix(in srgb, var(--warn) 40%, var(--line));
+}
+
+.dormidoBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: color-mix(in srgb, var(--warn) 16%, transparent);
+  color: var(--warn-text);
+  white-space: nowrap;
+}
+
+.ultimoMov {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.ultimoMov span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ultimoMovDormido {
+  color: var(--warn-text);
+  font-weight: 600;
+}
+
+.contactoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.contactoBtn:hover {
+  border-color: var(--accent);
+}
+
+.contactoForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.contactoForm textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+
+.contactoFormRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.contactoContador {
+  margin-right: auto;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.contactoError {
+  font-size: 12px;
+  color: var(--danger-text);
+}
+
+.timelineDotContacto {
+  background: var(--accent);
+}

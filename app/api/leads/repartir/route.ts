@@ -53,7 +53,9 @@ export async function POST() {
     carga.sort((a, b) => a.count - b.count);
     return prisma.lead.update({
       where: { id: lead.id },
-      data: { vendedorId: menor.id },
+      // Asignarle vendedor reinicia el contador de "dormido": el vendedor
+      // nuevo recién lo recibe.
+      data: { vendedorId: menor.id, ultimaActividadEn: new Date() },
     });
   });
 

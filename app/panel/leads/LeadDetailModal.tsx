@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Phone, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Phone, Mail, Moon } from "lucide-react";
 import styles from "./kanban.module.css";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import type { LeadDTO, Etapa } from "./KanbanView";
@@ -9,6 +9,12 @@ import { ChannelBadge } from "./ChannelBadge";
 import { WhatsAppGlyph } from "../../icons/WhatsAppGlyph";
 import { aUsdParaComparar, equivalente, formatearPrecio, type Moneda } from "@/lib/moneda";
 import type { CotizacionVista } from "@/lib/cotizacion";
+import { diasSinMovimiento, esDormido, textoDiasSinMovimiento } from "@/lib/leadsDormidos";
+
+// Entrada del Recorrido (GET /api/leads/[id]/actividad).
+type EventoRecorrido = { id: string; tipo: string; descripcion: string; createdAt: string };
+
+const NOTA_MAX = 200;
 
 export type VehiculoOption = {
   id: string;
@@ -66,6 +72,7 @@ export function LeadDetailModal({
   usuarios,
   canAsignar,
   cotizacion,
+  diasDormido,
   onClose,
   onUpdated,
 }: {
@@ -75,12 +82,63 @@ export function LeadDetailModal({
   canAsignar: boolean;
   // La que eligió la agencia (viene del server). null = sin "≈".
   cotizacion: CotizacionVista | null;
+  diasDormido: number;
   onClose: () => void;
   onUpdated: (lead: LeadDTO) => void;
 }) {
   const [showReassignInModal, setShowReassignInModal] = useState(false);
   const [savingEtapa, setSavingEtapa] = useState(false);
   const [savingVendedor, setSavingVendedor] = useState(false);
+
+  // Recorrido: se trae al abrir la ficha y cada vez que el lead se mueve.
+  const [recorrido, setRecorrido] = useState<EventoRecorrido[] | null>(null);
+  const [recorridoError, setRecorridoError] = useState(false);
+  const [mostrarContacto, setMostrarContacto] = useState(false);
+  const [notaContacto, setNotaContacto] = useState("");
+  const [guardandoContacto, setGuardandoContacto] = useState(false);
+  const [errorContacto, setErrorContacto] = useState<string | null>(null);
+
+  const ultimaActividad = lead.ultimaActividadEn ?? lead.createdAt ?? new Date().toISOString();
+
+  useEffect(() => {
+    let cancelado = false;
+    setRecorridoError(false);
+    fetch(`/api/leads/${lead.id}/actividad`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data: { items: EventoRecorrido[] }) => {
+        if (!cancelado) setRecorrido(data.items);
+      })
+      .catch(() => {
+        if (!cancelado) setRecorridoError(true);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [lead.id, lead.etapa, ultimaActividad]);
+
+  async function registrarContacto() {
+    setGuardandoContacto(true);
+    setErrorContacto(null);
+    try {
+      const res = await fetch(`/api/leads/${lead.id}/actividad`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nota: notaContacto.trim() || undefined }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setErrorContacto(data?.error ?? "No se pudo registrar el contacto");
+        return;
+      }
+      setMostrarContacto(false);
+      setNotaContacto("");
+      onUpdated({ ...lead, ultimaActividadEn: data.ultimaActividadEn });
+    } catch {
+      setErrorContacto("Error de conexión, intentá de nuevo");
+    } finally {
+      setGuardandoContacto(false);
+    }
+  }
 
   useBodyScrollLock(true);
 
@@ -175,6 +233,8 @@ export function LeadDetailModal({
     typeof lead.vehiculo?.precio === "number"
       ? equivalente(lead.vehiculo.precio, monedaVehiculo, cotizacion?.venta)
       : null;
+  const sinMovimiento = diasSinMovimiento(ultimaActividad);
+  const dormido = esDormido({ etapa: lead.etapa, ultimaActividadEn: ultimaActividad }, diasDormido);
 
   return (
     <div className={`${styles.drawerBg} ${styles.show}`} onClick={onClose}>
@@ -366,14 +426,80 @@ export function LeadDetailModal({
 
         <div className={styles.field}>
           <label>Recorrido</label>
-          <div className={styles.timeline}>
-            <div className={styles.timelineItem}>
-              <span className={styles.timelineDot} />
-              <div>
-                <div className={styles.timelineLabel}>Creado</div>
-                <div className={styles.timelineMeta}>{formatFecha(lead.createdAt)}</div>
-              </div>
+
+          {lead.etapa !== "CERRADO" && (
+            <div className={`${styles.ultimoMov} ${dormido ? styles.ultimoMovDormido : ""}`}>
+              <span>
+                {dormido && <Moon size={12} />} Último movimiento: {textoDiasSinMovimiento(sinMovimiento)}
+                {dormido && ` · dormido (aviso a los ${diasDormido} días)`}
+              </span>
+              {!mostrarContacto && (
+                <button type="button" className={styles.contactoBtn} onClick={() => setMostrarContacto(true)}>
+                  <Phone size={12} /> Registré un contacto
+                </button>
+              )}
             </div>
+          )}
+
+          {mostrarContacto && (
+            <div className={styles.contactoForm}>
+              <textarea
+                value={notaContacto}
+                maxLength={NOTA_MAX}
+                rows={2}
+                autoFocus
+                placeholder="Nota opcional: qué hablaron, próximo paso…"
+                onChange={(e) => setNotaContacto(e.target.value)}
+                aria-label="Nota del contacto (opcional)"
+              />
+              <div className={styles.contactoFormRow}>
+                <span className={styles.contactoContador}>
+                  {notaContacto.length}/{NOTA_MAX}
+                </span>
+                <button
+                  type="button"
+                  className={styles.btnGhost}
+                  disabled={guardandoContacto}
+                  onClick={() => {
+                    setMostrarContacto(false);
+                    setNotaContacto("");
+                    setErrorContacto(null);
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button type="button" className={styles.btnPrimary} disabled={guardandoContacto} onClick={registrarContacto}>
+                  {guardandoContacto ? "Guardando…" : "Guardar contacto"}
+                </button>
+              </div>
+              {errorContacto && <p className={styles.contactoError}>{errorContacto}</p>}
+            </div>
+          )}
+
+          <div className={styles.timeline}>
+            {recorrido && recorrido.length > 0 ? (
+              recorrido.map((ev) => (
+                <div className={styles.timelineItem} key={ev.id}>
+                  <span
+                    className={`${styles.timelineDot} ${ev.tipo === "CONTACTO_LEAD" ? styles.timelineDotContacto : ""}`}
+                  />
+                  <div>
+                    <div className={styles.timelineLabel}>
+                      {ev.tipo === "NUEVO_LEAD" ? "Creado" : ev.descripcion}
+                    </div>
+                    <div className={styles.timelineMeta}>{formatFecha(ev.createdAt)}</div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className={styles.timelineItem}>
+                <span className={styles.timelineDot} />
+                <div>
+                  <div className={styles.timelineLabel}>Creado</div>
+                  <div className={styles.timelineMeta}>{formatFecha(lead.createdAt)}</div>
+                </div>
+              </div>
+            )}
             <div className={styles.timelineItem}>
               <span className={`${styles.timelineDot} ${styles.timelineDotActive}`} />
               <div>
@@ -382,6 +508,9 @@ export function LeadDetailModal({
                 </div>
               </div>
             </div>
+            {recorridoError && (
+              <p className={styles.msgHint}>No se pudo cargar el historial completo del lead.</p>
+            )}
           </div>
         </div>
 

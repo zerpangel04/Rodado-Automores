@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
 import { cotizacionVista } from "@/lib/cotizacion";
 import { getCotizacionDeAgencia } from "@/lib/cotizacionAgencia";
+import { DIAS_DORMIDO_DEFAULT } from "@/lib/leadsDormidos";
 import { KanbanView, type LeadDTO } from "./KanbanView";
 import styles from "../panel.module.css";
 
@@ -12,7 +13,7 @@ export default async function LeadsPage() {
 
   const sucursalActual = await getSucursalActual(tenantId);
 
-  const [leads, vehiculos, usuarios, cotizacion] = await Promise.all([
+  const [leads, vehiculos, usuarios, cotizacion, tenant] = await Promise.all([
     prisma.lead.findMany({
       where: {
         tenantId,
@@ -52,6 +53,7 @@ export default async function LeadsPage() {
           orderBy: { nombre: "asc" },
         }),
     getCotizacionDeAgencia(tenantId),
+    prisma.tenant.findUnique({ where: { id: tenantId }, select: { diasLeadDormido: true } }),
   ]);
 
   const items: LeadDTO[] = leads.map((l) => ({
@@ -74,6 +76,7 @@ export default async function LeadsPage() {
       : null,
     vendedor: l.vendedor,
     createdAt: l.createdAt.toISOString(),
+    ultimaActividadEn: l.ultimaActividadEn.toISOString(),
   }));
 
   const vehiculoOptions = vehiculos.map((v) => ({
@@ -105,6 +108,7 @@ export default async function LeadsPage() {
           canAsignar={rol !== "VENDEDOR"}
           userId={userId}
           cotizacion={cotizacionVista(cotizacion)}
+          diasDormido={tenant?.diasLeadDormido ?? DIAS_DORMIDO_DEFAULT}
         />
       </div>
     </>

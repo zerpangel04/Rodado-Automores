@@ -7,6 +7,7 @@ import {
   RefreshCw,
   PauseCircle,
   AlertTriangle,
+  Phone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -22,6 +23,7 @@ export const actividadIcon: Record<string, LucideIcon> = {
   ML_ACTUALIZADO: RefreshCw,
   ML_PAUSADA: PauseCircle,
   ML_ATENCION: AlertTriangle,
+  CONTACTO_LEAD: Phone,
 };
 
 export const actividadColor: Record<string, string> = {
@@ -33,6 +35,7 @@ export const actividadColor: Record<string, string> = {
   ML_ACTUALIZADO: "var(--success)",
   ML_PAUSADA: "var(--info)",
   ML_ATENCION: "var(--warn)",
+  CONTACTO_LEAD: "var(--accent)",
 };
 
 export function formatRelativo(date: Date | string) {

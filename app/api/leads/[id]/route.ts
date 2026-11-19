@@ -4,13 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { leadUpdateSchema } from "@/lib/validation";
 import { registrarActividad } from "@/lib/actividad";
 import { etapaLabelEs } from "@/lib/labels";
-
-async function findVisibleLead(id: string, tenantId: string, userId: string, rol: string) {
-  const lead = await prisma.lead.findUnique({ where: { id } });
-  if (!lead || lead.tenantId !== tenantId) return null;
-  if (rol === "VENDEDOR" && lead.vendedorId !== userId) return null;
-  return lead;
-}
+import { findVisibleLead } from "@/lib/leads";
 
 export async function PATCH(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -57,9 +51,16 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ id: str
     }
   }
 
+  // Cambiar de etapa o de vendedor es un movimiento real del lead: reinicia
+  // el contador de "dormido". Editar datos sueltos (nombre, contacto, canal,
+  // auto) no, para que corregir un typo no esconda un lead abandonado.
+  const huboMovimiento =
+    (data.etapa !== undefined && data.etapa !== existente.etapa) ||
+    (data.vendedorId !== undefined && data.vendedorId !== existente.vendedorId);
+
   const lead = await prisma.lead.update({
     where: { id },
-    data,
+    data: { ...data, ...(huboMovimiento ? { ultimaActividadEn: new Date() } : {}) },
     include: {
       vehiculo: {
         select: { id: true, marca: true, modelo: true, estado: true, categoria: true, precio: true, moneda: true },

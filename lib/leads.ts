@@ -3,6 +3,15 @@ import type { CanalLead } from "@prisma/client";
 import { registrarActividad } from "@/lib/actividad";
 import { canalLabelEs } from "@/lib/labels";
 
+// Un lead que el usuario del panel puede ver: de su agencia y, si es
+// VENDEDOR, asignado a él. null si no existe o no le corresponde.
+export async function findVisibleLead(id: string, tenantId: string, userId: string, rol: string) {
+  const lead = await prisma.lead.findUnique({ where: { id } });
+  if (!lead || lead.tenantId !== tenantId) return null;
+  if (rol === "VENDEDOR" && lead.vendedorId !== userId) return null;
+  return lead;
+}
+
 // Lógica de creación de leads compartida entre el formulario de contacto
 // público (/api/public/leads) y el asistente de IA (/api/[dominio]/chat) —
 // ambos son "alguien de afuera del panel deja sus datos", solo cambia el canal.

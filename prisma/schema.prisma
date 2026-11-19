@@ -54,6 +54,9 @@ enum TipoActividad {
   ML_ACTUALIZADO
   ML_PAUSADA
   ML_ATENCION
+  // El vendedor registró un contacto con el lead sin cambiarlo de etapa.
+  // Aparece en el Recorrido de la ficha, no en la campanita.
+  CONTACTO_LEAD
 }
 
 // Cada concesionaria = un tenant. Todo dato cuelga de un tenant_id.
@@ -85,6 +88,9 @@ model Tenant {
   // Cotización con la que el catálogo muestra el equivalente ("≈") entre
   // pesos y dólares. Preferencia de cada agencia, en todos los planes.
   cotizacionPreferida TipoCotizacion @default(OFICIAL)
+  // Días sin movimiento a partir de los cuales un lead abierto se muestra
+  // como "dormido" en Leads y en Pendientes. Lo elige el Dueño o un Admin.
+  diasLeadDormido Int @default(7)
   // Foto de portada del catálogo (bucket agencia-portadas). Mismo gating
   // que colorAcento.
   portadaUrl    String?
@@ -348,10 +354,14 @@ model Lead {
   vendedorId    String?
   vendedor      Usuario?  @relation("VendedorAsignado", fields: [vendedorId], references: [id])
   createdAt     DateTime  @default(now())
+  // Último movimiento real del lead: creación, cambio de etapa, reasignación
+  // o contacto registrado. Define si está "dormido" (ver lib/leadsDormidos).
+  ultimaActividadEn DateTime @default(now())
 
   actividades ActividadLog[]
 
   @@index([tenantId, etapa])
+  @@index([tenantId, ultimaActividadEn])
 }
 
 model Venta {

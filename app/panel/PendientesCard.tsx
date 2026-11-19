@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import styles from "./panel.module.css";
-import { LeadDetailModal, type VehiculoOption } from "./leads/LeadDetailModal";
 import { AssignVendedorModal, type UsuarioOption } from "./leads/AssignVendedorModal";
 import type { LeadDTO } from "./leads/KanbanView";
-import type { CotizacionVista } from "@/lib/cotizacion";
 
 export type Pendiente =
   | { id: string; kind: "vtv"; label: string; meta: string; urgente: boolean }
-  | { id: string; kind: "contactar"; label: string; meta: string; urgente: boolean; lead: LeadDTO }
+  // Resumen de leads dormidos: una sola fila con el conteo, que lleva a
+  // Leads ya filtrado. Reemplaza al viejo "Contactar a X" por lead nuevo,
+  // que miraba la fecha de creación y no los contactos registrados.
+  | { id: string; kind: "dormidos"; label: string; meta: string; urgente: boolean; href: string }
   | {
       id: string;
       kind: "asignar";
@@ -21,32 +23,16 @@ export type Pendiente =
 
 export function PendientesCard({
   pendientes: initialPendientes,
-  vehiculos,
   usuarios,
-  canAsignar,
-  cotizacion,
 }: {
   pendientes: Pendiente[];
-  vehiculos: VehiculoOption[];
   usuarios: UsuarioOption[];
-  canAsignar: boolean;
-  cotizacion: CotizacionVista | null;
 }) {
   const [items, setItems] = useState(initialPendientes);
-  const [contactarLead, setContactarLead] = useState<LeadDTO | null>(null);
   const [asignarLead, setAsignarLead] = useState<Pick<
     LeadDTO,
     "id" | "nombreCliente" | "vehiculo"
   > | null>(null);
-
-  function handleContactarUpdated(updated: LeadDTO) {
-    if (updated.etapa !== "NUEVO") {
-      setItems((prev) => prev.filter((p) => !(p.kind === "contactar" && p.lead.id === updated.id)));
-      setContactarLead(null);
-      return;
-    }
-    setContactarLead(updated);
-  }
 
   function handleAsignarUpdated(updated: LeadDTO) {
     if (updated.vendedor) {
@@ -83,29 +69,25 @@ export function PendientesCard({
             );
           }
 
+          if (p.kind === "dormidos") {
+            return (
+              <Link key={p.id} href={p.href} className={`${styles.taskRow} ${styles.taskRowClickable}`}>
+                {body}
+              </Link>
+            );
+          }
+
           return (
             <button
               key={p.id}
               type="button"
               className={`${styles.taskRow} ${styles.taskRowClickable}`}
-              onClick={() => (p.kind === "contactar" ? setContactarLead(p.lead) : setAsignarLead(p.lead))}
+              onClick={() => setAsignarLead(p.lead)}
             >
               {body}
             </button>
           );
         })
-      )}
-
-      {contactarLead && (
-        <LeadDetailModal
-          lead={contactarLead}
-          vehiculos={vehiculos}
-          usuarios={usuarios}
-          canAsignar={canAsignar}
-          cotizacion={cotizacion}
-          onClose={() => setContactarLead(null)}
-          onUpdated={handleContactarUpdated}
-        />
       )}
 
       {asignarLead && (

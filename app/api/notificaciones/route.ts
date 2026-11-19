@@ -15,10 +15,14 @@ export async function GET() {
   const filtro =
     rol === "VENDEDOR" ? { tenantId, vendedorId: userId } : { tenantId };
 
+  // Los contactos registrados a mano ("Registré un contacto") van al
+  // Recorrido del lead, no a la campanita: los hace el propio equipo.
+  const noLeidas = { ...filtro, leido: false, tipo: { not: "CONTACTO_LEAD" as const } };
+
   const [count, items] = await Promise.all([
-    prisma.actividadLog.count({ where: { ...filtro, leido: false } }),
+    prisma.actividadLog.count({ where: noLeidas }),
     prisma.actividadLog.findMany({
-      where: { ...filtro, leido: false },
+      where: noLeidas,
       orderBy: { createdAt: "desc" },
       take: 10,
     }),
