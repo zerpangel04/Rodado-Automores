@@ -5,6 +5,7 @@ import Image from "next/image";
 import { TrendingUp, AlertTriangle, Clock } from "lucide-react";
 import styles from "./reportes.module.css";
 import { KpiSpark } from "../KpiSpark";
+import { formatearTotales, partesKpi, type TotalesPorMoneda } from "@/lib/moneda";
 
 export type Etapa = "NUEVO" | "CONTACTADO" | "TEST_DRIVE" | "NEGOCIACION" | "CERRADO";
 
@@ -16,10 +17,18 @@ const canalLogo: Partial<Record<CanalKey, string>> = {
   INSTAGRAM: "/logos/instagram.svg",
 };
 
+// `monto` en USD: las ventas en pesos convertidas con la cotización guardada
+// de cada venta (ver app/panel/reportes/page.tsx).
 type VentaDia = { fecha: string; unidades: number; monto: number };
 type LeadCanal = { canal: string; canalKey: CanalKey; total: number; cerrados: number; pct: number };
 type RotacionItem = { vehiculo: string; dias: number };
-type VendedorPerf = { nombre: string; leads: number; ventas: number; facturado: number; comision: number };
+type VendedorPerf = {
+  nombre: string;
+  leads: number;
+  ventas: number;
+  facturado: TotalesPorMoneda;
+  comision: TotalesPorMoneda;
+};
 type EmbudoItem = { label: string; n: number };
 type Lectura = { tono: "success" | "warn" | "danger"; titulo: string; detalle: string };
 
@@ -144,8 +153,11 @@ function VentasChart({ serie }: { serie: VentaDia[] }) {
 export function ReportesView({
   totalUnidades,
   totalMonto,
+  totalMontoUsd,
   totalUnidadesPrev,
-  totalMontoPrev,
+  totalMontoPrevUsd,
+  hayPesos,
+  ventasSinCotizacion,
   ventasSerie,
   embudo,
   conversionPct,
@@ -158,9 +170,16 @@ export function ReportesView({
   lecturas,
 }: {
   totalUnidades: number;
-  totalMonto: number;
+  // Lo que se muestra: un total por moneda.
+  totalMonto: TotalesPorMoneda;
+  // Solo para el "% vs. período anterior" (los dos períodos en USD, con la
+  // cotización de cada venta).
+  totalMontoUsd: number;
   totalUnidadesPrev: number;
-  totalMontoPrev: number;
+  totalMontoPrevUsd: number;
+  hayPesos: boolean;
+  // Ventas en pesos sin cotización guardada: no entran en el monto del gráfico.
+  ventasSinCotizacion: number;
   ventasSerie: VentaDia[];
   embudo: EmbudoItem[];
   conversionPct: number;
@@ -178,11 +197,8 @@ export function ReportesView({
   const maxCanal = Math.max(...leadsPorCanal.map((c) => c.total), 1);
 
   const montoTrend =
-    totalMontoPrev > 0
-      ? Math.round(((totalMonto - totalMontoPrev) / totalMontoPrev) * 100)
-      : totalMonto > 0
-      ? null
-      : null;
+    totalMontoPrevUsd > 0 ? Math.round(((totalMontoUsd - totalMontoPrevUsd) / totalMontoPrevUsd) * 100) : null;
+  const kpiMonto = partesKpi(totalMonto);
   const unidadesTrend = totalUnidadesPrev > 0 ? totalUnidades - totalUnidadesPrev : null;
   const conversionTrend = conversionPctPrev !== null ? conversionPct - conversionPctPrev : null;
   const rotacionTrend =
@@ -226,8 +242,9 @@ export function ReportesView({
         <KpiSpark
           color="var(--success)"
           label="Facturado"
-          value={totalMonto.toLocaleString("es-AR")}
-          unit="USD"
+          value={kpiMonto.valor}
+          unit={kpiMonto.unidad}
+          valueExtra={kpiMonto.extra}
           trend={
             montoTrend === null
               ? undefined
@@ -285,7 +302,8 @@ export function ReportesView({
             <div>
               <h2 className={`disp ${styles.cardTitle}`}>Ventas en el tiempo</h2>
               <p className={styles.subtext}>
-                {totalUnidades} vehículo{totalUnidades === 1 ? "" : "s"} · {usd(totalMonto)} en total
+                {totalUnidades} vehículo{totalUnidades === 1 ? "" : "s"} · {formatearTotales(totalMonto)} en
+                total
               </p>
             </div>
             <div className={styles.chartLegend}>
@@ -300,6 +318,15 @@ export function ReportesView({
             </div>
           </div>
           <VentasChart serie={ventasSerie} />
+          {(hayPesos || ventasSinCotizacion > 0) && (
+            <p className={styles.subtext} style={{ marginTop: 8 }}>
+              {hayPesos && "Las ventas en pesos se suman al monto en USD con la cotización del día de cada venta."}
+              {ventasSinCotizacion > 0 &&
+                ` ${ventasSinCotizacion} venta${ventasSinCotizacion === 1 ? "" : "s"} en pesos sin cotización guardada no ${
+                  ventasSinCotizacion === 1 ? "entra" : "entran"
+                } en el monto del gráfico.`}
+            </p>
+          )}
         </section>
 
         <section className={styles.card}>
@@ -506,10 +533,10 @@ export function ReportesView({
                       <span style={{ color: c1 }}>{cv}%</span>
                     </div>
                     <div className={styles.right} style={{ fontWeight: 600 }}>
-                      {usd(v.facturado)}
+                      {formatearTotales(v.facturado)}
                     </div>
                     <div className={styles.right} style={{ fontWeight: 600, color: "var(--accent-light)" }}>
-                      {usd(v.comision)}
+                      {formatearTotales(v.comision)}
                     </div>
                   </div>
                 );

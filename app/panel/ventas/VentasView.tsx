@@ -5,6 +5,17 @@ import { Search, ChevronDown } from "lucide-react";
 import styles from "./ventas.module.css";
 import { KpiBar } from "../KpiBar";
 import { Pill } from "../Pill";
+import {
+  aUsdParaComparar,
+  equivalente,
+  formatearPrecio,
+  formatearTotales,
+  partesKpi,
+  sumarPorMoneda,
+  sumarVentasEnUsd,
+  type Moneda,
+  type TotalesPorMoneda,
+} from "@/lib/moneda";
 
 export type VentaDTO = {
   id: string;
@@ -12,11 +23,27 @@ export type VentaDTO = {
   vehiculo: { marca: string; modelo: string; sucursal: string };
   vendedor: { id: string; nombre: string };
   compradorNombre: string | null;
+  // precioFinal y comision están en `moneda`.
   precioFinal: number;
   comision: number;
+  moneda: Moneda;
+  // Pesos por dólar al registrar la venta (null en ventas viejas).
+  cotizacion: number | null;
   estadoCobro: "PENDIENTE" | "COBRADO";
 };
 
+type Campo = "precioFinal" | "comision";
+
+// Totales por moneda, nunca sumando dólares con pesos.
+function totales(arr: VentaDTO[], k: Campo): TotalesPorMoneda {
+  return sumarPorMoneda(arr.map((v) => ({ monto: v[k], moneda: v.moneda })));
+}
+
+// Para lo que necesita un único número (%, ticket, ranking): en USD con la
+// cotización guardada de cada venta, nunca la de hoy.
+function enUsd(arr: VentaDTO[], k: Campo) {
+  return sumarVentasEnUsd(arr.map((v) => ({ monto: v[k], moneda: v.moneda, cotizacion: v.cotizacion })));
+}
 type Periodo = "mes" | "trimestre" | "todo";
 type FiltroCobro = "todas" | "pendiente" | "cobrado";
 
@@ -50,10 +77,6 @@ function haceLabel(iso: string) {
   return meses === 1 ? "hace 1 mes" : `hace ${meses} meses`;
 }
 
-function usd(n: number) {
-  return `USD ${Math.round(n).toLocaleString("es-AR")}`;
-}
-
 function csvField(value: string) {
   if (/[",\n]/.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -83,21 +106,7 @@ export function VentasView({
   const [vendedorId, setVendedorId] = useState("");
   const [listaAbierta, setListaAbierta] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [cotizacion, setCotizacion] = useState<number | null>(null);
   const [marcando, setMarcando] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("https://dolarapi.com/v1/dolares/oficial")
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled && d?.venta) setCotizacion(Number(d.venta));
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const vendedorWrapRef = useRef<HTMLDivElement>(null);
 
@@ -112,9 +121,6 @@ export function VentasView({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [listaAbierta]);
 
-  const ars = (usdValue: number) =>
-    cotizacion ? `≈ $${Math.round(usdValue * cotizacion).toLocaleString("es-AR")}` : "";
-
   const porPeriodo = useMemo(() => {
     if (periodo === "todo") return items;
     if (periodo === "mes") {
@@ -128,55 +134,72 @@ export function VentasView({
     return items.filter((v) => new Date(v.fecha).getTime() >= limite);
   }, [items, periodo]);
 
-  const sum = (arr: VentaDTO[], k: "precioFinal" | "comision") => arr.reduce((s, v) => s + v[k], 0);
-
   const cobradas = porPeriodo.filter((v) => v.estadoCobro === "COBRADO");
   const pendientes = porPeriodo.filter((v) => v.estadoCobro === "PENDIENTE");
-  const facturado = sum(porPeriodo, "precioFinal");
-  const comisionesTotal = sum(porPeriodo, "comision");
-  const comisionPendiente = sum(pendientes, "comision");
-  const ticketProm = porPeriodo.length ? Math.round(facturado / porPeriodo.length) : 0;
-  const maxVenta = porPeriodo.length ? Math.max(...porPeriodo.map((v) => v.precioFinal)) : 0;
+  // Totales que se muestran: por moneda.
+  const facturado = totales(porPeriodo, "precioFinal");
+  const comisionesTotal = totales(porPeriodo, "comision");
+  const comisionPendiente = totales(pendientes, "comision");
+  const hayPesos = porPeriodo.some((v) => v.moneda === "ARS");
 
-  const pctFacturadoCobrado = facturado > 0 ? Math.round((sum(cobradas, "precioFinal") / facturado) * 100) : 0;
+  // Indicadores de un solo número: en USD con la cotización de cada venta.
+  const facturadoUsd = enUsd(porPeriodo, "precioFinal");
+  const comisionesUsd = enUsd(porPeriodo, "comision");
+  const convertibles = porPeriodo.length - facturadoUsd.omitidas;
+  const ticketProm = convertibles > 0 ? Math.round(facturadoUsd.usd / convertibles) : 0;
+  const preciosUsd = porPeriodo
+    .map((v) => aUsdParaComparar(v.precioFinal, v.moneda, v.cotizacion))
+    .filter((x): x is number => x !== null);
+  const maxVenta = preciosUsd.length ? Math.max(...preciosUsd) : 0;
+
+  const pctFacturadoCobrado =
+    facturadoUsd.usd > 0 ? Math.round((enUsd(cobradas, "precioFinal").usd / facturadoUsd.usd) * 100) : 0;
   const pctUnidadesCobradas = porPeriodo.length
     ? Math.round((cobradas.length / porPeriodo.length) * 100)
     : 0;
   const pctComisionCobrada =
-    comisionesTotal > 0 ? Math.round((sum(cobradas, "comision") / comisionesTotal) * 100) : 0;
+    comisionesUsd.usd > 0 ? Math.round((enUsd(cobradas, "comision").usd / comisionesUsd.usd) * 100) : 0;
   const pctTicketVsMax = maxVenta > 0 ? Math.round((ticketProm / maxVenta) * 100) : 0;
 
+  const kpiFacturado = partesKpi(facturado);
+  const kpiComisiones = partesKpi(comisionesTotal);
+
   const porVendedor = useMemo(() => {
-    const map = new Map<
-      string,
-      { id: string; nombre: string; unidades: number; facturado: number; comision: number }
-    >();
+    const map = new Map<string, { id: string; nombre: string; ventas: VentaDTO[] }>();
     for (const v of porPeriodo) {
-      const entry = map.get(v.vendedor.id) ?? {
-        id: v.vendedor.id,
-        nombre: v.vendedor.nombre,
-        unidades: 0,
-        facturado: 0,
-        comision: 0,
-      };
-      entry.unidades += 1;
-      entry.facturado += v.precioFinal;
-      entry.comision += v.comision;
+      const entry = map.get(v.vendedor.id) ?? { id: v.vendedor.id, nombre: v.vendedor.nombre, ventas: [] };
+      entry.ventas.push(v);
       map.set(v.vendedor.id, entry);
     }
-    return Array.from(map.values()).sort((a, b) => b.facturado - a.facturado);
+    return Array.from(map.values())
+      .map((e) => ({
+        id: e.id,
+        nombre: e.nombre,
+        unidades: e.ventas.length,
+        facturado: totales(e.ventas, "precioFinal"),
+        comision: totales(e.ventas, "comision"),
+        // Solo para ordenar y para el largo de la barra.
+        facturadoUsd: enUsd(e.ventas, "precioFinal").usd,
+      }))
+      .sort((a, b) => b.facturadoUsd - a.facturadoUsd);
   }, [porPeriodo]);
-  const maxFacturadoVendedor = porVendedor.length ? porVendedor[0].facturado : 1;
+  const maxFacturadoVendedor = porVendedor.length ? porVendedor[0].facturadoUsd || 1 : 1;
 
   const pendientesPorVendedor = useMemo(() => {
-    const map = new Map<string, { nombre: string; unidades: number; comision: number }>();
+    const map = new Map<string, { nombre: string; ventas: VentaDTO[] }>();
     for (const v of pendientes) {
-      const entry = map.get(v.vendedor.id) ?? { nombre: v.vendedor.nombre, unidades: 0, comision: 0 };
-      entry.unidades += 1;
-      entry.comision += v.comision;
+      const entry = map.get(v.vendedor.id) ?? { nombre: v.vendedor.nombre, ventas: [] };
+      entry.ventas.push(v);
       map.set(v.vendedor.id, entry);
     }
-    return Array.from(map.values()).sort((a, b) => b.comision - a.comision);
+    return Array.from(map.values())
+      .map((e) => ({
+        nombre: e.nombre,
+        unidades: e.ventas.length,
+        comision: totales(e.ventas, "comision"),
+        comisionUsd: enUsd(e.ventas, "comision").usd,
+      }))
+      .sort((a, b) => b.comisionUsd - a.comisionUsd);
   }, [pendientes]);
 
   const pasaFiltro = (v: VentaDTO, f: FiltroCobro) =>
@@ -228,8 +251,10 @@ export function VentasView({
       "Vehículo",
       "Cliente",
       "Vendedor",
-      "Precio final (USD)",
-      "Comisión (USD)",
+      "Moneda",
+      "Precio final",
+      "Comisión",
+      "Cotización al vender (pesos por dólar)",
       "Estado de cobro",
     ];
     const filas = lista.map((v) => [
@@ -240,8 +265,11 @@ export function VentasView({
       // exporta en blanco en vez de inventarlo.
       v.compradorNombre ?? "",
       v.vendedor.nombre,
+      v.moneda,
       String(Math.round(v.precioFinal)),
       String(Math.round(v.comision)),
+      // En blanco en las ventas registradas antes de guardar la cotización.
+      v.cotizacion === null ? "" : String(v.cotizacion),
       v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente",
     ]);
 
@@ -292,9 +320,10 @@ export function VentasView({
         <KpiBar
           color="var(--success)"
           label="Facturado"
-          value={usd(facturado).replace("USD ", "")}
-          unit="USD"
-          trend={{ label: ars(facturado) || "cargando…", positive: "neutral" }}
+          value={kpiFacturado.valor}
+          unit={kpiFacturado.unidad}
+          valueExtra={kpiFacturado.extra}
+          trend={{ label: `${pctFacturadoCobrado}% cobrado`, positive: "neutral" }}
           percent={pctFacturadoCobrado}
         />
         <KpiBar
@@ -308,11 +337,12 @@ export function VentasView({
         <KpiBar
           color="var(--warn)"
           label="Comisiones"
-          value={comisionesTotal.toLocaleString("es-AR")}
-          unit="USD"
+          value={kpiComisiones.valor}
+          unit={kpiComisiones.unidad}
+          valueExtra={kpiComisiones.extra}
           trend={
             pendientes.length
-              ? { label: `${comisionPendiente.toLocaleString("es-AR")} sin pagar`, positive: false }
+              ? { label: `${formatearTotales(comisionPendiente)} sin pagar`, positive: false }
               : { label: "todo pagado", positive: true }
           }
           percent={pctComisionCobrada}
@@ -322,7 +352,9 @@ export function VentasView({
           label="Ticket promedio"
           value={ticketProm.toLocaleString("es-AR")}
           unit="USD"
-          trend={{ label: "por operación", positive: "neutral" }}
+          // Con ventas en pesos, el promedio las pasa a USD con la
+          // cotización de cada venta.
+          trend={{ label: hayPesos ? "por operación, en USD" : "por operación", positive: "neutral" }}
           percent={pctTicketVsMax}
         />
       </div>
@@ -403,7 +435,7 @@ export function VentasView({
                     <span className={styles.avatar}>{initials(v.nombre)}</span>
                     <span className={styles.vendedorItemBody}>
                       <span className={styles.vendedorItemName}>{v.nombre}</span>
-                      <span className={styles.vendedorItemMeta}>{usd(v.facturado)} facturado</span>
+                      <span className={styles.vendedorItemMeta}>{formatearTotales(v.facturado)} facturado</span>
                     </span>
                     <span className={styles.vendedorItemCount}>{v.unidades}</span>
                   </button>
@@ -463,14 +495,28 @@ export function VentasView({
                         </td>
                       )}
                       <td style={{ textAlign: "right" }}>
-                        <div className={styles.cellMain}>{usd(v.precioFinal)}</div>
-                        <div className={styles.cellSub}>{ars(v.precioFinal)}</div>
+                        <div className={styles.cellMain}>{formatearPrecio(v.precioFinal, v.moneda)}</div>
+                        {(() => {
+                          // Equivalente con la cotización del día de la venta
+                          // (no la de hoy). Las ventas viejas no la tienen.
+                          const eq = equivalente(v.precioFinal, v.moneda, v.cotizacion);
+                          return eq ? (
+                            <div
+                              className={styles.cellSub}
+                              title="Con la cotización del día en que se registró la venta"
+                            >
+                              ≈ {formatearPrecio(eq.monto, eq.moneda)} al vender
+                            </div>
+                          ) : null;
+                        })()}
                       </td>
                       <td style={{ textAlign: "right" }}>
-                        <div className={styles.cellMain}>{usd(v.comision)}</div>
-                        <div className={styles.cellSub}>
-                          {((v.comision / v.precioFinal) * 100).toFixed(1).replace(".", ",")}% del total
-                        </div>
+                        <div className={styles.cellMain}>{formatearPrecio(v.comision, v.moneda)}</div>
+                        {v.precioFinal > 0 && (
+                          <div className={styles.cellSub}>
+                            {((v.comision / v.precioFinal) * 100).toFixed(1).replace(".", ",")}% del total
+                          </div>
+                        )}
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <Pill color={v.estadoCobro === "COBRADO" ? "green" : "amber"}>
@@ -488,10 +534,10 @@ export function VentasView({
                       TOTAL {lista.length} {lista.length === 1 ? "OPERACIÓN" : "OPERACIONES"}
                     </td>
                     <td style={{ textAlign: "right" }} className={styles.totalValue}>
-                      {usd(sum(lista, "precioFinal"))}
+                      {formatearTotales(totales(lista, "precioFinal"))}
                     </td>
                     <td style={{ textAlign: "right" }} className={styles.totalComision}>
-                      {usd(sum(lista, "comision"))}
+                      {formatearTotales(totales(lista, "comision"))}
                     </td>
                     <td />
                   </tr>
@@ -523,14 +569,14 @@ export function VentasView({
                           </span>
                         </span>
                         <span className={styles.rankTotals}>
-                          <span className={styles.rankFacturado}>{usd(v.facturado)}</span>
-                          <span className={styles.rankComision}>{usd(v.comision)} comisión</span>
+                          <span className={styles.rankFacturado}>{formatearTotales(v.facturado)}</span>
+                          <span className={styles.rankComision}>{formatearTotales(v.comision)} comisión</span>
                         </span>
                       </div>
                       <div className={styles.rankTrack}>
                         <div
                           className={styles.rankFill}
-                          style={{ width: `${Math.round((v.facturado / maxFacturadoVendedor) * 100)}%` }}
+                          style={{ width: `${Math.round((v.facturadoUsd / maxFacturadoVendedor) * 100)}%` }}
                         />
                       </div>
                     </div>
@@ -560,12 +606,12 @@ export function VentasView({
                             {p.unidades} {p.unidades === 1 ? "venta sin cobrar" : "ventas sin cobrar"}
                           </span>
                         </span>
-                        <span className={styles.pendMonto}>{usd(p.comision)}</span>
+                        <span className={styles.pendMonto}>{formatearTotales(p.comision)}</span>
                       </div>
                     ))}
                     <div className={styles.pendTotalRow}>
                       <span>Total pendiente</span>
-                      <span className={styles.pendTotalValue}>{usd(comisionPendiente)}</span>
+                      <span className={styles.pendTotalValue}>{formatearTotales(comisionPendiente)}</span>
                     </div>
                     <button type="button" className={styles.pagarBtn} onClick={handleRegistrarPago} disabled={marcando}>
                       {marcando ? "Registrando…" : "Registrar pago de comisiones"}

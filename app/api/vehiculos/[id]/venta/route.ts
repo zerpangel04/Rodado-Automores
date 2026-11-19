@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { currentSession } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
-import { ventaInputSchema } from "@/lib/validation";
+import { errorTopePrecioVenta, ventaInputSchema } from "@/lib/validation";
+import { getCotizacionDeAgencia } from "@/lib/cotizacionAgencia";
 import { registrarActividad } from "@/lib/actividad";
 import { pausarPublicacionMercadoLibre } from "@/lib/mercadolibre";
 
@@ -30,12 +31,18 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
   const parsed = ventaInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Datos inválidos", detalles: parsed.error.flatten() },
+      { error: parsed.error.issues[0]?.message ?? "Datos inválidos", detalles: parsed.error.flatten() },
       { status: 400 }
     );
   }
 
   const { vendedorId, compradorNombre, precioFinal, comision } = parsed.data;
+  // Sin moneda explícita, la del vehículo (no un USD fijo).
+  const moneda = parsed.data.moneda ?? vehiculo.moneda;
+  const errorTope = errorTopePrecioVenta(precioFinal, moneda);
+  if (errorTope) {
+    return NextResponse.json({ error: errorTope }, { status: 400 });
+  }
 
   if (rol === "VENDEDOR" && vendedorId !== userId) {
     return NextResponse.json(
@@ -55,6 +62,12 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
   // otro auto? ¿se descarta?). Esa decisión queda en manos del dueño — el
   // front ya le muestra una alerta con la lista antes de confirmar la
   // venta si hay leads activos para este vehículo.
+  //
+  // La cotización del momento (la que eligió la agencia) queda guardada en
+  // la venta, sea en USD o en pesos: los reportes la usan para convertir
+  // esta venta siempre igual, aunque el dólar cambie después. Si la fuente
+  // no responde, la venta se registra igual, sin cotización.
+  const cotizacion = await getCotizacionDeAgencia(tenantId);
   const [venta] = await prisma.$transaction([
     prisma.venta.create({
       data: {
@@ -64,6 +77,8 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
         compradorNombre: compradorNombre || null,
         precioFinal,
         comision,
+        moneda,
+        cotizacion: cotizacion?.venta ?? null,
       },
     }),
     prisma.vehiculo.update({

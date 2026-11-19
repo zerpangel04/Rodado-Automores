@@ -2,7 +2,7 @@ import { z } from "zod";
 import { SOBRE_NOSOTROS_MAX, HORARIOS_MAX, ANIO_INICIO_MIN } from "./catalogo";
 import { WHATSAPP_MAX, normalizarWhatsappAR } from "./whatsapp";
 import { CONTRASTE_MINIMO, contrasteSuficiente, normalizarHex } from "./colorAcento";
-import { MONEDAS, PRECIO_MAXIMO, mensajeTopePrecio } from "./moneda";
+import { MONEDAS, PRECIO_MAXIMO, mensajeTopePrecio, type Moneda } from "./moneda";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -164,12 +164,37 @@ export const leadUpdateSchema = z.object({
   vendedorId: z.string().trim().optional().nullable(),
 });
 
-export const ventaInputSchema = z.object({
-  vendedorId: z.string().trim().min(1, "Elegí un vendedor"),
-  compradorNombre: z.string().trim().max(200).optional(),
-  precioFinal: z.coerce.number().min(0),
-  comision: z.coerce.number().min(0),
-});
+// La moneda es la de la venta (precio final y comisión van en la misma). Si
+// no viene, la API usa la del vehículo — nunca un USD fijo, que convertiría
+// en dólares el precio en pesos de un auto cargado en ARS. La cotización no
+// se recibe del cliente: la guarda el server al registrar la venta.
+export const ventaInputSchema = z
+  .object({
+    vendedorId: z.string().trim().min(1, "Elegí un vendedor"),
+    compradorNombre: z.string().trim().max(200).optional(),
+    precioFinal: z.coerce
+      .number({ error: "El precio final tiene que ser un número" })
+      .min(0, "El precio final no puede ser negativo"),
+    comision: z.coerce
+      .number({ error: "La comisión tiene que ser un número" })
+      .min(0, "La comisión no puede ser negativa"),
+    moneda: z.enum(MONEDAS, { error: "La moneda tiene que ser USD o ARS" }).optional(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.comision > v.precioFinal) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["comision"],
+        message: "La comisión no puede ser mayor que el precio final. Revisá que estén en la misma moneda.",
+      });
+    }
+  });
+
+// El tope de precio depende de la moneda, que puede venir del vehículo:
+// por eso se valida en la API, ya con la moneda resuelta.
+export function errorTopePrecioVenta(precioFinal: number, moneda: Moneda): string | null {
+  return precioFinal > PRECIO_MAXIMO[moneda] ? mensajeTopePrecio(moneda) : null;
+}
 
 export const forgotPasswordInputSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email inválido").max(200),

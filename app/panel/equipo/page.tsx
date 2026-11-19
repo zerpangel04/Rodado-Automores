@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatRelativo } from "../actividadDisplay";
+import { sumarPorMoneda } from "@/lib/moneda";
 import { EquipoView, type UsuarioDTO } from "./EquipoView";
 import styles from "../panel.module.css";
 
@@ -60,6 +61,7 @@ export default async function EquipoPage(props: { searchParams: Promise<{ invita
         fecha: true,
         precioFinal: true,
         comision: true,
+        moneda: true,
         vehiculo: { select: { sucursalId: true } },
       },
     }),
@@ -84,7 +86,10 @@ export default async function EquipoPage(props: { searchParams: Promise<{ invita
   const items: UsuarioDTO[] = usuarios.map((u) => {
     const leadsActivos = leadsAll.filter((l) => l.vendedorId === u.id && l.etapa !== "CERRADO");
     const ventasEsteMes = ventasAll.filter((v) => v.vendedorId === u.id && v.fecha >= startOfMonth);
-    const comisionEsteMes = ventasEsteMes.reduce((s, v) => s + Number(v.comision), 0);
+    // Por moneda: una comisión en pesos no se suma a una en dólares.
+    const comisionEsteMes = sumarPorMoneda(
+      ventasEsteMes.map((v) => ({ monto: Number(v.comision), moneda: v.moneda }))
+    );
     // Cierre = ventas del mes sobre los leads que le llegaron este mes (no
     // sobre los "activos" ahora mismo) — si se usa el conteo de activos
     // como base, un vendedor que cierra rápido termina con más ventas que
@@ -138,7 +143,10 @@ export default async function EquipoPage(props: { searchParams: Promise<{ invita
   const sinAsignar = leadsAll.filter((l) => l.etapa !== "CERRADO" && !l.vendedorId).length;
 
   const totalVentasMes = items.reduce((s, u) => s + u.ventasEsteMes, 0);
-  const totalComisionMes = items.reduce((s, u) => s + u.comisionEsteMes, 0);
+  const totalComisionMes = {
+    USD: items.reduce((s, u) => s + u.comisionEsteMes.USD, 0),
+    ARS: items.reduce((s, u) => s + u.comisionEsteMes.ARS, 0),
+  };
   const totalLeadsAsignados = items.reduce((s, u) => s + u.leadsActivos, 0);
   const totalLeadsEsteMes = leadsAll.filter((l) => l.createdAt >= startOfMonth).length;
   const cierreEquipo =

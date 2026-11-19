@@ -155,3 +155,75 @@ export function textoMonedas(monedas: Iterable<Moneda>): string {
   if (s.has("USD") && s.has("ARS")) return "en dólares y en pesos";
   return s.has("ARS") ? "en pesos" : "en dólares";
 }
+
+// ---------------- Ventas ----------------
+//
+// Una venta guarda su moneda y la cotización del día en que se registró
+// (pesos por dólar). Los TOTALES de ventas se muestran por moneda
+// (sumarPorMoneda / formatearTotales). Lo que necesita un único número
+// (gráficos, % de cobrado, ticket promedio, ranking) convierte cada venta
+// a USD con SU cotización guardada, nunca con la de hoy: así un mes viejo
+// no cambia de valor cuando se mueve el dólar.
+
+export type MontoVenta = { monto: number; moneda: Moneda; cotizacion: number | null };
+
+// Suma en USD para comparar o graficar. Una venta en pesos sin cotización
+// guardada no se puede convertir: se cuenta aparte en `omitidas`.
+export function sumarVentasEnUsd(items: Iterable<MontoVenta>): { usd: number; omitidas: number } {
+  let usd = 0;
+  let omitidas = 0;
+  for (const { monto, moneda, cotizacion } of items) {
+    const v = aUsdParaComparar(monto, moneda, cotizacion);
+    if (v === null) omitidas++;
+    else usd += v;
+  }
+  return { usd, omitidas };
+}
+
+// Partes de un KPI de montos: el número grande y su unidad en la moneda
+// principal (USD si hay), y el monto de la otra moneda aparte
+// ("+ $9.500.000"), sin convertir ni sumar entre monedas.
+export function partesKpi(t: TotalesPorMoneda): { valor: string; unidad: string; extra: string | null } {
+  const n = (x: number) => Math.round(x).toLocaleString("es-AR");
+  if (t.ARS !== 0 && t.USD === 0) return { valor: n(t.ARS), unidad: "pesos", extra: null };
+  return { valor: n(t.USD), unidad: "USD", extra: t.ARS !== 0 ? `+ ${formatearPrecio(t.ARS, "ARS")}` : null };
+}
+
+// Precio final del formulario de venta al cambiar la moneda de la venta.
+// Si el precio sigue siendo el del auto tal cual se precargó, se convierte
+// con la cotización (pesos redondeados a miles, dólares a unidades) para
+// que nunca quede, por ejemplo, "27500" leído como $27.500. Si se vuelve a
+// la moneda del auto sin haber tocado el valor convertido, vuelve su precio
+// original. En cualquier otro caso (el usuario ya lo editó, o no hay
+// cotización) el número no se toca.
+export function precioAlCambiarMonedaVenta(p: {
+  precioActual: string;
+  monedaActual: Moneda;
+  monedaNueva: Moneda;
+  precioAuto: number;
+  monedaAuto: Moneda;
+  cotizacion: number | null | undefined;
+}): string {
+  const { precioActual, monedaActual, monedaNueva, precioAuto, monedaAuto, cotizacion } = p;
+  if (monedaNueva === monedaActual || !cotizacion || cotizacion <= 0) return precioActual;
+  const otra = otraMoneda(monedaAuto);
+  const c = convertir(precioAuto, monedaAuto, otra, cotizacion);
+  const convertido = String(otra === "ARS" ? Math.round(c / 1000) * 1000 : Math.round(c));
+  if (monedaActual === monedaAuto && precioActual === String(precioAuto)) return convertido;
+  if (monedaNueva === monedaAuto && precioActual === convertido) return String(precioAuto);
+  return precioActual;
+}
+
+// Monto por moneda abreviado para tarjetas chicas, con la nota de abajo.
+// Solo USD queda como siempre ("1,25k" · "USD del mes"); solo pesos,
+// "$9,5M" · "pesos del mes"; con las dos, "1,25k + $9,5M" · "del mes".
+export function montoCortoPorMoneda(
+  t: TotalesPorMoneda,
+  { decimalesUsd = 1, periodo = "del mes" }: { decimalesUsd?: number; periodo?: string } = {}
+): { valor: string; nota: string } {
+  const usdCorto = `${(t.USD / 1000).toFixed(decimalesUsd).replace(".", ",")}k`;
+  if (t.ARS === 0) return { valor: usdCorto, nota: `USD ${periodo}` };
+  const arsCorto = `$${formatearCompacto(t.ARS)}`;
+  if (t.USD === 0) return { valor: arsCorto, nota: `pesos ${periodo}` };
+  return { valor: `${usdCorto} + ${arsCorto}`, nota: periodo };
+}

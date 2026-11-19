@@ -35,6 +35,8 @@ export default async function VentasPage() {
     compradorNombre: v.compradorNombre,
     precioFinal: Number(v.precioFinal),
     comision: Number(v.comision),
+    moneda: v.moneda,
+    cotizacion: v.cotizacion === null ? null : Number(v.cotizacion),
     estadoCobro: v.estadoCobro,
   }));
 

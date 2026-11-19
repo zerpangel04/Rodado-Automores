@@ -19,7 +19,13 @@ register(
   import.meta.url
 );
 
-const { vehiculoInputSchema, vehiculoUpdateSchema, catalogoGeneralSchema } = await import("../lib/validation.ts");
+const {
+  vehiculoInputSchema,
+  vehiculoUpdateSchema,
+  catalogoGeneralSchema,
+  ventaInputSchema,
+  errorTopePrecioVenta,
+} = await import("../lib/validation.ts");
 
 test("PATCH parcial { estado } solo cambia el estado (no borra documentos ni VTV)", () => {
   const r = vehiculoUpdateSchema.parse({ estado: "RESERVADO" });
@@ -117,4 +123,38 @@ test("Catálogo general: acepta OFICIAL o BLUE y rechaza otra cosa con mensaje e
   const r = catalogoGeneralSchema.safeParse({ ...generalBase, cotizacionPreferida: "MEP" });
   assert.ok(!r.success);
   assert.equal(r.error.issues[0].message, "Elegí dólar oficial o dólar blue");
+});
+
+// ---------------- Venta ----------------
+
+const ventaBase = { vendedorId: "u1", precioFinal: 27500, comision: 500 };
+
+test("Venta: sin moneda queda sin definir (la API usa la del vehículo, no un USD fijo)", () => {
+  const r = ventaInputSchema.parse(ventaBase);
+  assert.equal(r.moneda, undefined);
+});
+
+test("Venta: acepta USD o ARS y rechaza otra moneda con mensaje en castellano", () => {
+  assert.equal(ventaInputSchema.parse({ ...ventaBase, moneda: "ARS" }).moneda, "ARS");
+  const r = ventaInputSchema.safeParse({ ...ventaBase, moneda: "EUR" });
+  assert.ok(!r.success);
+  assert.equal(r.error.issues[0].message, "La moneda tiene que ser USD o ARS");
+});
+
+test("Venta: la comisión no puede superar el precio final", () => {
+  const r = ventaInputSchema.safeParse({ ...ventaBase, precioFinal: 27500, comision: 190000 });
+  assert.ok(!r.success);
+  assert.match(r.error.issues[0].message, /no puede ser mayor que el precio final/);
+  assert.ok(ventaInputSchema.safeParse({ ...ventaBase, comision: 27500 }).success);
+});
+
+test("Venta: no acepta montos negativos", () => {
+  assert.ok(!ventaInputSchema.safeParse({ ...ventaBase, precioFinal: -1 }).success);
+  assert.ok(!ventaInputSchema.safeParse({ ...ventaBase, comision: -1 }).success);
+});
+
+test("Venta: el tope de precio depende de la moneda", () => {
+  assert.equal(errorTopePrecioVenta(150_000_000, "ARS"), null);
+  assert.match(errorTopePrecioVenta(150_000_000, "USD"), /USD 100\.000\.000/);
+  assert.equal(errorTopePrecioVenta(27500, "USD"), null);
 });

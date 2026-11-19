@@ -6,6 +6,7 @@ export function KpiSpark({
   label,
   value,
   unit,
+  valueExtra,
   trend,
   spark,
 }: {
@@ -13,6 +14,8 @@ export function KpiSpark({
   label: string;
   value: string;
   unit?: string;
+  // Un segundo monto en otra moneda ("+ $9.500.000"), al lado de la unidad.
+  valueExtra?: string | null;
   trend?: { label: string; positive: boolean | "neutral" };
   spark: number[];
 }) {
@@ -32,6 +35,7 @@ export function KpiSpark({
           <Odometro value={value} />
         </span>
         {unit && <span className={styles.kpiBarUnit}>{unit}</span>}
+        {valueExtra && <span className={`${styles.kpiBarUnit} mono`}>{valueExtra}</span>}
         {trend && (
           <span
             className={`${styles.kpiBarTrend} ${

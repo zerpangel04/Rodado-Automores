@@ -7,6 +7,7 @@ import { Search, Plus, Star, UserRound, X } from "lucide-react";
 import styles from "./equipo.module.css";
 import { KpiBar } from "../KpiBar";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
+import { formatearTotales, montoCortoPorMoneda, partesKpi, type TotalesPorMoneda } from "@/lib/moneda";
 
 export type Rol = "DUENIO" | "ADMIN" | "VENDEDOR";
 
@@ -22,7 +23,8 @@ export type UsuarioDTO = {
   leadsActivos: number;
   ventasEsteMes: number;
   cierre: number;
-  comisionEsteMes: number;
+  // Por moneda (nunca dólares y pesos sumados).
+  comisionEsteMes: TotalesPorMoneda;
 };
 
 type ResumenDTO = {
@@ -35,7 +37,7 @@ type ResumenDTO = {
   sinAsignar: number;
   cierreEquipo: number;
   totalVentasMes: number;
-  totalComisionMes: number;
+  totalComisionMes: TotalesPorMoneda;
 };
 
 type CargaItem = { id: string; nombre: string; leads: number };
@@ -56,9 +58,8 @@ function initials(name: string) {
     .join("");
 }
 
-function usd(n: number) {
-  return `USD ${Math.round(n).toLocaleString("es-AR")}`;
-}
+// Comisión del mes abreviada (en USD con 2 decimales, como siempre).
+const comisionCorta = (t: TotalesPorMoneda) => montoCortoPorMoneda(t, { decimalesUsd: 2 });
 
 export function EquipoView({
   initialItems,
@@ -349,8 +350,9 @@ export function EquipoView({
         <KpiBar
           color="var(--secondary)"
           label="Comisiones del mes"
-          value={resumen.totalComisionMes.toLocaleString("es-AR")}
-          unit="USD"
+          value={partesKpi(resumen.totalComisionMes).valor}
+          unit={partesKpi(resumen.totalComisionMes).unidad}
+          valueExtra={partesKpi(resumen.totalComisionMes).extra}
           trend={{ label: "a liquidar", positive: "neutral" }}
           percent={100}
         />
@@ -416,9 +418,9 @@ export function EquipoView({
                 <div className={`${styles.metric} ${styles.metricDivider}`}>
                   <div className={styles.metricLabel}>COMISIÓN</div>
                   <div className={`${styles.metricValue} ${styles.metricAccent}`}>
-                    {(u.comisionEsteMes / 1000).toFixed(2).replace(".", ",")}k
+                    {comisionCorta(u.comisionEsteMes).valor}
                   </div>
-                  <div className={styles.metricNote}>USD del mes</div>
+                  <div className={styles.metricNote}>{comisionCorta(u.comisionEsteMes).nota}</div>
                 </div>
               </div>
 
@@ -678,7 +680,7 @@ export function EquipoView({
               </div>
               <div className={`${styles.metric} ${styles.metricDivider}`}>
                 <div className={styles.metricLabel}>COMISIÓN</div>
-                <div className={`${styles.metricValue} ${styles.metricAccent}`}>{usd(fichaFor.comisionEsteMes)}</div>
+                <div className={`${styles.metricValue} ${styles.metricAccent}`}>{formatearTotales(fichaFor.comisionEsteMes)}</div>
                 <div className={styles.metricNote}>del mes</div>
               </div>
             </div>

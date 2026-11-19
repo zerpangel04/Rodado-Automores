@@ -365,6 +365,13 @@ model Venta {
   compradorNombre  String?
   precioFinal      Decimal
   comision         Decimal
+  // Moneda de precioFinal y de comision (las dos van en la misma). Propia
+  // de la venta, no heredada del vehículo: es un registro histórico.
+  moneda           Moneda      @default(USD)
+  // Pesos por dólar al momento de la venta, con la cotización que tenía
+  // elegida la agencia. null en las ventas anteriores a este campo o si la
+  // cotización no estaba disponible al registrarla.
+  cotizacion       Decimal?
   estadoCobro      EstadoCobro @default(PENDIENTE)
   fecha            DateTime    @default(now())
 

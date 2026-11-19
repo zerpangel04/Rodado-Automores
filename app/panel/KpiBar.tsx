@@ -7,6 +7,7 @@ export function KpiBar({
   label,
   value,
   unit,
+  valueExtra,
   trend,
   percent,
 }: {
@@ -15,6 +16,8 @@ export function KpiBar({
   label: string;
   value: string;
   unit?: string;
+  // Un segundo monto en otra moneda ("+ $9.500.000"), al lado de la unidad.
+  valueExtra?: string | null;
   trend?: { label: string; positive: boolean | "neutral" };
   percent: number;
 }) {
@@ -34,6 +37,7 @@ export function KpiBar({
           <Odometro value={value} />
         </span>
         {unit && <span className={styles.kpiBarUnit}>{unit}</span>}
+        {valueExtra && <span className={`${styles.kpiBarUnit} mono`}>{valueExtra}</span>}
         {trend && (
           <span
             className={`${styles.kpiBarTrend} ${

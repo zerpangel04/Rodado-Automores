@@ -150,3 +150,71 @@ test("textoMonedas: dólares, pesos o ambas", () => {
   assert.equal(m.textoMonedas(["USD", "ARS"]), "en dólares y en pesos");
   assert.equal(m.textoMonedas([]), "en dólares");
 });
+
+// ---------------- Ventas ----------------
+
+const ventas = [
+  { monto: 27500, moneda: "USD", cotizacion: 1500 },
+  { monto: 9_000_000, moneda: "ARS", cotizacion: 1500 }, // USD 6.000 con SU cotización
+  { monto: 12300, moneda: "USD", cotizacion: null }, // venta vieja en USD: no necesita cotización
+  { monto: 5_000_000, moneda: "ARS", cotizacion: null }, // pesos sin cotización: no se puede convertir
+];
+
+test("sumarVentasEnUsd: cada venta con su cotización guardada; sin cotización en pesos, se omite", () => {
+  assert.deepEqual(m.sumarVentasEnUsd(ventas), { usd: 27500 + 6000 + 12300, omitidas: 1 });
+  assert.deepEqual(m.sumarVentasEnUsd([]), { usd: 0, omitidas: 0 });
+});
+
+test("partesKpi: USD principal y pesos aparte, nunca sumados", () => {
+  assert.deepEqual(m.partesKpi({ USD: 27500, ARS: 0 }), { valor: "27.500", unidad: "USD", extra: null });
+  assert.deepEqual(m.partesKpi({ USD: 0, ARS: 9_500_000 }), { valor: "9.500.000", unidad: "pesos", extra: null });
+  assert.deepEqual(m.partesKpi({ USD: 27500, ARS: 9_500_000 }), {
+    valor: "27.500",
+    unidad: "USD",
+    extra: "+ $9.500.000",
+  });
+  assert.deepEqual(m.partesKpi({ USD: 0, ARS: 0 }), { valor: "0", unidad: "USD", extra: null });
+});
+
+test("montoCortoPorMoneda: solo USD queda como antes; pesos y mixto por separado", () => {
+  assert.deepEqual(m.montoCortoPorMoneda({ USD: 1250, ARS: 0 }, { decimalesUsd: 2 }), { valor: "1,25k", nota: "USD del mes" });
+  assert.deepEqual(m.montoCortoPorMoneda({ USD: 45600, ARS: 0 }), { valor: "45,6k", nota: "USD del mes" });
+  assert.deepEqual(m.montoCortoPorMoneda({ USD: 0, ARS: 9_500_000 }), { valor: "$9,5M", nota: "pesos del mes" });
+  assert.deepEqual(m.montoCortoPorMoneda({ USD: 1250, ARS: 190_000 }, { decimalesUsd: 2 }), {
+    valor: "1,25k + $190,0k",
+    nota: "del mes",
+  });
+});
+
+// Modal de venta: lo que queda en "Precio final" al tocar USD / $ ARS.
+const auto208 = { precioAuto: 17800, monedaAuto: "USD", cotizacion: 1570 };
+const cambio = (precioActual, monedaActual, monedaNueva, extra = {}) =>
+  m.precioAlCambiarMonedaVenta({ ...auto208, precioActual, monedaActual, monedaNueva, ...extra });
+
+test("venta: precio sin tocar se convierte al cambiar de moneda (pesos a miles)", () => {
+  // 17.800 × 1570 = 27.946.000 (ya redondo a miles)
+  assert.equal(cambio("17800", "USD", "ARS"), "27946000");
+  // Auto en pesos vendido en dólares: 9.500.000 / 1570 = 6050,9 → 6051
+  assert.equal(
+    m.precioAlCambiarMonedaVenta({ precioActual: "9500000", monedaActual: "ARS", monedaNueva: "USD", precioAuto: 9_500_000, monedaAuto: "ARS", cotizacion: 1570 }),
+    "6051"
+  );
+});
+
+test("venta: volver a la moneda del auto sin editar restaura su precio", () => {
+  assert.equal(cambio("27946000", "ARS", "USD"), "17800");
+});
+
+test("venta: si el usuario ya editó el precio, cambiar la moneda no lo toca", () => {
+  assert.equal(cambio("17500", "USD", "ARS"), "17500"); // editado antes de cambiar
+  assert.equal(cambio("28000000", "ARS", "USD"), "28000000"); // editado en pesos y vuelve a USD
+});
+
+test("venta: sin cotización nunca convierte", () => {
+  assert.equal(cambio("17800", "USD", "ARS", { cotizacion: null }), "17800");
+  assert.equal(cambio("17800", "USD", "ARS", { cotizacion: 0 }), "17800");
+});
+
+test("venta: elegir la misma moneda no cambia nada", () => {
+  assert.equal(cambio("17800", "USD", "USD"), "17800");
+});

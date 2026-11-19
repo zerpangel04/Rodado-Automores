@@ -7,6 +7,7 @@ import { MapPin, Phone, Plus, AlertTriangle, Building2 } from "lucide-react";
 import styles from "./sucursales.module.css";
 import { KpiBar } from "../KpiBar";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
+import { formatearTotales, montoCortoPorMoneda, type TotalesPorMoneda } from "@/lib/moneda";
 
 export type SucursalDTO = {
   id: string;
@@ -17,7 +18,8 @@ export type SucursalDTO = {
   esPrincipal: boolean;
   leadsActivos: number;
   ventasEsteMes: number;
-  facturadoEsteMes: number;
+  // Por moneda (nunca dólares y pesos sumados).
+  facturadoEsteMes: TotalesPorMoneda;
   participacionStock: number;
   equipo: { id: string; nombre: string }[];
 };
@@ -27,7 +29,7 @@ type ResumenDTO = {
   stockTotal: number;
   stockPorSucursal: number[];
   ventasMes: number;
-  facturadoMes: number;
+  facturadoMes: TotalesPorMoneda;
   equipoAsignado: number;
   totalUsuarios: number;
   vendedoresSinSucursal: number;
@@ -57,9 +59,6 @@ function initials(name: string) {
     .join("");
 }
 
-function usd(n: number) {
-  return `USD ${Math.round(n).toLocaleString("es-AR")}`;
-}
 
 export function SucursalesView({
   initialItems,
@@ -161,7 +160,7 @@ export function SucursalesView({
                 esPrincipal: false,
                 leadsActivos: 0,
                 ventasEsteMes: 0,
-                facturadoEsteMes: 0,
+                facturadoEsteMes: { USD: 0, ARS: 0 },
                 participacionStock: 0,
                 equipo: [],
               },
@@ -272,7 +271,7 @@ export function SucursalesView({
           label="Ventas del mes"
           value={String(resumen.ventasMes)}
           unit="operaciones"
-          trend={{ label: usd(resumen.facturadoMes), positive: "neutral" }}
+          trend={{ label: formatearTotales(resumen.facturadoMes), positive: "neutral" }}
           percent={
             resumen.stockTotal > 0 ? Math.min(100, Math.round((resumen.ventasMes / resumen.stockTotal) * 100)) : 0
           }
@@ -385,9 +384,9 @@ export function SucursalesView({
                 <div className={`${styles.metric} ${styles.metricDivider}`}>
                   <div className={styles.metricLabel}>FACTURADO</div>
                   <div className={`${styles.metricValue} ${styles.metricAccent}`}>
-                    {(s.facturadoEsteMes / 1000).toFixed(1).replace(".", ",")}k
+                    {montoCortoPorMoneda(s.facturadoEsteMes).valor}
                   </div>
-                  <div className={styles.metricNote}>USD del mes</div>
+                  <div className={styles.metricNote}>{montoCortoPorMoneda(s.facturadoEsteMes).nota}</div>
                 </div>
               </div>
 

@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SUCURSAL_COOKIE } from "@/lib/sucursalFiltro";
+import { sumarPorMoneda } from "@/lib/moneda";
 import { SucursalesView, type SucursalDTO } from "./SucursalesView";
 import styles from "../panel.module.css";
 
@@ -45,6 +46,7 @@ export default async function SucursalesPage() {
       select: {
         fecha: true,
         precioFinal: true,
+        moneda: true,
         vendedorId: true,
         vehiculo: { select: { sucursalId: true } },
       },
@@ -58,9 +60,10 @@ export default async function SucursalesPage() {
   const nombrePorId = new Map(usuarios.map((u) => [u.id, u.nombre]));
   const totalVehiculos = sucursales.reduce((s, x) => s + x._count.vehiculos, 0);
   const totalVentasMes = ventasAll.filter((v) => v.fecha >= startOfMonth).length;
-  const totalFacturadoMes = ventasAll
-    .filter((v) => v.fecha >= startOfMonth)
-    .reduce((s, v) => s + Number(v.precioFinal), 0);
+  // Facturado por moneda: nunca dólares y pesos en un mismo número.
+  const facturado = (ventas: typeof ventasAll) =>
+    sumarPorMoneda(ventas.map((v) => ({ monto: Number(v.precioFinal), moneda: v.moneda })));
+  const totalFacturadoMes = facturado(ventasAll.filter((v) => v.fecha >= startOfMonth));
 
   const items: SucursalDTO[] = sucursales.map((s, idx) => {
     const leadsSucursal = leadsAll.filter((l) => l.vehiculo?.sucursalId === s.id);
@@ -83,7 +86,7 @@ export default async function SucursalesPage() {
       esPrincipal: idx === 0,
       leadsActivos: leadsSucursal.filter((l) => l.etapa !== "CERRADO").length,
       ventasEsteMes: ventasEsteMes.length,
-      facturadoEsteMes: ventasEsteMes.reduce((sum, v) => sum + Number(v.precioFinal), 0),
+      facturadoEsteMes: facturado(ventasEsteMes),
       participacionStock: totalVehiculos > 0 ? Math.round((s._count.vehiculos / totalVehiculos) * 100) : 0,
       equipo,
     };

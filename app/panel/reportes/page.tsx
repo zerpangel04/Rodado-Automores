@@ -4,6 +4,13 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
 import { getPlanTenant } from "@/lib/planes";
+import {
+  aUsdParaComparar,
+  sumarPorMoneda,
+  sumarVentasEnUsd,
+  type MontoVenta,
+  type TotalesPorMoneda,
+} from "@/lib/moneda";
 import styles from "../panel.module.css";
 import reportStyles from "./reportes.module.css";
 import { ReportesView, type Etapa } from "./ReportesView";
@@ -127,7 +134,7 @@ export default async function ReportesPage(
   ] = await Promise.all([
     prisma.venta.findMany({
       where: { tenantId, ...vendorFilter, ...sucursalFilter, fecha: { gte: from, lte: to } },
-      select: { fecha: true, precioFinal: true },
+      select: { fecha: true, precioFinal: true, moneda: true, cotizacion: true },
       orderBy: { fecha: "asc" },
     }),
     prisma.lead.findMany({
@@ -154,7 +161,7 @@ export default async function ReportesPage(
       : Promise.resolve([]),
     prisma.venta.findMany({
       where: { tenantId, ...vendorFilter, ...sucursalFilter, fecha: { gte: prevFrom, lte: prevTo } },
-      select: { precioFinal: true },
+      select: { precioFinal: true, moneda: true, cotizacion: true },
     }),
     prisma.lead.findMany({
       where: { tenantId, ...vendorFilter, ...sucursalFilter, createdAt: { gte: prevFrom, lte: prevTo } },
@@ -166,13 +173,25 @@ export default async function ReportesPage(
     }),
   ]);
 
+  // Montos de cada venta con su moneda y la cotización guardada al venderse.
+  const montoVenta = (v: { precioFinal: unknown; moneda: MontoVenta["moneda"]; cotizacion: unknown }): MontoVenta => ({
+    monto: Number(v.precioFinal),
+    moneda: v.moneda,
+    cotizacion: v.cotizacion === null ? null : Number(v.cotizacion),
+  });
+
   // --- Ventas en el tiempo: agrupadas por día ---
+  // El gráfico necesita un único monto por día: cada venta en pesos se pasa
+  // a USD con la cotización guardada al registrarla (nunca la de hoy). Las
+  // que no tienen cotización guardada se cuentan en unidades pero no en el
+  // monto, y se avisa debajo del gráfico.
   const ventasPorDia = new Map<string, { unidades: number; monto: number }>();
   for (const v of ventasEnRango) {
     const key = isoDay(v.fecha);
     const actual = ventasPorDia.get(key) ?? { unidades: 0, monto: 0 };
     actual.unidades += 1;
-    actual.monto += Number(v.precioFinal);
+    const m = montoVenta(v);
+    actual.monto += aUsdParaComparar(m.monto, m.moneda, m.cotizacion) ?? 0;
     ventasPorDia.set(key, actual);
   }
   const ventasSerie = [...ventasPorDia.entries()]
@@ -180,8 +199,14 @@ export default async function ReportesPage(
     .map(([fecha, v]) => ({ fecha, ...v }));
 
   const totalUnidades = ventasEnRango.length;
-  const totalMonto = ventasEnRango.reduce((s, v) => s + Number(v.precioFinal), 0);
-  const totalMontoPrev = ventasPrev.reduce((s, v) => s + Number(v.precioFinal), 0);
+  // Lo que se muestra: un total por moneda.
+  const totalMonto = sumarPorMoneda(ventasEnRango.map(montoVenta));
+  // Solo para el "% vs. período anterior": los dos períodos en USD.
+  const enRangoUsd = sumarVentasEnUsd(ventasEnRango.map(montoVenta));
+  const totalMontoUsd = enRangoUsd.usd;
+  const totalMontoPrevUsd = sumarVentasEnUsd(ventasPrev.map(montoVenta)).usd;
+  const ventasSinCotizacion = enRangoUsd.omitidas;
+  const hayPesos = ventasEnRango.some((v) => v.moneda === "ARS");
   const totalUnidadesPrev = ventasPrev.length;
 
   // --- Leads por canal + conversión a cerrado ---
@@ -242,8 +267,8 @@ export default async function ReportesPage(
     nombre: string;
     leads: number;
     ventas: number;
-    facturado: number;
-    comision: number;
+    facturado: TotalesPorMoneda;
+    comision: TotalesPorMoneda;
   }[] = [];
 
   if (rol === "DUENIO" && usuariosTenant.length > 0) {
@@ -258,33 +283,34 @@ export default async function ReportesPage(
         },
         _count: { _all: true },
       }),
-      prisma.venta.groupBy({
-        by: ["vendedorId"],
+      // Ventas una por una (no groupBy con _sum): sumar precioFinal de
+      // distintas monedas daría un número sin sentido.
+      prisma.venta.findMany({
         where: { tenantId, ...sucursalFilter, fecha: { gte: from, lte: to } },
-        _count: { _all: true },
-        _sum: { comision: true, precioFinal: true },
+        select: { vendedorId: true, precioFinal: true, comision: true, moneda: true, cotizacion: true },
       }),
     ]);
 
     const leadsPorVendedor = new Map(leadsGroup.map((g) => [g.vendedorId, g._count._all]));
-    const ventasPorVendedor = new Map(ventasGroup.map((g) => [g.vendedorId, g._count._all]));
-    const comisionPorVendedor = new Map(
-      ventasGroup.map((g) => [g.vendedorId, Number(g._sum.comision ?? 0)])
-    );
-    const facturadoPorVendedor = new Map(
-      ventasGroup.map((g) => [g.vendedorId, Number(g._sum.precioFinal ?? 0)])
-    );
+    const ventasDe = (id: string) => ventasGroup.filter((v) => v.vendedorId === id);
 
     performanceVendedores = usuariosTenant
-      .map((u) => ({
-        nombre: u.nombre,
-        leads: leadsPorVendedor.get(u.id) ?? 0,
-        ventas: ventasPorVendedor.get(u.id) ?? 0,
-        facturado: facturadoPorVendedor.get(u.id) ?? 0,
-        comision: comisionPorVendedor.get(u.id) ?? 0,
-      }))
+      .map((u) => {
+        const suyas = ventasDe(u.id);
+        const comisiones = suyas.map((v) => montoVenta({ ...v, precioFinal: v.comision }));
+        return {
+          nombre: u.nombre,
+          leads: leadsPorVendedor.get(u.id) ?? 0,
+          ventas: suyas.length,
+          facturado: sumarPorMoneda(suyas.map(montoVenta)),
+          comision: sumarPorMoneda(comisiones),
+          // Solo para desempatar el orden.
+          comisionUsd: sumarVentasEnUsd(comisiones).usd,
+        };
+      })
       .filter((u) => u.leads > 0 || u.ventas > 0)
-      .sort((a, b) => b.ventas - a.ventas || b.comision - a.comision);
+      .sort((a, b) => b.ventas - a.ventas || b.comisionUsd - a.comisionUsd)
+      .map(({ comisionUsd: _, ...resto }) => resto);
   }
 
   // --- Lecturas automáticas: solo se generan cuando hay datos reales que
@@ -372,8 +398,11 @@ export default async function ReportesPage(
         <ReportesView
           totalUnidades={totalUnidades}
           totalMonto={totalMonto}
+          totalMontoUsd={totalMontoUsd}
           totalUnidadesPrev={totalUnidadesPrev}
-          totalMontoPrev={totalMontoPrev}
+          totalMontoPrevUsd={totalMontoPrevUsd}
+          hayPesos={hayPesos}
+          ventasSinCotizacion={ventasSinCotizacion}
           ventasSerie={ventasSerie}
           embudo={embudo}
           conversionPct={conversionPct}

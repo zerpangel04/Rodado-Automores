@@ -30,6 +30,7 @@ import {
   equivalente,
   formatearPrecio,
   PRECIO_MAXIMO,
+  precioAlCambiarMonedaVenta,
   type Moneda,
 } from "@/lib/moneda";
 import { KpiBar } from "../KpiBar";
@@ -145,6 +146,8 @@ type SaleForm = {
   compradorNombre: string;
   precioFinal: string;
   comision: string;
+  // Moneda de la venta (precio final y comisión). Arranca en la del auto.
+  moneda: Moneda;
 };
 
 const stateLabel: Record<EstadoVehiculo, string> = {
@@ -262,6 +265,7 @@ export function StockView({
     compradorNombre: "",
     precioFinal: "",
     comision: "",
+    moneda: "USD",
   });
   const [saleError, setSaleError] = useState<string | null>(null);
   const [saleSaving, setSaleSaving] = useState(false);
@@ -830,11 +834,31 @@ export function StockView({
       compradorNombre: "",
       precioFinal: String(v.precio),
       comision: "",
+      moneda: v.moneda,
     });
     setSaleError(null);
     setSaleWarningLeads(null);
     setSaleWarningExpanded(false);
     setReassigningLeadId(null);
+  }
+
+  // Cambiar la moneda de la venta. Si el precio final sigue siendo el del
+  // auto tal cual se precargó, se convierte con la cotización de la agencia
+  // (redondeado: pesos a miles, dólares a unidades) para que nunca quede,
+  // por ejemplo, "27500" leído como $27.500. Si el usuario ya lo editó, o no
+  // hay cotización, se deja el número como está y el "≈" de abajo muestra
+  // qué representa. La comisión no se toca: se carga en la moneda elegida.
+  function cambiarMonedaVenta(m: Moneda) {
+    if (!saleTarget || m === saleForm.moneda) return;
+    const precioFinal = precioAlCambiarMonedaVenta({
+      precioActual: saleForm.precioFinal,
+      monedaActual: saleForm.moneda,
+      monedaNueva: m,
+      precioAuto: saleTarget.precio,
+      monedaAuto: saleTarget.moneda,
+      cotizacion: cotizacion?.venta,
+    });
+    setSaleForm({ ...saleForm, moneda: m, precioFinal });
   }
 
   async function submitSale() {
@@ -851,6 +875,7 @@ export function StockView({
           compradorNombre: saleForm.compradorNombre.trim() || undefined,
           precioFinal: Number(saleForm.precioFinal) || 0,
           comision: Number(saleForm.comision) || 0,
+          moneda: saleForm.moneda,
         }),
       });
       if (!res.ok) {
@@ -1751,26 +1776,64 @@ export function StockView({
             />
           </div>
 
+          <div className={styles.field}>
+            <label>Moneda de la venta</label>
+            <div className={styles.monedaSwitch} role="radiogroup" aria-label="Moneda de la venta">
+              {(["USD", "ARS"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  role="radio"
+                  aria-checked={saleForm.moneda === m}
+                  className={saleForm.moneda === m ? styles.monedaActiva : ""}
+                  onClick={() => cambiarMonedaVenta(m)}
+                >
+                  {m === "USD" ? "USD" : "$ ARS"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className={styles.fieldRow}>
             <div className={styles.field}>
-              <label>Precio final (USD)</label>
+              <label>Precio final ({saleForm.moneda === "USD" ? "USD" : "$"})</label>
               <input
                 type="number"
+                min={0}
+                max={PRECIO_MAXIMO[saleForm.moneda]}
                 value={saleForm.precioFinal}
                 onChange={(e) => setSaleForm({ ...saleForm, precioFinal: e.target.value })}
-                placeholder="24500"
+                placeholder={saleForm.moneda === "USD" ? "24500" : "9500000"}
               />
+              {(() => {
+                const monto = Number(saleForm.precioFinal);
+                const eq = monto > 0 ? equivalente(monto, saleForm.moneda, cotizacion?.venta) : null;
+                return eq && cotizacion ? (
+                  <div className={styles.precioEquivalente}>
+                    ≈ {formatearPrecio(eq.monto, eq.moneda)} ·{" "}
+                    {cotizacion.tipo === "BLUE" ? "dólar blue" : "dólar oficial"} {cotizacion.fecha}
+                  </div>
+                ) : null;
+              })()}
             </div>
             <div className={styles.field}>
-              <label>Comisión (USD)</label>
+              <label>Comisión ({saleForm.moneda === "USD" ? "USD" : "$"})</label>
               <input
                 type="number"
+                min={0}
                 value={saleForm.comision}
                 onChange={(e) => setSaleForm({ ...saleForm, comision: e.target.value })}
-                placeholder="500"
+                placeholder={saleForm.moneda === "USD" ? "500" : "190000"}
               />
             </div>
           </div>
+          {saleTarget && saleForm.moneda !== saleTarget.moneda && (
+            <p className={styles.precioEquivalente} style={{ marginTop: 0 }}>
+              El auto está publicado en {saleTarget.moneda === "USD" ? "dólares" : "pesos"} (
+              {formatearPrecio(saleTarget.precio, saleTarget.moneda)}); la venta se registra en{" "}
+              {saleForm.moneda === "USD" ? "dólares" : "pesos"}.
+            </p>
+          )}
 
           <div className={styles.modalActions}>
             <button className={styles.btnGhost} onClick={() => setSaleTarget(null)}>
