@@ -57,6 +57,10 @@ enum TipoActividad {
   // El vendedor registró un contacto con el lead sin cambiarlo de etapa.
   // Aparece en el Recorrido de la ficha, no en la campanita.
   CONTACTO_LEAD
+  // Se liquidaron (o se anuló la liquidación de) comisiones de un vendedor.
+  // Van con vendedorId: el vendedor lo ve en su campanita.
+  COMISION_LIQUIDADA
+  COMISION_ANULADA
 }
 
 // Cada concesionaria = un tenant. Todo dato cuelga de un tenant_id.
@@ -91,6 +95,9 @@ model Tenant {
   // Días sin movimiento a partir de los cuales un lead abierto se muestra
   // como "dormido" en Leads y en Pendientes. Lo elige el Dueño o un Admin.
   diasLeadDormido Int @default(7)
+  // % de comisión por defecto de la agencia (ej. 3.00). Precarga la comisión
+  // en el modal de venta; null = se carga a mano. Usuario.comisionPct lo pisa.
+  comisionPct   Decimal? @db.Decimal(5, 2)
   // Foto de portada del catálogo (bucket agencia-portadas). Mismo gating
   // que colorAcento.
   portadaUrl    String?
@@ -100,6 +107,7 @@ model Tenant {
   leads      Lead[]
   ventas     Venta[]
   sucursales Sucursal[]
+  liquidacionesComision LiquidacionComision[]
 
   mercadoLibreConexion MercadoLibreConexion?
   actividades          ActividadLog[]
@@ -183,6 +191,8 @@ model Usuario {
   passwordHash String
   rol          Rol      @default(VENDEDOR)
   createdAt    DateTime @default(now())
+  // % de comisión propio de este vendedor; null = usa el de la agencia.
+  comisionPct  Decimal? @db.Decimal(5, 2)
 
   leadsAsignados          Lead[]                    @relation("VendedorAsignado")
   ventas                  Venta[]                   @relation("VendedorVenta")
@@ -190,6 +200,9 @@ model Usuario {
   actividadesComoVendedor ActividadLog[]            @relation("VendedorActividad")
   dispositivosConfiables  DispositivoConfiable[]
   codigosVerificacionLogin CodigoVerificacionLogin[]
+  liquidacionesRecibidas   LiquidacionComision[]     @relation("LiquidacionVendedor")
+  liquidacionesCreadas     LiquidacionComision[]     @relation("LiquidacionCreadaPor")
+  liquidacionesAnuladas    LiquidacionComision[]     @relation("LiquidacionAnuladaPor")
 }
 
 // Token de un solo uso para el flujo de "olvidé mi contraseña".
@@ -382,12 +395,54 @@ model Venta {
   // elegida la agencia. null en las ventas anteriores a este campo o si la
   // cotización no estaba disponible al registrarla.
   cotizacion       Decimal?
+  // DEPRECADO: lo único que lo escribía era "Registrar pago de comisiones",
+  // así que en la práctica era "comisión pagada". Se migró a liquidaciones
+  // históricas y ya no se usa; queda en la base hasta una migración
+  // posterior que lo borre, para poder volver atrás si hiciera falta.
   estadoCobro      EstadoCobro @default(PENDIENTE)
   fecha            DateTime    @default(now())
+  // Liquidación en la que se pagó la comisión de esta venta. null =
+  // comisión pendiente. Restrict: no se borra una liquidación con ventas.
+  liquidacionId    String?
+  liquidacion      LiquidacionComision? @relation(fields: [liquidacionId], references: [id], onDelete: Restrict)
 
   actividades ActividadLog[]
 
   @@index([tenantId, fecha])
+  @@index([tenantId, liquidacionId])
+}
+
+// Pago de comisiones a un vendedor, en UNA moneda (USD y pesos nunca se
+// suman: un vendedor con ventas en las dos tiene dos liquidaciones). Lo
+// hace el Dueño o un Admin. Anular vuelve sus ventas a pendiente pero la
+// liquidación queda registrada (anuladaEn), con ventaIds como constancia de
+// qué ventas incluía.
+model LiquidacionComision {
+  id             String    @id @default(cuid())
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id])
+  vendedorId     String
+  vendedor       Usuario   @relation("LiquidacionVendedor", fields: [vendedorId], references: [id])
+  moneda         Moneda
+  // Total y cantidad al momento de liquidar (no se recalculan).
+  total          Decimal
+  cantidadVentas Int
+  ventaIds       String[]
+  nota           String?   @db.VarChar(200)
+  // Cuándo se liquidó. En las históricas (historica = true) es la fecha de
+  // la migración: el botón viejo no guardaba cuándo se pagó.
+  fecha          DateTime  @default(now())
+  historica      Boolean   @default(false)
+  creadaPorId    String?
+  creadaPor      Usuario?  @relation("LiquidacionCreadaPor", fields: [creadaPorId], references: [id], onDelete: SetNull)
+  anuladaEn      DateTime?
+  anuladaPorId   String?
+  anuladaPor     Usuario?  @relation("LiquidacionAnuladaPor", fields: [anuladaPorId], references: [id], onDelete: SetNull)
+
+  ventas Venta[]
+
+  @@index([tenantId, fecha])
+  @@index([tenantId, vendedorId])
 }
 
 // Historial cronológico de eventos de la agencia para el widget "Actividad
