@@ -7,6 +7,13 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
+  /* El botón se puede arrastrar lejos de la esquina: el contenedor no debe
+     seguir tapando clics donde estaba. Solo sus hijos reciben eventos. */
+  pointer-events: none;
+}
+
+.root > * {
+  pointer-events: auto;
 }
 
 .bubbleBtn {

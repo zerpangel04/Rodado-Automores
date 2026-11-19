@@ -1,0 +1,27 @@
+/* Envoltorio del botón flotante arrastrable (app/Arrastrable.tsx). */
+
+.arrastrable {
+  /* Sin scroll/zoom del navegador al arrastrar con el dedo desde el botón. */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Sin menú de "guardar imagen" al mantener apretado en iOS. */
+  -webkit-touch-callout: none;
+  /* Capa propia: moverlo con transform no repinta el resto de la página. */
+  will-change: transform;
+}
+
+.arrastrable img {
+  -webkit-user-drag: none;
+}
+
+.arrastrable[data-arrastrando],
+.arrastrable[data-arrastrando] * {
+  cursor: grabbing !important;
+}
+
+/* Mientras se arrastra, sin el "levantar" del hover ni transiciones. */
+.arrastrable[data-arrastrando] > * {
+  transform: none !important;
+  transition: none !important;
+}

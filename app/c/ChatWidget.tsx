@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, ArrowRight } from "lucide-react";
 import { RodiAvatar } from "../icons/RodiAvatar";
+import { Arrastrable } from "../Arrastrable";
 import styles from "./chat.module.css";
 import { ASK_ASSISTANT_EVENT } from "./chatEvents";
 
@@ -174,16 +175,19 @@ export function ChatWidget({
       )}
 
       {!open && (
-        <button type="button" className={styles.bubbleBtn} onClick={() => setOpen(true)}>
-          <span className={styles.bubbleIcon}>
-            <RodiAvatar size={30} />
-            <span className={styles.bubbleIconDot} />
-          </span>
-          <span className={styles.bubbleText}>
-            <span className={styles.bubbleTitle}>Preguntale al asistente</span>
-            <span className={styles.bubbleSub}>Conoce todo el stock · responde al instante</span>
-          </span>
-        </button>
+        // Se puede arrastrar para correrlo de lo que tape (ver Arrastrable).
+        <Arrastrable storageKey="rodado:rodi:posicion:catalogo">
+          <button type="button" className={styles.bubbleBtn} onClick={() => setOpen(true)}>
+            <span className={styles.bubbleIcon}>
+              <RodiAvatar size={30} />
+              <span className={styles.bubbleIconDot} />
+            </span>
+            <span className={styles.bubbleText}>
+              <span className={styles.bubbleTitle}>Preguntale al asistente</span>
+              <span className={styles.bubbleSub}>Conoce todo el stock · responde al instante</span>
+            </span>
+          </button>
+        </Arrastrable>
       )}
     </div>
   );

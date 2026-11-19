@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, ArrowRight } from "lucide-react";
 import { RodiAvatar } from "../icons/RodiAvatar";
+import { Arrastrable } from "../Arrastrable";
 import styles from "./asistente.module.css";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -156,14 +157,18 @@ export function AsistentePanel() {
       )}
 
       {!open && (
-        <button
-          type="button"
-          className={styles.bubbleBtn}
-          onClick={() => setOpen(true)}
-          aria-label="Abrir a Rodi, el asistente de Rodado"
-        >
-          <RodiAvatar size={48} />
-        </button>
+        // Se puede arrastrar para correrlo de lo que tape (ver Arrastrable).
+        <Arrastrable storageKey="rodado:rodi:posicion:panel">
+          <button
+            type="button"
+            className={styles.bubbleBtn}
+            onClick={() => setOpen(true)}
+            aria-label="Abrir a Rodi, el asistente de Rodado"
+            title="Rodi — arrastralo para moverlo"
+          >
+            <RodiAvatar size={48} />
+          </button>
+        </Arrastrable>
       )}
     </div>
   );
