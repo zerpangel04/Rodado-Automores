@@ -4,6 +4,7 @@ import { WHATSAPP_MAX, normalizarWhatsappAR } from "./whatsapp";
 import { CONTRASTE_MINIMO, contrasteSuficiente, normalizarHex } from "./colorAcento";
 import { MONEDAS, PRECIO_MAXIMO, mensajeTopePrecio, type Moneda } from "./moneda";
 import { DIAS_DORMIDO_OPCIONES, esDiasDormidoValido } from "./leadsDormidos";
+import { COMISION_PCT_MAX, COMISION_PCT_MIN, finDelDiaArgentina } from "./comisiones";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -180,6 +181,43 @@ export const seguimientoLeadsSchema = z.object({
   diasLeadDormido: z.number().refine(esDiasDormidoValido, {
     message: `Elegí uno de estos valores: ${DIAS_DORMIDO_OPCIONES.join(", ")} días`,
   }),
+});
+
+// Liquidar comisiones: un vendedor y UNA moneda. Opcionalmente solo algunas
+// ventas (ventaIds) y/o solo las vendidas hasta una fecha ("YYYY-MM-DD",
+// inclusive, hora de Argentina). Sin filtros: todo lo pendiente.
+export const NOTA_LIQUIDACION_MAX = 200;
+export const liquidarComisionesSchema = z.object({
+  vendedorId: z.string().trim().min(1, "Elegí un vendedor"),
+  moneda: z.enum(MONEDAS, { error: "La moneda tiene que ser USD o ARS" }),
+  ventaIds: z.array(z.string().trim().min(1)).min(1).max(500).optional(),
+  hasta: z
+    .string()
+    .refine((s) => finDelDiaArgentina(s) !== null, { message: "La fecha de corte no es válida" })
+    .optional(),
+  nota: z
+    .string()
+    .trim()
+    .max(NOTA_LIQUIDACION_MAX, `La nota puede tener hasta ${NOTA_LIQUIDACION_MAX} caracteres`)
+    .optional(),
+});
+
+export const anularLiquidacionSchema = z.object({
+  motivo: z
+    .string()
+    .trim()
+    .max(NOTA_LIQUIDACION_MAX, `El motivo puede tener hasta ${NOTA_LIQUIDACION_MAX} caracteres`)
+    .optional(),
+});
+
+// % de comisión (agencia o vendedor). null = sin % (se carga a mano / usa
+// el de la agencia).
+export const comisionPctSchema = z.object({
+  comisionPct: z
+    .number({ error: "El porcentaje tiene que ser un número" })
+    .min(COMISION_PCT_MIN, "El porcentaje no puede ser negativo")
+    .max(COMISION_PCT_MAX, `El porcentaje no puede pasar de ${COMISION_PCT_MAX}%`)
+    .nullable(),
 });
 
 // La moneda es la de la venta (precio final y comisión van en la misma). Si

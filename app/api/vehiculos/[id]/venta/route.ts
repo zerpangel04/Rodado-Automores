@@ -133,6 +133,20 @@ export async function DELETE(_req: NextRequest, props: { params: Promise<{ id: s
     );
   }
 
+  // Si la comisión ya se pagó, revertir dejaría al vendedor cobrando por una
+  // venta que no existe. Primero hay que anular la liquidación (v2: ajustes
+  // negativos en la próxima). Ojo: la FK Restrict protege borrar la
+  // liquidación, no la venta; este chequeo es la única barrera.
+  if (venta.liquidacionId) {
+    return NextResponse.json(
+      {
+        error:
+          "La comisión de esta venta ya se liquidó. Anulá esa liquidación en Ventas → Comisiones y después revertí la venta.",
+      },
+      { status: 409 }
+    );
+  }
+
   await prisma.$transaction([
     prisma.venta.delete({ where: { id: venta.id } }),
     prisma.vehiculo.update({ where: { id }, data: { estado: "DISPONIBLE" } }),

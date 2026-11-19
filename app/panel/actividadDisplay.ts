@@ -8,6 +8,8 @@ import {
   PauseCircle,
   AlertTriangle,
   Phone,
+  Wallet,
+  Undo2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +26,8 @@ export const actividadIcon: Record<string, LucideIcon> = {
   ML_PAUSADA: PauseCircle,
   ML_ATENCION: AlertTriangle,
   CONTACTO_LEAD: Phone,
+  COMISION_LIQUIDADA: Wallet,
+  COMISION_ANULADA: Undo2,
 };
 
 export const actividadColor: Record<string, string> = {
@@ -36,6 +40,8 @@ export const actividadColor: Record<string, string> = {
   ML_PAUSADA: "var(--info)",
   ML_ATENCION: "var(--warn)",
   CONTACTO_LEAD: "var(--accent)",
+  COMISION_LIQUIDADA: "var(--success)",
+  COMISION_ANULADA: "var(--warn)",
 };
 
 export function formatRelativo(date: Date | string) {
