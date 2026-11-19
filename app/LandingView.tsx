@@ -62,7 +62,7 @@ const MODULOS = [
   { icon: "◔", title: "Reportes", desc: "Ventas en el tiempo, conversión por canal, rotación promedio de stock y ranking por vendedor.", meta: "Núcleo" },
   { icon: "⬡", title: "Multisucursal", desc: "Una cuenta, varias sucursales: mirás todo consolidado o filtrás por ubicación.", meta: "Módulo" },
   { icon: "◎", title: "Equipo y roles", desc: "El dueño ve toda la operación; cada vendedor ve solo lo suyo.", meta: "Módulo" },
-  { icon: "$", title: "Cotización del dólar", desc: "Oficial y blue actualizados en vivo dentro del panel, para cotizar sin salir del sistema.", meta: "Incluido" },
+  { icon: "$", title: "Dólares y pesos", desc: "Cada auto con su precio en USD o en pesos, y al lado el equivalente en la otra moneda con el dólar oficial o blue que elijas, actualizado en vivo.", meta: "Incluido" },
   { icon: "◇", title: "Tasación con IA", desc: "Precio de referencia sugerido según categoría, año y kilometraje. Es una estimación para orientarte, no un dato de mercado en vivo.", meta: "Módulo" },
   { icon: "⇱", title: "Catálogo público", desc: "Tu propia URL con tu stock, tus filtros y tus fotos, con mapa de cada local y botón de WhatsApp. Cada consulta entra como lead al CRM. En Profesional y Empresa lo personalizás con tu color, foto de portada y autos destacados.", meta: "Incluido" },
 ] as const;
@@ -105,7 +105,7 @@ const TABS = [
     label: "Stock",
     url: "rodado.app/stock",
     title: "Cada auto, con su carpeta al día.",
-    desc: "Fotos reales con recorte al subirlas, precio, y toda la documentación del vehículo en la misma ficha. La VTV avisa sola cuando está por vencer.",
+    desc: "Fotos reales con recorte al subirlas, precio en dólares o en pesos, y toda la documentación del vehículo en la misma ficha. La VTV avisa sola cuando está por vencer.",
     bullets: ["Título, cédula, informe de dominio y libre de deuda", "Alerta automática de vencimiento de VTV", "Badge de interesados por unidad"],
     panelLabel: "STOCK ACTIVO",
     rows: [

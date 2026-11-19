@@ -12,6 +12,10 @@ const CONOCIMIENTO_RODADO = `CÓMO FUNCIONA RODADO (conocimiento general, válid
 - Catálogo público: la página web de la agencia con su stock (no muestra vendidos). Se configura en /panel/catalogo (solo el Dueño), con dos pestañas. "General", en todos los planes: texto "Sobre nosotros" y año de inicio, horarios de cada sucursal, mostrar u ocultar el mapa con la ubicación de los locales, y el número de WhatsApp del botón flotante (si no se carga, usa el primer teléfono de las sucursales). "Personalización", solo en Profesional y Empresa: color de acento del catálogo y foto de portada (se recorta en formato horizontal).
 - Vehículos destacados: aparecen primero en el catálogo (en el orden por defecto) con una etiqueta "Destacado". Se marcan con la estrella de cada vehículo en /panel/stock; pueden hacerlo el Dueño y los Admin, no los Vendedores. Límite por plan: Básico 0, Profesional 3, Empresa 4. Los vendidos no cuentan y al registrar la venta se desmarcan solos.
 - Si una agencia baja de plan, lo que había configurado del catálogo (color, portada, destacados) queda guardado pero no se muestra; vuelve a aplicarse si sube de plan. Si quedan más destacados que el nuevo límite, se muestran los primeros que se marcaron.
+- Moneda (dólares o pesos): cada vehículo tiene su precio en USD o en pesos ($ ARS); se elige con el selector "USD / $ ARS" al cargarlo o editarlo en /panel/stock. En la importación por CSV va en la columna "moneda" (USD, U$S, US$ o dólares; ARS, $ o pesos); si está vacía o no está, se toma USD. Los precios nunca se convierten solos: cada uno se muestra en su moneda y, al lado, un equivalente aproximado "≈" en la otra.
+- Cotización para los "≈": la agencia elige dólar oficial o dólar blue en /panel/catalogo → General (solo el Dueño); se usa en el catálogo, la ficha del vehículo, el panel y el asistente del catálogo. Es solo una referencia: el precio publicado es el que vale.
+- Ventas en dos monedas: cada venta se registra en su propia moneda (arranca en la del vehículo y se puede cambiar en el modal de venta; precio final y comisión van en la misma) y guarda la cotización del momento. Los totales se muestran separados por moneda (por ejemplo "USD 45.000 + $12.000.000"), nunca sumados en un solo número; los gráficos, porcentajes, ticket promedio y rankings convierten a USD con la cotización guardada en cada venta, no con la de hoy.
+- Mercado Libre publica cada vehículo en su moneda, y el asistente del catálogo informa cada precio en la moneda en que está publicado.
 - Planes (Básico, Profesional, Empresa): cada uno con un límite de sucursales, vehículos y usuarios, y features exclusivas (Reportes avanzados, Asistente de tasación con IA, Catálogo personalizado, Vehículos destacados, Soporte prioritario). Se ven y comparan en /panel/plan.`;
 
 function fmtLimite(n: number | null): string {
@@ -40,9 +44,12 @@ export async function armarContextoTenant(params: {
 }): Promise<{ contexto: string; tenantNombre: string }> {
   const { tenantId, nombreUsuario, rol } = params;
 
-  const [tenant, plan, sucursalesCount, vehiculosCount, usuariosCount, mlConexion, destacadosCount] =
+  const [tenant, plan, sucursalesCount, vehiculosCount, usuariosCount, mlConexion, destacadosCount, porMoneda] =
     await Promise.all([
-      prisma.tenant.findUniqueOrThrow({ where: { id: tenantId }, select: { nombre: true } }),
+      prisma.tenant.findUniqueOrThrow({
+        where: { id: tenantId },
+        select: { nombre: true, cotizacionPreferida: true },
+      }),
       getPlanTenant(tenantId),
       prisma.sucursal.count({ where: { tenantId } }),
       prisma.vehiculo.count({ where: { tenantId } }),
@@ -51,7 +58,14 @@ export async function armarContextoTenant(params: {
       prisma.vehiculo.count({
         where: { tenantId, destacadoEn: { not: null }, estado: { not: "VENDIDO" } },
       }),
+      prisma.vehiculo.groupBy({
+        by: ["moneda"],
+        where: { tenantId, estado: { not: "VENDIDO" } },
+        _count: { _all: true },
+      }),
     ]);
+
+  const enStock = (m: "USD" | "ARS") => porMoneda.find((g) => g.moneda === m)?._count._all ?? 0;
 
   const contexto = `- Agencia: ${tenant.nombre}
 - Usuario actual: ${nombreUsuario} (rol: ${ROL_LABEL[rol] ?? rol})
@@ -64,7 +78,9 @@ export async function armarContextoTenant(params: {
   - Catálogo personalizado (color y portada): ${fmtSiNo(plan.catalogoPersonalizado)}
   - Vehículos destacados: ${destacadosCount} marcados, el plan permite ${plan.limiteDestacados}
   - Soporte prioritario: ${fmtSiNo(plan.soportePrioritario)}
-- Mercado Libre: ${mlConexion ? "conectado" : "no conectado"}`;
+- Mercado Libre: ${mlConexion ? "conectado" : "no conectado"}
+- Vehículos en stock (sin vendidos) por moneda: ${enStock("USD")} en dólares, ${enStock("ARS")} en pesos
+- Cotización elegida para los "≈": ${tenant.cotizacionPreferida === "BLUE" ? "dólar blue" : "dólar oficial"}`;
 
   return { contexto, tenantNombre: tenant.nombre };
 }
