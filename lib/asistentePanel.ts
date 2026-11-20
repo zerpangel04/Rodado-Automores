@@ -3,6 +3,7 @@ import { getPlanTenant } from "@/lib/planes";
 import { corteDormidos } from "@/lib/leadsDormidos";
 import { formatearPrecio } from "@/lib/moneda";
 import { formatearPct } from "@/lib/comisiones";
+import { corteTrabados } from "@/lib/tramites";
 
 const CONOCIMIENTO_RODADO = `CÓMO FUNCIONA RODADO (conocimiento general, válido para cualquier agencia):
 - Stock: carga y gestión de vehículos (fotos, ficha técnica, documentación, VTV). Desde ahí también se puede importar stock masivo por CSV y usar la Tasación con IA (si el plan lo incluye) para sugerir un precio de referencia.
@@ -13,6 +14,11 @@ const CONOCIMIENTO_RODADO = `CÓMO FUNCIONA RODADO (conocimiento general, válid
 - Anular una liquidación: desde el historial de Comisiones (solo Dueño o Admin), con un motivo opcional. Sus ventas vuelven a "comisión pendiente", la liquidación queda registrada como anulada (cuándo y quién) y queda en el log de actividad. Las liquidaciones "históricas" (fecha desconocida) son pagos marcados antes de que existiera este sistema.
 - Revertir una venta cuya comisión ya se liquidó no se puede: primero hay que anular esa liquidación en Ventas → Comisiones.
 - Los Vendedores ven solo sus propias comisiones (pendientes y liquidadas) y no pueden liquidar ni anular.
+- Trámites (Ventas → Trámites): cada venta tiene un expediente con los pasos post-venta (por defecto: boleto de compraventa firmado, pago total recibido, informe de dominio actualizado, patentes al día, infracciones/multas al día, verificación policial, formulario 08 firmado y certificado, transferencia presentada en el Registro, título y cédula del comprador recibidos, entrega del vehículo). Cada paso se tilda como hecho, con una fecha (se precarga la de hoy y se puede cambiar, por ejemplo el turno del Registro) y una nota opcional; queda registrado quién lo marcó y cuándo. Pueden tildar pasos el Dueño, un Admin o el vendedor de esa venta.
+- Las ventas nuevas crean su expediente solas al registrarse. Las ventas anteriores a esta función no tienen: se le puede dar "Iniciar expediente" desde Trámites a las que se quiera seguir.
+- La plantilla de pasos la edita solo el Dueño, abajo en Ventas → Trámites ("Pasos del expediente"): agregar, renombrar, ordenar, desactivar o quitar pasos (por ejemplo sumar "Denuncia de venta"). Los cambios se aplican a los expedientes nuevos; los ya abiertos conservan sus pasos. Los requisitos de transferencia cambian según la jurisdicción y en el tiempo: si te preguntan qué exige la ley, decí que la lista es una base y que conviene validarla con el gestor o el Registro; no inventes normativa.
+- Expediente trabado: uno en curso que lleva N días o más sin movimiento (por defecto 10; el Dueño lo cambia en la misma sección). Se ve con la etiqueta "Trabado" en Trámites y como "Revisar N expedientes de trámites trabados" en Pendientes.
+- Revertir una venta cuyo expediente tiene algún paso hecho no se puede: primero hay que destildar esos pasos en Trámites. Si el expediente no tiene ningún paso hecho, se borra junto con la venta.
 - Reportes: ventas en el tiempo, embudo de conversión, leads por canal, rotación de stock y performance por vendedor — disponible solo en plan Profesional o superior.
 - Sucursales: cada agencia puede tener una o más; el stock y el equipo se pueden filtrar por sucursal.
 - Equipo: gestión de usuarios y roles (Dueño, Admin, Vendedor). Solo un Dueño puede invitar gente, y solo otro Dueño puede ascender a alguien a Dueño.
@@ -59,7 +65,7 @@ export async function armarContextoTenant(params: {
     await Promise.all([
       prisma.tenant.findUniqueOrThrow({
         where: { id: tenantId },
-        select: { nombre: true, cotizacionPreferida: true, diasLeadDormido: true, comisionPct: true },
+        select: { nombre: true, cotizacionPreferida: true, diasLeadDormido: true, comisionPct: true, diasExpedienteTrabado: true },
       }),
       getPlanTenant(tenantId),
       prisma.sucursal.count({ where: { tenantId } }),
@@ -104,6 +110,16 @@ export async function armarContextoTenant(params: {
   }
   const pctAgencia = tenant.comisionPct === null ? null : Number(tenant.comisionPct);
 
+  // Expedientes de trámites trabados de toda la agencia (no es un dato de
+  // dinero: se le pasa a cualquier rol).
+  const expedientesTrabados = await prisma.expediente.count({
+    where: {
+      tenantId,
+      completadoEn: null,
+      ultimaActividadEn: { lte: corteTrabados(tenant.diasExpedienteTrabado) },
+    },
+  });
+
   const contexto = `- Agencia: ${tenant.nombre}
 - Usuario actual: ${nombreUsuario} (rol: ${ROL_LABEL[rol] ?? rol})
 - Plan actual: ${plan.nombre} (USD ${Number(plan.precioUsd)}/mes)
@@ -119,7 +135,8 @@ export async function armarContextoTenant(params: {
 - Vehículos en stock (sin vendidos) por moneda: ${enStock("USD")} en dólares, ${enStock("ARS")} en pesos
 - Cotización elegida para los "≈": ${tenant.cotizacionPreferida === "BLUE" ? "dólar blue" : "dólar oficial"}
 - Leads dormidos: se marcan a los ${tenant.diasLeadDormido} días sin movimiento; ahora hay ${leadsDormidos} en toda la agencia
-- Comisión por defecto de la agencia: ${pctAgencia === null ? "sin porcentaje (la comisión se carga a mano)" : formatearPct(pctAgencia)}${lineaComisiones}`;
+- Comisión por defecto de la agencia: ${pctAgencia === null ? "sin porcentaje (la comisión se carga a mano)" : formatearPct(pctAgencia)}${lineaComisiones}
+- Expedientes de trámites trabados: se marcan a los ${tenant.diasExpedienteTrabado} días sin movimiento; ahora hay ${expedientesTrabados} en toda la agencia`;
 
   return { contexto, tenantNombre: tenant.nombre };
 }

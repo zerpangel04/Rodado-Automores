@@ -12,6 +12,8 @@ export type Pendiente =
   // Leads ya filtrado. Reemplaza al viejo "Contactar a X" por lead nuevo,
   // que miraba la fecha de creación y no los contactos registrados.
   | { id: string; kind: "dormidos"; label: string; meta: string; urgente: boolean; href: string }
+  // Lo mismo para expedientes de trámites trabados (lleva a Ventas → Trámites).
+  | { id: string; kind: "trabados"; label: string; meta: string; urgente: boolean; href: string }
   | {
       id: string;
       kind: "asignar";
@@ -69,7 +71,7 @@ export function PendientesCard({
             );
           }
 
-          if (p.kind === "dormidos") {
+          if (p.kind === "dormidos" || p.kind === "trabados") {
             return (
               <Link key={p.id} href={p.href} className={`${styles.taskRow} ${styles.taskRowClickable}`}>
                 {body}

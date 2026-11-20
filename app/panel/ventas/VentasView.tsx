@@ -33,6 +33,8 @@ export type VentaDTO = {
   cotizacion: number | null;
   // La comisión ya se le pagó al vendedor (está en una liquidación vigente).
   comisionLiquidada: boolean;
+  // Progreso del expediente de trámites; null = sin expediente.
+  tramites: { hechos: number; total: number; completo: boolean } | null;
 };
 
 type Campo = "precioFinal" | "comision";
@@ -440,12 +442,13 @@ export function VentasView({
                   <th style={{ textAlign: "right" }}>Precio final</th>
                   <th style={{ textAlign: "right" }}>Comisión</th>
                   <th style={{ textAlign: "right" }}>Estado comisión</th>
+                  <th style={{ textAlign: "right" }}>Trámites</th>
                 </tr>
               </thead>
               <tbody>
                 {lista.length === 0 ? (
                   <tr>
-                    <td colSpan={verVendedor ? 7 : 6} className={styles.emptyRow}>
+                    <td colSpan={verVendedor ? 8 : 7} className={styles.emptyRow}>
                       Sin ventas con estos filtros
                     </td>
                   </tr>
@@ -504,6 +507,15 @@ export function VentasView({
                           {v.comisionLiquidada ? "Liquidada" : "Pendiente"}
                         </Pill>
                       </td>
+                      <td style={{ textAlign: "right" }}>
+                        <Link
+                          href={`/panel/ventas/tramites?venta=${v.id}`}
+                          className={styles.tramitesLink}
+                          title={v.tramites ? "Ver el expediente de trámites" : "Esta venta no tiene expediente"}
+                        >
+                          {v.tramites ? (v.tramites.completo ? "Completo" : `${v.tramites.hechos}/${v.tramites.total}`) : "—"}
+                        </Link>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -520,6 +532,7 @@ export function VentasView({
                     <td style={{ textAlign: "right" }} className={styles.totalComision}>
                       {formatearTotales(totales(lista, "comision"))}
                     </td>
+                    <td />
                     <td />
                   </tr>
                 </tfoot>

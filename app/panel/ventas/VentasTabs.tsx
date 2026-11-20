@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./ventas.module.css";
 
-// Pestañas de la sección Ventas: el listado de ventas y la liquidación de
-// comisiones de los vendedores.
+// Pestañas de la sección Ventas: el listado de ventas, la liquidación de
+// comisiones y el seguimiento de trámites post-venta.
 const TABS = [
   { href: "/panel/ventas", label: "Ventas" },
   { href: "/panel/ventas/comisiones", label: "Comisiones" },
+  { href: "/panel/ventas/tramites", label: "Trámites" },
 ];
 
 export function VentasTabs() {

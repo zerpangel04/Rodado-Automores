@@ -12,6 +12,7 @@ import { PendientesCard, type Pendiente } from "./PendientesCard";
 import { OnboardingChecklist, type OnboardingPaso } from "./OnboardingChecklist";
 import { CatalogLinkCard } from "./CatalogLinkCard";
 import { DIAS_DORMIDO_DEFAULT, corteDormidos } from "@/lib/leadsDormidos";
+import { DIAS_TRABADO_DEFAULT, corteTrabados } from "@/lib/tramites";
 
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 100) : 0);
 
@@ -85,6 +86,7 @@ export default async function PanelHome() {
     vehiculosPublicadosMlCount,
     mlConexionesCount,
     dormidos,
+    trabados,
   ] = await Promise.all([
     prisma.vehiculo.count({
       where: { tenantId, estado: { not: "VENDIDO" } },
@@ -141,6 +143,21 @@ export default async function PanelHome() {
       });
       return { dias, count };
     })(),
+    // Expedientes de trámites trabados (en curso y sin movimiento hace N
+    // días). Un vendedor cuenta solo los de sus ventas.
+    (async () => {
+      const t = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { diasExpedienteTrabado: true } });
+      const dias = t?.diasExpedienteTrabado ?? DIAS_TRABADO_DEFAULT;
+      const count = await prisma.expediente.count({
+        where: {
+          tenantId,
+          completadoEn: null,
+          ultimaActividadEn: { lte: corteTrabados(dias) },
+          ...(rol === "VENDEDOR" ? { venta: { vendedorId: userId } } : {}),
+        },
+      });
+      return { dias, count };
+    })(),
   ]);
 
   const alertasVtv = vehiculosConVtv
@@ -163,6 +180,18 @@ export default async function PanelHome() {
             meta: `Sin movimiento hace ${dormidos.dias} días o más`,
             urgente: true,
             href: "/panel/leads?dormidos=1",
+          },
+        ]
+      : []),
+    ...(trabados.count > 0
+      ? [
+          {
+            id: "expedientes-trabados",
+            kind: "trabados" as const,
+            label: `Revisar ${trabados.count} expediente${trabados.count === 1 ? "" : "s"} de trámites trabado${trabados.count === 1 ? "" : "s"}`,
+            meta: `Sin movimiento hace ${trabados.dias} días o más`,
+            urgente: true,
+            href: "/panel/ventas/tramites?filtro=trabados",
           },
         ]
       : []),

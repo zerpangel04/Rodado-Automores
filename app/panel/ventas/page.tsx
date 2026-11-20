@@ -20,6 +20,7 @@ export default async function VentasPage() {
     include: {
       vehiculo: { select: { marca: true, modelo: true, sucursal: { select: { nombre: true } } } },
       vendedor: { select: { id: true, nombre: true } },
+      expediente: { select: { completadoEn: true, pasos: { select: { hecho: true } } } },
     },
     orderBy: { fecha: "desc" },
   });
@@ -40,6 +41,14 @@ export default async function VentasPage() {
     cotizacion: v.cotizacion === null ? null : Number(v.cotizacion),
     // Comisión ya pagada al vendedor (está en una liquidación vigente).
     comisionLiquidada: v.liquidacionId !== null,
+    // Progreso del expediente de trámites (null = la venta no tiene).
+    tramites: v.expediente
+      ? {
+          hechos: v.expediente.pasos.filter((p) => p.hecho).length,
+          total: v.expediente.pasos.length,
+          completo: v.expediente.completadoEn !== null,
+        }
+      : null,
   }));
 
   return (
