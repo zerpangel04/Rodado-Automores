@@ -22,13 +22,25 @@ export function diasSinMovimiento(ultimaActividad: Date | string, ahora: Date = 
   return Math.max(0, Math.floor((ahora.getTime() - t) / MS_DIA));
 }
 
+// Regla común "sin movimiento": algo abierto que lleva `diasUmbral` días o
+// más sin cambios. La usan los leads dormidos y los expedientes trabados
+// (lib/tramites.ts).
+export function estaSinMovimiento(
+  abierto: boolean,
+  ultimaActividad: Date | string,
+  diasUmbral: number,
+  ahora: Date = new Date()
+): boolean {
+  if (!abierto) return false;
+  return diasSinMovimiento(ultimaActividad, ahora) >= diasUmbral;
+}
+
 export function esDormido(
   lead: { etapa: string; ultimaActividadEn: Date | string },
   diasUmbral: number,
   ahora: Date = new Date()
 ): boolean {
-  if (lead.etapa === "CERRADO") return false;
-  return diasSinMovimiento(lead.ultimaActividadEn, ahora) >= diasUmbral;
+  return estaSinMovimiento(lead.etapa !== "CERRADO", lead.ultimaActividadEn, diasUmbral, ahora);
 }
 
 // Fecha de corte para consultar en la base: dormido <=> ultimaActividadEn <= corte.

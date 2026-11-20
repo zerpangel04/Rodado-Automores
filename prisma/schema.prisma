@@ -98,6 +98,9 @@ model Tenant {
   // % de comisión por defecto de la agencia (ej. 3.00). Precarga la comisión
   // en el modal de venta; null = se carga a mano. Usuario.comisionPct lo pisa.
   comisionPct   Decimal? @db.Decimal(5, 2)
+  // Días sin movimiento para marcar un expediente de trámites como
+  // "trabado" (Ventas → Trámites y Pendientes).
+  diasExpedienteTrabado Int @default(10)
   // Foto de portada del catálogo (bucket agencia-portadas). Mismo gating
   // que colorAcento.
   portadaUrl    String?
@@ -108,6 +111,8 @@ model Tenant {
   ventas     Venta[]
   sucursales Sucursal[]
   liquidacionesComision LiquidacionComision[]
+  pasosTramite          PasoTramitePlantilla[]
+  expedientes           Expediente[]
 
   mercadoLibreConexion MercadoLibreConexion?
   actividades          ActividadLog[]
@@ -203,6 +208,7 @@ model Usuario {
   liquidacionesRecibidas   LiquidacionComision[]     @relation("LiquidacionVendedor")
   liquidacionesCreadas     LiquidacionComision[]     @relation("LiquidacionCreadaPor")
   liquidacionesAnuladas    LiquidacionComision[]     @relation("LiquidacionAnuladaPor")
+  pasosCompletados         PasoExpediente[]          @relation("PasoCompletadoPor")
 }
 
 // Token de un solo uso para el flujo de "olvidé mi contraseña".
@@ -407,9 +413,68 @@ model Venta {
   liquidacion      LiquidacionComision? @relation(fields: [liquidacionId], references: [id], onDelete: Restrict)
 
   actividades ActividadLog[]
+  // Expediente de trámites post-venta (transferencia, etc.). Las ventas
+  // nuevas lo crean al registrarse; las viejas, a demanda.
+  expediente  Expediente?
 
   @@index([tenantId, fecha])
   @@index([tenantId, liquidacionId])
+}
+
+// Plantilla de pasos del expediente de cada agencia (la edita el Dueño). Se
+// crea con la lista por defecto la primera vez que la agencia la usa. Los
+// expedientes COPIAN los pasos activos al crearse: cambiar la plantilla no
+// toca los expedientes ya abiertos.
+model PasoTramitePlantilla {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  nombre    String   @db.VarChar(80)
+  orden     Int
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, orden])
+}
+
+// Seguimiento de trámites de una venta. RESTRICT hacia Venta: no se puede
+// borrar (revertir) una venta con expediente. La API borra el expediente
+// junto con la venta solo si no tiene ningún paso hecho; si tiene alguno,
+// bloquea la reversión.
+model Expediente {
+  id                String    @id @default(cuid())
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id])
+  ventaId           String    @unique
+  venta             Venta     @relation(fields: [ventaId], references: [id], onDelete: Restrict)
+  creadoEn          DateTime  @default(now())
+  // Último cambio en algún paso: define si está "trabado".
+  ultimaActividadEn DateTime  @default(now())
+  // Todos los pasos hechos. null = en curso.
+  completadoEn      DateTime?
+
+  pasos PasoExpediente[]
+
+  @@index([tenantId, ultimaActividadEn])
+}
+
+// Un paso del expediente (copia del nombre y orden de la plantilla).
+model PasoExpediente {
+  id              String     @id @default(cuid())
+  expedienteId    String
+  expediente      Expediente @relation(fields: [expedienteId], references: [id], onDelete: Cascade)
+  nombre          String     @db.VarChar(80)
+  orden           Int
+  hecho           Boolean    @default(false)
+  // Fecha del trámite (solo día: ej. el turno en el Registro).
+  fecha           DateTime?  @db.Date
+  nota            String?    @db.VarChar(300)
+  // Quién y cuándo lo marcó como hecho (se guarda solo con la sesión).
+  completadoPorId String?
+  completadoPor   Usuario?   @relation("PasoCompletadoPor", fields: [completadoPorId], references: [id], onDelete: SetNull)
+  completadoEn    DateTime?
+
+  @@index([expedienteId, orden])
 }
 
 // Pago de comisiones a un vendedor, en UNA moneda (USD y pesos nunca se
