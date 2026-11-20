@@ -161,7 +161,7 @@ export function textoMonedas(monedas: Iterable<Moneda>): string {
 // Una venta guarda su moneda y la cotización del día en que se registró
 // (pesos por dólar). Los TOTALES de ventas se muestran por moneda
 // (sumarPorMoneda / formatearTotales). Lo que necesita un único número
-// (gráficos, % de cobrado, ticket promedio, ranking) convierte cada venta
+// (gráficos, % de comisión liquidada, ticket promedio, ranking) convierte cada venta
 // a USD con SU cotización guardada, nunca con la de hoy: así un mes viejo
 // no cambia de valor cuando se mueve el dólar.
 

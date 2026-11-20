@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Search, ChevronDown } from "lucide-react";
+import { agruparPendientes } from "@/lib/comisiones";
 import styles from "./ventas.module.css";
 import { KpiBar } from "../KpiBar";
 import { Pill } from "../Pill";
@@ -29,7 +31,8 @@ export type VentaDTO = {
   moneda: Moneda;
   // Pesos por dólar al registrar la venta (null en ventas viejas).
   cotizacion: number | null;
-  estadoCobro: "PENDIENTE" | "COBRADO";
+  // La comisión ya se le pagó al vendedor (está en una liquidación vigente).
+  comisionLiquidada: boolean;
 };
 
 type Campo = "precioFinal" | "comision";
@@ -45,7 +48,9 @@ function enUsd(arr: VentaDTO[], k: Campo) {
   return sumarVentasEnUsd(arr.map((v) => ({ monto: v[k], moneda: v.moneda, cotizacion: v.cotizacion })));
 }
 type Periodo = "mes" | "trimestre" | "todo";
-type FiltroCobro = "todas" | "pendiente" | "cobrado";
+// Estado de la COMISIÓN de cada venta (no del cobro al comprador, que Rodado
+// no registra).
+type FiltroComision = "todas" | "pendiente" | "liquidada";
 
 const periodos: { key: Periodo; label: string }[] = [
   { key: "mes", label: "Este mes" },
@@ -53,10 +58,10 @@ const periodos: { key: Periodo; label: string }[] = [
   { key: "todo", label: "Todo" },
 ];
 
-const filtrosCobro: { key: FiltroCobro; label: string; dotColor?: string }[] = [
+const filtrosComision: { key: FiltroComision; label: string; dotColor?: string }[] = [
   { key: "todas", label: "Todas" },
-  { key: "pendiente", label: "Pendiente", dotColor: "var(--warn)" },
-  { key: "cobrado", label: "Cobrado", dotColor: "var(--success)" },
+  { key: "pendiente", label: "Comisión pendiente", dotColor: "var(--warn)" },
+  { key: "liquidada", label: "Liquidada", dotColor: "var(--success)" },
 ];
 
 function initials(name: string) {
@@ -102,11 +107,10 @@ export function VentasView({
   useEffect(() => setItems(initialItems), [initialItems]);
 
   const [periodo, setPeriodo] = useState<Periodo>("mes");
-  const [filtro, setFiltro] = useState<FiltroCobro>("todas");
+  const [filtro, setFiltro] = useState<FiltroComision>("todas");
   const [vendedorId, setVendedorId] = useState("");
   const [listaAbierta, setListaAbierta] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [marcando, setMarcando] = useState(false);
 
   const vendedorWrapRef = useRef<HTMLDivElement>(null);
 
@@ -134,8 +138,9 @@ export function VentasView({
     return items.filter((v) => new Date(v.fecha).getTime() >= limite);
   }, [items, periodo]);
 
-  const cobradas = porPeriodo.filter((v) => v.estadoCobro === "COBRADO");
-  const pendientes = porPeriodo.filter((v) => v.estadoCobro === "PENDIENTE");
+  // Comisiones del período ya liquidadas / todavía pendientes.
+  const liquidadas = porPeriodo.filter((v) => v.comisionLiquidada);
+  const pendientes = porPeriodo.filter((v) => !v.comisionLiquidada);
   // Totales que se muestran: por moneda.
   const facturado = totales(porPeriodo, "precioFinal");
   const comisionesTotal = totales(porPeriodo, "comision");
@@ -152,13 +157,10 @@ export function VentasView({
     .filter((x): x is number => x !== null);
   const maxVenta = preciosUsd.length ? Math.max(...preciosUsd) : 0;
 
-  const pctFacturadoCobrado =
-    facturadoUsd.usd > 0 ? Math.round((enUsd(cobradas, "precioFinal").usd / facturadoUsd.usd) * 100) : 0;
-  const pctUnidadesCobradas = porPeriodo.length
-    ? Math.round((cobradas.length / porPeriodo.length) * 100)
-    : 0;
-  const pctComisionCobrada =
-    comisionesUsd.usd > 0 ? Math.round((enUsd(cobradas, "comision").usd / comisionesUsd.usd) * 100) : 0;
+  // Rodado no registra cuándo paga el comprador: Facturado y Unidades ya no
+  // muestran "cobrado" (antes leían el estado de la comisión por error).
+  const pctComisionLiquidada =
+    comisionesUsd.usd > 0 ? Math.round((enUsd(liquidadas, "comision").usd / comisionesUsd.usd) * 100) : 0;
   const pctTicketVsMax = maxVenta > 0 ? Math.round((ticketProm / maxVenta) * 100) : 0;
 
   const kpiFacturado = partesKpi(facturado);
@@ -185,25 +187,29 @@ export function VentasView({
   }, [porPeriodo]);
   const maxFacturadoVendedor = porVendedor.length ? porVendedor[0].facturadoUsd || 1 : 1;
 
-  const pendientesPorVendedor = useMemo(() => {
-    const map = new Map<string, { nombre: string; ventas: VentaDTO[] }>();
-    for (const v of pendientes) {
-      const entry = map.get(v.vendedor.id) ?? { nombre: v.vendedor.nombre, ventas: [] };
-      entry.ventas.push(v);
-      map.set(v.vendedor.id, entry);
-    }
-    return Array.from(map.values())
-      .map((e) => ({
-        nombre: e.nombre,
-        unidades: e.ventas.length,
-        comision: totales(e.ventas, "comision"),
-        comisionUsd: enUsd(e.ventas, "comision").usd,
-      }))
-      .sort((a, b) => b.comisionUsd - a.comisionUsd);
-  }, [pendientes]);
+  // Panel lateral: TODAS las comisiones pendientes, no solo las del período
+  // elegido (antes, con "Este mes", las de meses anteriores no aparecían en
+  // el total). Por vendedor y moneda, sin sumar dólares con pesos.
+  const pendientesPorGrupo = useMemo(
+    () =>
+      agruparPendientes(
+        items.map((v) => ({
+          id: v.id,
+          vendedorId: v.vendedor.id,
+          vendedorNombre: v.vendedor.nombre,
+          moneda: v.moneda,
+          comision: v.comision,
+          fecha: v.fecha,
+          liquidacionId: v.comisionLiquidada ? "liquidada" : null,
+        }))
+      ),
+    [items]
+  );
+  const totalPendienteGeneral = sumarPorMoneda(pendientesPorGrupo.map((g) => ({ monto: g.total, moneda: g.moneda })));
+  const ventasPendientesGeneral = pendientesPorGrupo.reduce((s, g) => s + g.cantidad, 0);
 
-  const pasaFiltro = (v: VentaDTO, f: FiltroCobro) =>
-    f === "todas" || (f === "pendiente" ? v.estadoCobro === "PENDIENTE" : v.estadoCobro === "COBRADO");
+  const pasaFiltro = (v: VentaDTO, f: FiltroComision) =>
+    f === "todas" || (f === "pendiente" ? !v.comisionLiquidada : v.comisionLiquidada);
 
   const lista = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -218,31 +224,6 @@ export function VentasView({
     });
   }, [porPeriodo, filtro, vendedorId, searchQuery]);
 
-  async function handleRegistrarPago() {
-    if (pendientes.length === 0) return;
-    if (
-      !confirm(
-        `¿Marcar ${pendientes.length} venta${pendientes.length === 1 ? "" : "s"} como cobrada${
-          pendientes.length === 1 ? "" : "s"
-        }?`
-      )
-    )
-      return;
-    setMarcando(true);
-    const ids = pendientes.map((v) => v.id);
-    const res = await fetch("/api/ventas/marcar-cobradas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids }),
-    });
-    setMarcando(false);
-    if (res.ok) {
-      setItems((prev) =>
-        prev.map((v) => (ids.includes(v.id) ? { ...v, estadoCobro: "COBRADO" as const } : v))
-      );
-    }
-  }
-
   const vendedorSeleccionado = porVendedor.find((v) => v.id === vendedorId);
 
   function handleExport() {
@@ -255,7 +236,7 @@ export function VentasView({
       "Precio final",
       "Comisión",
       "Cotización al vender (pesos por dólar)",
-      "Estado de cobro",
+      "Comisión liquidada",
     ];
     const filas = lista.map((v) => [
       new Date(v.fecha).toLocaleDateString("es-AR"),
@@ -270,7 +251,7 @@ export function VentasView({
       String(Math.round(v.comision)),
       // En blanco en las ventas registradas antes de guardar la cotización.
       v.cotizacion === null ? "" : String(v.cotizacion),
-      v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente",
+      v.comisionLiquidada ? "Sí" : "Pendiente",
     ]);
 
     const csv =
@@ -323,16 +304,16 @@ export function VentasView({
           value={kpiFacturado.valor}
           unit={kpiFacturado.unidad}
           valueExtra={kpiFacturado.extra}
-          trend={{ label: `${pctFacturadoCobrado}% cobrado`, positive: "neutral" }}
-          percent={pctFacturadoCobrado}
+          trend={{ label: hayPesos ? "en dólares y en pesos" : "en el período", positive: "neutral" }}
+          percent={porPeriodo.length ? 100 : 0}
         />
         <KpiBar
           color="var(--info)"
           label="Unidades vendidas"
           value={String(porPeriodo.length)}
           unit="vehículos"
-          trend={{ label: `${cobradas.length} cobradas`, positive: "neutral" }}
-          percent={pctUnidadesCobradas}
+          trend={{ label: "en el período", positive: "neutral" }}
+          percent={porPeriodo.length ? 100 : 0}
         />
         <KpiBar
           color="var(--warn)"
@@ -342,10 +323,10 @@ export function VentasView({
           valueExtra={kpiComisiones.extra}
           trend={
             pendientes.length
-              ? { label: `${formatearTotales(comisionPendiente)} sin pagar`, positive: false }
-              : { label: "todo pagado", positive: true }
+              ? { label: `${formatearTotales(comisionPendiente)} sin liquidar`, positive: false }
+              : { label: "todo liquidado", positive: true }
           }
-          percent={pctComisionCobrada}
+          percent={pctComisionLiquidada}
         />
         <KpiBar
           color="var(--accent)"
@@ -361,7 +342,7 @@ export function VentasView({
 
       <div className={styles.filterBar}>
         <div className={styles.segmented}>
-          {filtrosCobro.map((f) => {
+          {filtrosComision.map((f) => {
             const count = porPeriodo.filter((v) => pasaFiltro(v, f.key)).length;
             return (
               <button
@@ -458,7 +439,7 @@ export function VentasView({
                   {verVendedor && <th>Vendedor</th>}
                   <th style={{ textAlign: "right" }}>Precio final</th>
                   <th style={{ textAlign: "right" }}>Comisión</th>
-                  <th style={{ textAlign: "right" }}>Cobro</th>
+                  <th style={{ textAlign: "right" }}>Estado comisión</th>
                 </tr>
               </thead>
               <tbody>
@@ -519,8 +500,8 @@ export function VentasView({
                         )}
                       </td>
                       <td style={{ textAlign: "right" }}>
-                        <Pill color={v.estadoCobro === "COBRADO" ? "green" : "amber"}>
-                          {v.estadoCobro === "COBRADO" ? "Cobrado" : "Pendiente"}
+                        <Pill color={v.comisionLiquidada ? "green" : "amber"}>
+                          {v.comisionLiquidada ? "Liquidada" : "Pendiente"}
                         </Pill>
                       </td>
                     </tr>
@@ -587,35 +568,36 @@ export function VentasView({
 
             <div className={styles.sideCard}>
               <div className={styles.sideHead}>
-                <span>Comisiones a pagar</span>
+                <span>Comisiones a liquidar</span>
                 <span className={styles.pendCount}>
-                  {pendientes.length} {pendientes.length === 1 ? "venta" : "ventas"}
+                  {ventasPendientesGeneral} {ventasPendientesGeneral === 1 ? "venta" : "ventas"}
                 </span>
               </div>
               <div className={styles.sideBody}>
-                {pendientesPorVendedor.length === 0 ? (
-                  <p className={styles.empty}>No hay comisiones pendientes de pago.</p>
+                {pendientesPorGrupo.length === 0 ? (
+                  <p className={styles.empty}>No hay comisiones pendientes de liquidar.</p>
                 ) : (
                   <>
-                    {pendientesPorVendedor.map((p) => (
-                      <div key={p.nombre} className={styles.pendRow}>
+                    {pendientesPorGrupo.map((g) => (
+                      <div key={`${g.vendedorId}-${g.moneda}`} className={styles.pendRow}>
                         <span className={styles.pendDot} />
                         <span className={styles.pendInfo}>
-                          <span className={styles.pendName}>{p.nombre}</span>
+                          <span className={styles.pendName}>{g.vendedorNombre}</span>
                           <span className={styles.pendDetalle}>
-                            {p.unidades} {p.unidades === 1 ? "venta sin cobrar" : "ventas sin cobrar"}
+                            {g.cantidad} {g.cantidad === 1 ? "venta" : "ventas"} · {g.moneda === "USD" ? "en dólares" : "en pesos"}
                           </span>
                         </span>
-                        <span className={styles.pendMonto}>{formatearTotales(p.comision)}</span>
+                        <span className={styles.pendMonto}>{formatearPrecio(g.total, g.moneda)}</span>
                       </div>
                     ))}
                     <div className={styles.pendTotalRow}>
                       <span>Total pendiente</span>
-                      <span className={styles.pendTotalValue}>{formatearTotales(comisionPendiente)}</span>
+                      <span className={styles.pendTotalValue}>{formatearTotales(totalPendienteGeneral)}</span>
                     </div>
-                    <button type="button" className={styles.pagarBtn} onClick={handleRegistrarPago} disabled={marcando}>
-                      {marcando ? "Registrando…" : "Registrar pago de comisiones"}
-                    </button>
+                    <p className={styles.pendNota}>De todos los períodos, no solo el filtrado.</p>
+                    <Link href="/panel/ventas/comisiones" className={styles.pagarBtn}>
+                      {verVendedor ? "Liquidar comisiones →" : "Ver mis comisiones →"}
+                    </Link>
                   </>
                 )}
               </div>

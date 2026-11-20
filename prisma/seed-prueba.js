@@ -148,6 +148,11 @@ async function borrarAgencia(dominio) {
   await prisma.$transaction([
     prisma.actividadLog.deleteMany({ where: { tenantId } }),
     prisma.venta.deleteMany({ where: { tenantId } }),
+    // Después de las ventas (que las referencian) y antes de usuarios y
+    // agencia (a los que referencian con RESTRICT). Este script vacía la
+    // agencia de PRUEBA entera: acá no aplica el bloqueo de "comisión
+    // liquidada" de la app, se borra todo junto.
+    prisma.liquidacionComision.deleteMany({ where: { tenantId } }),
     prisma.lead.deleteMany({ where: { tenantId } }),
     prisma.vehiculo.deleteMany({ where: { tenantId } }),
     prisma.dispositivoConfiable.deleteMany({ where: { usuarioId: { in: usuarioIds } } }),

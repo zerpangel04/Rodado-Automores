@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSucursalActual } from "@/lib/sucursalFiltro";
 import styles from "../panel.module.css";
 import { VentasView } from "./VentasView";
+import { VentasTabs } from "./VentasTabs";
 
 export default async function VentasPage() {
   const session = await auth();
@@ -37,7 +38,8 @@ export default async function VentasPage() {
     comision: Number(v.comision),
     moneda: v.moneda,
     cotizacion: v.cotizacion === null ? null : Number(v.cotizacion),
-    estadoCobro: v.estadoCobro,
+    // Comisión ya pagada al vendedor (está en una liquidación vigente).
+    comisionLiquidada: v.liquidacionId !== null,
   }));
 
   return (
@@ -50,6 +52,7 @@ export default async function VentasPage() {
             {sucursalActual ? ` · ${sucursalActual.nombre}` : ""}
           </div>
         </div>
+        <VentasTabs />
       </div>
       <div className={styles.content}>
         <VentasView initialItems={items} verVendedor={rol !== "VENDEDOR"} />

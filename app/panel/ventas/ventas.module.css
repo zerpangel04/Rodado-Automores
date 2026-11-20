@@ -589,3 +589,53 @@
     margin-left: 0;
   }
 }
+
+/* ── Pestañas Ventas | Comisiones ──────────────────────────────────── */
+
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--input-bg);
+}
+
+.tab {
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  color: var(--ink-soft);
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tabActiva {
+  background: var(--accent-grad);
+  color: var(--accent-ink);
+}
+
+.tabActiva:hover {
+  color: var(--accent-ink);
+}
+
+.pendNota {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: 2px 0 0;
+}
+
+a.pagarBtn {
+  display: block;
+}
+
+/* La campanita de escritorio es fixed arriba a la derecha (panel.module.css
+   .desktopBell, oculta debajo de 860px): las pestañas le dejan su lugar. */
+@media (min-width: 861px) {
+  .tabs {
+    margin-right: 52px;
+  }
+}
