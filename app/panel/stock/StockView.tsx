@@ -33,6 +33,7 @@ import {
   precioAlCambiarMonedaVenta,
   type Moneda,
 } from "@/lib/moneda";
+import { calcularComision, formatearPct, pctEfectivo } from "@/lib/comisiones";
 import { KpiBar } from "../KpiBar";
 import { FOTOS_MAX_COUNT, FOTO_MAX_BYTES, FOTO_ALLOWED_TYPES } from "@/lib/validation";
 import { getCroppedImageFile } from "@/lib/cropImage";
@@ -82,7 +83,8 @@ type SaleWarningLead = LeadActivoDTO & {
   reassignTo?: { id: string; marca: string; modelo: string };
 };
 
-type UsuarioOption = { id: string; nombre: string };
+// comisionPct: % propio del usuario (null = usa el de la agencia).
+type UsuarioOption = { id: string; nombre: string; comisionPct: number | null };
 type SucursalOption = { id: string; nombre: string };
 
 const etapaLabel: Record<string, string> = {
@@ -204,10 +206,13 @@ export function StockView({
   limiteDestacados,
   puedeDestacar,
   cotizacion,
+  comisionPctAgencia,
   abrirNuevo = false,
 }: {
   initialItems: VehiculoDTO[];
   usuarios: UsuarioOption[];
+  // % de comisión por defecto de la agencia (null = se carga a mano).
+  comisionPctAgencia: number | null;
   sucursales: SucursalOption[];
   defaultSucursalId: string;
   userId: string;
@@ -267,6 +272,8 @@ export function StockView({
     comision: "",
     moneda: "USD",
   });
+  // Si alguien tipeó la comisión a mano, ya no se recalcula sola.
+  const [comisionEditada, setComisionEditada] = useState(false);
   const [saleError, setSaleError] = useState<string | null>(null);
   const [saleSaving, setSaleSaving] = useState(false);
   const [saleWarningLeads, setSaleWarningLeads] = useState<SaleWarningLead[] | null>(null);
@@ -827,15 +834,43 @@ export function StockView({
     }
   }
 
+  // % que corresponde al vendedor elegido (el suyo o el de la agencia) y de
+  // dónde sale, para la precarga y el texto de ayuda de la comisión.
+  function pctDeVendedor(vendedorId: string): { pct: number | null; origen: string } {
+    const u = usuarios.find((x) => x.id === vendedorId);
+    const pct = pctEfectivo(u?.comisionPct, comisionPctAgencia);
+    if (pct === null) return { pct: null, origen: "" };
+    if (u && u.comisionPct !== null) return { pct, origen: `${formatearPct(pct)} propio de ${u.nombre}` };
+    return { pct, origen: `${formatearPct(pct)} de la agencia` };
+  }
+
+  function comisionSugerida(form: SaleForm): number | null {
+    return calcularComision(Number(form.precioFinal), pctDeVendedor(form.vendedorId).pct, form.moneda);
+  }
+
+  // Aplica un cambio al formulario de venta y, si la comisión no se editó a
+  // mano, la recalcula con el % del vendedor sobre el precio y moneda nuevos.
+  function actualizarVenta(cambios: Partial<SaleForm>, editada = comisionEditada) {
+    setSaleForm((prev) => {
+      const next = { ...prev, ...cambios };
+      if (editada) return next;
+      const sugerida = comisionSugerida(next);
+      return { ...next, comision: sugerida === null ? next.comision : String(sugerida) };
+    });
+  }
+
   function openSaleModal(v: VehiculoDTO) {
     setSaleTarget(v);
-    setSaleForm({
+    setComisionEditada(false);
+    const base: SaleForm = {
       vendedorId: canRevertirVenta ? "" : userId,
       compradorNombre: "",
       precioFinal: String(v.precio),
       comision: "",
       moneda: v.moneda,
-    });
+    };
+    const sugerida = comisionSugerida(base);
+    setSaleForm({ ...base, comision: sugerida === null ? "" : String(sugerida) });
     setSaleError(null);
     setSaleWarningLeads(null);
     setSaleWarningExpanded(false);
@@ -847,7 +882,8 @@ export function StockView({
   // (redondeado: pesos a miles, dólares a unidades) para que nunca quede,
   // por ejemplo, "27500" leído como $27.500. Si el usuario ya lo editó, o no
   // hay cotización, se deja el número como está y el "≈" de abajo muestra
-  // qué representa. La comisión no se toca: se carga en la moneda elegida.
+  // qué representa. La comisión se recalcula con el % (si no se editó a
+  // mano); si se editó, queda como está y se carga en la moneda elegida.
   function cambiarMonedaVenta(m: Moneda) {
     if (!saleTarget || m === saleForm.moneda) return;
     const precioFinal = precioAlCambiarMonedaVenta({
@@ -858,7 +894,7 @@ export function StockView({
       monedaAuto: saleTarget.moneda,
       cotizacion: cotizacion?.venta,
     });
-    setSaleForm({ ...saleForm, moneda: m, precioFinal });
+    actualizarVenta({ moneda: m, precioFinal });
   }
 
   async function submitSale() {
@@ -1754,7 +1790,7 @@ export function StockView({
               <label>Vendedor</label>
               <select
                 value={saleForm.vendedorId}
-                onChange={(e) => setSaleForm({ ...saleForm, vendedorId: e.target.value })}
+                onChange={(e) => actualizarVenta({ vendedorId: e.target.value })}
               >
                 <option value="">Elegí un vendedor</option>
                 {usuarios.map((u) => (
@@ -1802,7 +1838,7 @@ export function StockView({
                 min={0}
                 max={PRECIO_MAXIMO[saleForm.moneda]}
                 value={saleForm.precioFinal}
-                onChange={(e) => setSaleForm({ ...saleForm, precioFinal: e.target.value })}
+                onChange={(e) => actualizarVenta({ precioFinal: e.target.value })}
                 placeholder={saleForm.moneda === "USD" ? "24500" : "9500000"}
               />
               {(() => {
@@ -1822,9 +1858,41 @@ export function StockView({
                 type="number"
                 min={0}
                 value={saleForm.comision}
-                onChange={(e) => setSaleForm({ ...saleForm, comision: e.target.value })}
+                onChange={(e) => {
+                  setComisionEditada(true);
+                  setSaleForm({ ...saleForm, comision: e.target.value });
+                }}
                 placeholder={saleForm.moneda === "USD" ? "500" : "190000"}
               />
+              {(() => {
+                const { pct, origen } = pctDeVendedor(saleForm.vendedorId);
+                const sugerida = comisionSugerida(saleForm);
+                if (pct === null) {
+                  return (
+                    <div className={styles.precioEquivalente}>
+                      Sin porcentaje cargado: completala a mano (se configura en Equipo).
+                    </div>
+                  );
+                }
+                if (comisionEditada && sugerida !== null && Number(saleForm.comision) !== sugerida) {
+                  return (
+                    <div className={styles.precioEquivalente}>
+                      Editada a mano. Con {origen}: {formatearPrecio(sugerida, saleForm.moneda)} ·{" "}
+                      <button
+                        type="button"
+                        className={styles.linkInline}
+                        onClick={() => {
+                          setComisionEditada(false);
+                          actualizarVenta({}, false);
+                        }}
+                      >
+                        usar esa
+                      </button>
+                    </div>
+                  );
+                }
+                return <div className={styles.precioEquivalente}>Calculada con {origen}. Podés editarla.</div>;
+              })()}
             </div>
           </div>
           {saleTarget && saleForm.moneda !== saleTarget.moneda && (

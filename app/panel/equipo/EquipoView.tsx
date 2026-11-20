@@ -8,6 +8,8 @@ import styles from "./equipo.module.css";
 import { KpiBar } from "../KpiBar";
 import { useBodyScrollLock } from "@/lib/useBodyScrollLock";
 import { formatearTotales, montoCortoPorMoneda, partesKpi, type TotalesPorMoneda } from "@/lib/moneda";
+import { formatearPct } from "@/lib/comisiones";
+import { CampoComisionPct } from "./CampoComisionPct";
 
 export type Rol = "DUENIO" | "ADMIN" | "VENDEDOR";
 
@@ -25,6 +27,8 @@ export type UsuarioDTO = {
   cierre: number;
   // Por moneda (nunca dólares y pesos sumados).
   comisionEsteMes: TotalesPorMoneda;
+  // % de comisión propio; null = usa el de la agencia.
+  comisionPct: number | null;
 };
 
 type ResumenDTO = {
@@ -67,16 +71,27 @@ export function EquipoView({
   resumen,
   carga,
   abrirInvitar = false,
+  comisionPctAgencia: comisionPctAgenciaInicial,
 }: {
   initialItems: UsuarioDTO[];
   userId: string;
   resumen: ResumenDTO;
   carga: CargaItem[];
   abrirInvitar?: boolean;
+  // % de comisión por defecto de la agencia; null = sin %.
+  comisionPctAgencia: number | null;
 }) {
   const router = useRouter();
   const [items, setItems] = useState<UsuarioDTO[]>(initialItems);
   useEffect(() => setItems(initialItems), [initialItems]);
+  const [comisionPctAgencia, setComisionPctAgencia] = useState(comisionPctAgenciaInicial);
+
+  // Al guardar el % de un usuario se actualiza en la lista y en la ficha
+  // abierta, sin recargar la página.
+  function actualizarPctUsuario(id: string, pct: number | null) {
+    setItems((prev) => prev.map((u) => (u.id === id ? { ...u, comisionPct: pct } : u)));
+    setFichaFor((f) => (f && f.id === id ? { ...f, comisionPct: pct } : f));
+  }
 
   // Llega desde "Primeros pasos": abre la invitación y limpia la URL para
   // que recargar la página no vuelva a abrirla.
@@ -355,6 +370,23 @@ export function EquipoView({
           valueExtra={partesKpi(resumen.totalComisionMes).extra}
           trend={{ label: "a liquidar", positive: "neutral" }}
           percent={100}
+        />
+      </div>
+
+      <div className={styles.pctAgencia}>
+        <div className={styles.pctAgenciaTexto}>
+          <span className={styles.pctAgenciaTitulo}>Comisión por defecto de la agencia</span>
+          <span className={styles.pctAgenciaSub}>
+            Precarga la comisión al registrar una venta (se puede editar en cada una). Cada vendedor puede tener su propio
+            porcentaje en su ficha.
+          </span>
+        </div>
+        <CampoComisionPct
+          endpoint="/api/tenant/comisiones"
+          valorInicial={comisionPctAgencia}
+          placeholder="Ej. 3"
+          ayuda={comisionPctAgencia === null ? "Sin porcentaje: la comisión se carga a mano." : "Vacío = sin porcentaje."}
+          onGuardado={setComisionPctAgencia}
         />
       </div>
 
@@ -683,6 +715,24 @@ export function EquipoView({
                 <div className={`${styles.metricValue} ${styles.metricAccent}`}>{formatearTotales(fichaFor.comisionEsteMes)}</div>
                 <div className={styles.metricNote}>del mes</div>
               </div>
+            </div>
+
+            <div className={styles.drawerPct}>
+              <span className={styles.drawerLabel}>Porcentaje de comisión propio</span>
+              <CampoComisionPct
+                key={fichaFor.id}
+                endpoint={`/api/usuarios/${fichaFor.id}/comision`}
+                valorInicial={fichaFor.comisionPct}
+                placeholder={comisionPctAgencia === null ? "Ej. 3" : `${comisionPctAgencia}`.replace(".", ",")}
+                ayuda={
+                  fichaFor.comisionPct !== null
+                    ? `Usa ${formatearPct(fichaFor.comisionPct)} propio. Vacío = usar el de la agencia.`
+                    : comisionPctAgencia !== null
+                      ? `Vacío: usa el de la agencia (${formatearPct(comisionPctAgencia)}).`
+                      : "Vacío: la agencia no tiene porcentaje, la comisión se carga a mano."
+                }
+                onGuardado={(pct) => actualizarPctUsuario(fichaFor.id, pct)}
+              />
             </div>
 
             <div className={styles.modalActions}>

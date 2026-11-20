@@ -1142,3 +1142,12 @@ button.destacadoInline:disabled {
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
 }
+
+/* Link dentro del texto de ayuda (ej. "usar esa" en la comisión). */
+.linkInline {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}

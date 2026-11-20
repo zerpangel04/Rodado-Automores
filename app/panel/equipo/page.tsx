@@ -32,10 +32,10 @@ export default async function EquipoPage(props: { searchParams: Promise<{ invita
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [usuarios, sucursales, leadsAll, ventasAll, actividades] = await Promise.all([
+  const [usuarios, sucursales, leadsAll, ventasAll, actividades, tenant] = await Promise.all([
     prisma.usuario.findMany({
       where: { tenantId },
-      select: { id: true, nombre: true, email: true, rol: true },
+      select: { id: true, nombre: true, email: true, rol: true, comisionPct: true },
       orderBy: { nombre: "asc" },
     }),
     prisma.sucursal.findMany({
@@ -72,6 +72,7 @@ export default async function EquipoPage(props: { searchParams: Promise<{ invita
       select: { vendedorId: true, createdAt: true },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.tenant.findUnique({ where: { id: tenantId }, select: { comisionPct: true } }),
   ]);
 
   const sucColorPorId = new Map(sucursales.map((s, i) => [s.id, SUC_PALETA[i % SUC_PALETA.length]]));
@@ -132,6 +133,7 @@ export default async function EquipoPage(props: { searchParams: Promise<{ invita
       ventasEsteMes: ventasEsteMes.length,
       cierre,
       comisionEsteMes,
+      comisionPct: u.comisionPct === null ? null : Number(u.comisionPct),
     };
   });
 
@@ -187,6 +189,7 @@ export default async function EquipoPage(props: { searchParams: Promise<{ invita
           resumen={resumen}
           carga={carga}
           abrirInvitar={invitar === "1"}
+          comisionPctAgencia={tenant?.comisionPct == null ? null : Number(tenant.comisionPct)}
         />
       </div>
     </>

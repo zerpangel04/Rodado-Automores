@@ -122,3 +122,18 @@ export function textoAnulacion(
   const base = `Se anuló la liquidación de ${formatearPrecio(total, moneda)} a ${vendedor}: ${ventas(cantidad)} vuelve${cantidad === 1 ? "" : "n"} a pendiente`;
   return motivo ? `${base}. Motivo: ${motivo}` : base;
 }
+
+// Lo que se tipea en el campo de % ("3", "2,5", "2.5", ""): vacío = sin %
+// (null); cualquier cosa no numérica o fuera de rango = "invalido".
+export function parsearPct(texto: string): number | null | "invalido" {
+  const t = texto.trim().replace("%", "").trim();
+  if (t === "") return null;
+  if (!/^\d{1,2}([.,]\d{1,2})?$/.test(t)) return "invalido";
+  const n = Number(t.replace(",", "."));
+  return esPctComisionValido(n) ? n : "invalido";
+}
+
+// "3%" / "2,5%" / "2,75%".
+export function formatearPct(n: number): string {
+  return `${n.toLocaleString("es-AR", { maximumFractionDigits: 2 })}%`;
+}

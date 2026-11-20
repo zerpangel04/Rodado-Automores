@@ -24,7 +24,7 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
     }),
     prisma.usuario.findMany({
       where: { tenantId },
-      select: { id: true, nombre: true },
+      select: { id: true, nombre: true, comisionPct: true },
       orderBy: { nombre: "asc" },
     }),
     prisma.sucursal.findMany({
@@ -52,7 +52,7 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
       orderBy: { destacadoEn: "asc" },
       select: { id: true },
     }),
-    prisma.tenant.findUnique({ where: { id: tenantId }, select: { cotizacionPreferida: true } }),
+    prisma.tenant.findUnique({ where: { id: tenantId }, select: { cotizacionPreferida: true, comisionPct: true } }),
   ]);
 
   // Cotización que eligió la agencia: en Stock se usa solo para ordenar por
@@ -123,7 +123,14 @@ export default async function StockPage(props: { searchParams: Promise<{ nuevo?:
         <StockView
           abrirNuevo={nuevo === "1"}
           initialItems={items}
-          usuarios={usuarios}
+          // % de comisión de cada uno (Decimal → number) para precargar la
+          // comisión en el modal de venta.
+          usuarios={usuarios.map((u) => ({
+            id: u.id,
+            nombre: u.nombre,
+            comisionPct: u.comisionPct === null ? null : Number(u.comisionPct),
+          }))}
+          comisionPctAgencia={tenant?.comisionPct == null ? null : Number(tenant.comisionPct)}
           sucursales={sucursales}
           defaultSucursalId={sucursalActual?.id ?? sucursales[0]?.id ?? ""}
           userId={userId}

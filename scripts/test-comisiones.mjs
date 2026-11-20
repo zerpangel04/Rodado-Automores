@@ -101,3 +101,22 @@ test("textos del log de actividad", () => {
   );
   assert.equal(c.textoAnulacion("Martín", "USD", 1593, 2), "Se anuló la liquidación de USD 1.593 a Martín: 2 ventas vuelven a pendiente");
 });
+
+test("campo de %: coma o punto, vacío = sin %", () => {
+  assert.equal(c.parsearPct("3"), 3);
+  assert.equal(c.parsearPct("2,5"), 2.5);
+  assert.equal(c.parsearPct("2.75"), 2.75);
+  assert.equal(c.parsearPct(" 3 % "), 3);
+  assert.equal(c.parsearPct(""), null);
+  assert.equal(c.parsearPct("   "), null);
+  assert.equal(c.parsearPct("abc"), "invalido");
+  assert.equal(c.parsearPct("25"), "invalido"); // más del 20%
+  assert.equal(c.parsearPct("-1"), "invalido");
+  assert.equal(c.parsearPct("2,555"), "invalido");
+});
+
+test("formato del %", () => {
+  assert.equal(c.formatearPct(3), "3%");
+  assert.equal(c.formatearPct(2.5), "2,5%");
+  assert.equal(c.formatearPct(2.75), "2,75%");
+});

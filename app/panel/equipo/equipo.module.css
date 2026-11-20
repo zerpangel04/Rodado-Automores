@@ -886,3 +886,122 @@
     margin-left: 0;
   }
 }
+
+/* ── % de comisión (agencia y vendedor) ────────────────────────────── */
+
+.pctAgencia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.pctAgenciaTexto {
+  flex: 1 1 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pctAgenciaTitulo {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.pctAgenciaSub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.pctCampo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 220px;
+}
+
+.pctFila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pctInputWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pctInput {
+  width: 96px;
+  padding: 8px 26px 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: right;
+}
+
+.pctInput[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.pctSufijo {
+  position: absolute;
+  right: 10px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.pctGuardar {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--accent-grad);
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+
+.pctGuardar:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.pctAyuda,
+.pctOk,
+.pctError {
+  font-size: 11.5px;
+  margin: 0;
+}
+
+.pctAyuda {
+  color: var(--ink-soft);
+}
+
+.pctOk {
+  color: var(--success);
+}
+
+.pctError {
+  color: var(--danger-text);
+}
+
+.drawerPct {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  /* Mismo tamaño que los rótulos de .drawerField (Rol, Sucursal…). */
+  font-size: 12.5px;
+}
