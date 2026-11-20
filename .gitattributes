@@ -1,0 +1,5 @@
+# Migraciones de Prisma: sin conversión de fin de línea. Prisma registra el
+# checksum (sha256) de los bytes exactos de cada migration.sql; con
+# core.autocrlf=true, un checkout o rebase en Windows los reescribía con CRLF
+# y cambiaba el checksum respecto del ya aplicado en otra base.
+prisma/migrations/**/migration.sql -text
