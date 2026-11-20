@@ -147,6 +147,9 @@ async function borrarAgencia(dominio) {
   const usuarioIds = usuarios.map((u) => u.id);
   await prisma.$transaction([
     prisma.actividadLog.deleteMany({ where: { tenantId } }),
+    // Antes de las ventas (Expediente → Venta es RESTRICT); los pasos se
+    // borran en cascada con su expediente.
+    prisma.expediente.deleteMany({ where: { tenantId } }),
     prisma.venta.deleteMany({ where: { tenantId } }),
     // Después de las ventas (que las referencian) y antes de usuarios y
     // agencia (a los que referencian con RESTRICT). Este script vacía la
@@ -163,6 +166,7 @@ async function borrarAgencia(dominio) {
     prisma.mercadoLibreConexion.deleteMany({ where: { tenantId } }),
     prisma.solicitudIntegracion.deleteMany({ where: { tenantId } }),
     prisma.interesIntegracion.deleteMany({ where: { tenantId } }),
+    prisma.pasoTramitePlantilla.deleteMany({ where: { tenantId } }),
     prisma.tenant.delete({ where: { id: tenantId } }),
   ]);
 }

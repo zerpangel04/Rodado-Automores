@@ -5,6 +5,9 @@ import { errorTopePrecioVenta, ventaInputSchema } from "@/lib/validation";
 import { getCotizacionDeAgencia } from "@/lib/cotizacionAgencia";
 import { registrarActividad } from "@/lib/actividad";
 import { pausarPublicacionMercadoLibre } from "@/lib/mercadolibre";
+import { crearExpediente } from "@/lib/expedientes";
+import { TX_OPCIONES } from "@/lib/transacciones";
+import { puedeRevertirConExpediente } from "@/lib/tramites";
 
 export async function POST(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -100,6 +103,15 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
 
   await pausarPublicacionMercadoLibre(tenantId, vehiculo);
 
+  // Expediente de trámites (copia de la plantilla de la agencia). No debe
+  // tumbar la venta, que ya se registró: si falla, se puede iniciar a mano
+  // desde Ventas → Trámites ("Iniciar expediente").
+  try {
+    await prisma.$transaction((tx) => crearExpediente(tx, tenantId, venta.id), TX_OPCIONES);
+  } catch (err) {
+    console.error("No se pudo crear el expediente de la venta", venta.id, err);
+  }
+
   return NextResponse.json(venta, { status: 201 });
 }
 
@@ -147,10 +159,48 @@ export async function DELETE(_req: NextRequest, props: { params: Promise<{ id: s
     );
   }
 
-  await prisma.$transaction([
-    prisma.venta.delete({ where: { id: venta.id } }),
-    prisma.vehiculo.update({ where: { id }, data: { estado: "DISPONIBLE" } }),
-  ]);
+  // Expediente de trámites: si ya tiene algún paso hecho (boleto firmado,
+  // 08, transferencia…), revertir borraría ese registro. Se bloquea, igual
+  // que con la comisión liquidada. Si no tiene ningún paso hecho, se borra
+  // junto con la venta (la FK RESTRICT exige borrarlo primero).
+  const expediente = await prisma.expediente.findUnique({
+    where: { ventaId: venta.id },
+    select: { id: true, pasos: { select: { hecho: true } } },
+  });
+  if (expediente && !puedeRevertirConExpediente(expediente.pasos)) {
+    const hechos = expediente.pasos.filter((p) => p.hecho).length;
+    return NextResponse.json(
+      {
+        error: `El expediente de trámites de esta venta tiene ${hechos} paso${hechos === 1 ? "" : "s"} hecho${hechos === 1 ? "" : "s"}. Destildalos en Ventas → Trámites antes de revertir la venta.`,
+      },
+      { status: 409 }
+    );
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      if (expediente) {
+        // Solo si sigue sin pasos hechos (por si alguien tildó uno recién).
+        const borrado = await tx.expediente.deleteMany({
+          where: { id: expediente.id, pasos: { none: { hecho: true } } },
+        });
+        if (borrado.count === 0) throw new ReversionBloqueada();
+      }
+      await tx.venta.delete({ where: { id: venta.id } });
+      await tx.vehiculo.update({ where: { id }, data: { estado: "DISPONIBLE" } });
+    }, TX_OPCIONES);
+  } catch (err) {
+    if (err instanceof ReversionBloqueada) {
+      return NextResponse.json(
+        { error: "Alguien acaba de tildar un paso del expediente de esta venta. Revisalo en Ventas → Trámites antes de revertir." },
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 
   return NextResponse.json({ ok: true });
 }
+
+// Se tildó un paso del expediente entre el chequeo y el borrado.
+class ReversionBloqueada extends Error {}

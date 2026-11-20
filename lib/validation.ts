@@ -5,6 +5,14 @@ import { CONTRASTE_MINIMO, contrasteSuficiente, normalizarHex } from "./colorAce
 import { MONEDAS, PRECIO_MAXIMO, mensajeTopePrecio, type Moneda } from "./moneda";
 import { DIAS_DORMIDO_OPCIONES, esDiasDormidoValido } from "./leadsDormidos";
 import { COMISION_PCT_MAX, COMISION_PCT_MIN, finDelDiaArgentina } from "./comisiones";
+import {
+  DIAS_TRABADO_OPCIONES,
+  NOMBRE_PASO_MAX,
+  NOTA_PASO_MAX,
+  PASOS_PLANTILLA_MAX,
+  esDiasTrabadoValido,
+  esFechaYmd,
+} from "./tramites";
 
 export const FOTOS_MAX_COUNT = 6;
 export const FOTO_MAX_BYTES = 5 * 1024 * 1024;
@@ -218,6 +226,56 @@ export const comisionPctSchema = z.object({
     .min(COMISION_PCT_MIN, "El porcentaje no puede ser negativo")
     .max(COMISION_PCT_MAX, `El porcentaje no puede pasar de ${COMISION_PCT_MAX}%`)
     .nullable(),
+});
+
+// "Iniciar expediente" en una venta que no lo tiene (ventas anteriores a
+// los trámites).
+export const iniciarExpedienteSchema = z.object({
+  ventaId: z.string().trim().min(1, "Falta la venta"),
+});
+
+// Cambio en un paso del expediente. Todos opcionales: se manda solo lo que
+// cambia. fecha: "YYYY-MM-DD" o null para borrarla; nota: null o "" la borra.
+export const pasoExpedienteUpdateSchema = z
+  .object({
+    hecho: z.boolean().optional(),
+    fecha: z
+      .string()
+      .refine(esFechaYmd, { message: "La fecha no es válida" })
+      .nullable()
+      .optional(),
+    nota: z
+      .string()
+      .trim()
+      .max(NOTA_PASO_MAX, `La nota puede tener hasta ${NOTA_PASO_MAX} caracteres`)
+      .nullable()
+      .optional(),
+  })
+  .refine((v) => v.hecho !== undefined || v.fecha !== undefined || v.nota !== undefined, {
+    message: "No hay nada para cambiar",
+  });
+
+// Plantilla de pasos (solo Dueño): la lista completa en orden. id = paso
+// existente; sin id = paso nuevo. Los que no vienen se borran de la
+// plantilla (no de los expedientes ya creados, que tienen su copia).
+export const plantillaTramitesSchema = z.object({
+  pasos: z
+    .array(
+      z.object({
+        id: z.string().trim().min(1).optional(),
+        nombre: z
+          .string()
+          .trim()
+          .min(1, "Hay un paso sin nombre")
+          .max(NOMBRE_PASO_MAX, `Cada paso puede tener hasta ${NOMBRE_PASO_MAX} caracteres`),
+        activo: z.boolean(),
+      })
+    )
+    .min(1, "La plantilla tiene que tener al menos un paso")
+    .max(PASOS_PLANTILLA_MAX, `La plantilla puede tener hasta ${PASOS_PLANTILLA_MAX} pasos`),
+  diasExpedienteTrabado: z.number().refine(esDiasTrabadoValido, {
+    message: `Elegí uno de estos valores: ${DIAS_TRABADO_OPCIONES.join(", ")} días`,
+  }),
 });
 
 // La moneda es la de la venta (precio final y comisión van en la misma). Si
