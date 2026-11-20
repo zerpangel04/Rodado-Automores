@@ -1,11 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { getPlanTenant } from "@/lib/planes";
 import { corteDormidos } from "@/lib/leadsDormidos";
+import { formatearPrecio } from "@/lib/moneda";
+import { formatearPct } from "@/lib/comisiones";
 
 const CONOCIMIENTO_RODADO = `CÓMO FUNCIONA RODADO (conocimiento general, válido para cualquier agencia):
 - Stock: carga y gestión de vehículos (fotos, ficha técnica, documentación, VTV). Desde ahí también se puede importar stock masivo por CSV y usar la Tasación con IA (si el plan lo incluye) para sugerir un precio de referencia.
 - Leads: pipeline de consultas de compradores por WhatsApp, Mercado Libre, Instagram, el catálogo web o el asistente de IA del catálogo. Se pueden asignar a un vendedor manualmente, o se asignan solos al vendedor con menos carga si no se especifica ninguno.
-- Ventas: registro de ventas cerradas, con comisión automática por vendedor.
+- Ventas: registro de ventas cerradas (se registran desde Stock, botón "Vender" del vehículo), con la comisión de cada vendedor. Tiene dos pestañas: "Ventas" (el listado) y "Comisiones" (liquidación).
+- Porcentaje de comisión: el Dueño define en /panel/equipo una "Comisión por defecto de la agencia" (por ejemplo 3%) y, si quiere, un porcentaje propio para cada vendedor en su ficha (pisa al de la agencia; vacío = usa el de la agencia). Solo el Dueño puede cambiarlos, no los Admin ni los Vendedores. Al registrar una venta, la comisión se precarga con el porcentaje del vendedor elegido (dólares redondeados a la unidad, pesos a la centena) y se recalcula si cambian el vendedor, el precio o la moneda; se puede editar a mano en cada venta para casos excepcionales, y el modal ofrece volver a la sugerida. Si no hay ningún porcentaje cargado, la comisión se tipea a mano.
+- Liquidar comisiones: en Ventas → Comisiones están las comisiones pendientes agrupadas por vendedor y por moneda (USD y pesos se liquidan por separado, nunca sumados). Se elige qué ventas incluir, se puede agregar una nota (por ejemplo "transferencia del 30/11") y se confirma: queda una liquidación con fecha, total, ventas incluidas y quién la hizo, y el vendedor recibe el aviso en su campanita. En el historial se ve cada liquidación con su detalle y se puede bajar un comprobante en CSV. Solo el Dueño o un Admin pueden liquidar.
+- Anular una liquidación: desde el historial de Comisiones (solo Dueño o Admin), con un motivo opcional. Sus ventas vuelven a "comisión pendiente", la liquidación queda registrada como anulada (cuándo y quién) y queda en el log de actividad. Las liquidaciones "históricas" (fecha desconocida) son pagos marcados antes de que existiera este sistema.
+- Revertir una venta cuya comisión ya se liquidó no se puede: primero hay que anular esa liquidación en Ventas → Comisiones.
+- Los Vendedores ven solo sus propias comisiones (pendientes y liquidadas) y no pueden liquidar ni anular.
 - Reportes: ventas en el tiempo, embudo de conversión, leads por canal, rotación de stock y performance por vendedor — disponible solo en plan Profesional o superior.
 - Sucursales: cada agencia puede tener una o más; el stock y el equipo se pueden filtrar por sucursal.
 - Equipo: gestión de usuarios y roles (Dueño, Admin, Vendedor). Solo un Dueño puede invitar gente, y solo otro Dueño puede ascender a alguien a Dueño.
@@ -52,7 +59,7 @@ export async function armarContextoTenant(params: {
     await Promise.all([
       prisma.tenant.findUniqueOrThrow({
         where: { id: tenantId },
-        select: { nombre: true, cotizacionPreferida: true, diasLeadDormido: true },
+        select: { nombre: true, cotizacionPreferida: true, diasLeadDormido: true, comisionPct: true },
       }),
       getPlanTenant(tenantId),
       prisma.sucursal.count({ where: { tenantId } }),
@@ -80,6 +87,23 @@ export async function armarContextoTenant(params: {
     },
   });
 
+  // Comisiones pendientes de la agencia: solo para Dueño/Admin. Un Vendedor
+  // no ve comisiones ajenas, así que a Rodi tampoco se le pasan.
+  let lineaComisiones = "";
+  if (rol !== "VENDEDOR") {
+    const pendientes = await prisma.venta.groupBy({
+      by: ["moneda"],
+      where: { tenantId, liquidacionId: null },
+      _sum: { comision: true },
+      _count: { _all: true },
+    });
+    const partes = pendientes.map(
+      (g) => `${formatearPrecio(Number(g._sum.comision ?? 0), g.moneda)} en ${g._count._all} venta${g._count._all === 1 ? "" : "s"}`
+    );
+    lineaComisiones = `\n- Comisiones pendientes de liquidar (toda la agencia): ${partes.length ? partes.join(" + ") : "ninguna"}`;
+  }
+  const pctAgencia = tenant.comisionPct === null ? null : Number(tenant.comisionPct);
+
   const contexto = `- Agencia: ${tenant.nombre}
 - Usuario actual: ${nombreUsuario} (rol: ${ROL_LABEL[rol] ?? rol})
 - Plan actual: ${plan.nombre} (USD ${Number(plan.precioUsd)}/mes)
@@ -94,7 +118,8 @@ export async function armarContextoTenant(params: {
 - Mercado Libre: ${mlConexion ? "conectado" : "no conectado"}
 - Vehículos en stock (sin vendidos) por moneda: ${enStock("USD")} en dólares, ${enStock("ARS")} en pesos
 - Cotización elegida para los "≈": ${tenant.cotizacionPreferida === "BLUE" ? "dólar blue" : "dólar oficial"}
-- Leads dormidos: se marcan a los ${tenant.diasLeadDormido} días sin movimiento; ahora hay ${leadsDormidos} en toda la agencia`;
+- Leads dormidos: se marcan a los ${tenant.diasLeadDormido} días sin movimiento; ahora hay ${leadsDormidos} en toda la agencia
+- Comisión por defecto de la agencia: ${pctAgencia === null ? "sin porcentaje (la comisión se carga a mano)" : formatearPct(pctAgencia)}${lineaComisiones}`;
 
   return { contexto, tenantNombre: tenant.nombre };
 }
