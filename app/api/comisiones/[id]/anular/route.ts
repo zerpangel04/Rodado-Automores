@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { anularLiquidacionSchema } from "@/lib/validation";
 import { registrarActividad } from "@/lib/actividad";
 import { textoAnulacion } from "@/lib/comisiones";
+import { TX_OPCIONES } from "@/lib/transacciones";
 
 // Anula una liquidación: sus ventas vuelven a "comisión pendiente" y la
 // liquidación queda registrada como anulada (cuándo y quién), con ventaIds
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ id: stri
       data: { liquidacionId: null },
     });
     return liberadas.count;
-  });
+  }, TX_OPCIONES);
 
   if (resultado === null) {
     return NextResponse.json({ error: "Esta liquidación ya estaba anulada" }, { status: 409 });

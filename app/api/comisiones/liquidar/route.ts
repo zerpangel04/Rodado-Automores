@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { liquidarComisionesSchema } from "@/lib/validation";
 import { registrarActividad } from "@/lib/actividad";
 import { finDelDiaArgentina, sumarMontos, textoLiquidacion } from "@/lib/comisiones";
+import { TX_OPCIONES } from "@/lib/transacciones";
 
 // Error de negocio dentro de la transacción: corta y devuelve este status.
 class LiquidacionError extends Error {
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
         throw new LiquidacionError("Otra persona liquidó algunas de estas comisiones recién. Recargá la página y volvé a intentar.", 409);
       }
       return creada;
-    });
+    }, TX_OPCIONES);
 
     await registrarActividad({
       tenantId,
